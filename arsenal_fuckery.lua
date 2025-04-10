@@ -5,7 +5,7 @@ local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local tweenService = game:GetService("TweenService")
 
-
+-- GUI Setup (Next-Level Design)
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
@@ -20,13 +20,14 @@ frame.Draggable = true
 frame.BackgroundTransparency = 1
 frame.Parent = gui
 
-
+-- Neon Border with Glow
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Thickness = 3
 frameStroke.Color = Color3.fromRGB(255, 0, 0)
 frameStroke.Transparency = 1
 frameStroke.Parent = frame
 
+-- Gradient with a Sharper Contrast
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 25)),
@@ -35,6 +36,7 @@ frameGradient.Color = ColorSequence.new({
 frameGradient.Rotation = 90
 frameGradient.Parent = frame
 
+-- Title with a Futuristic Font
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 60)
 title.BackgroundTransparency = 1
@@ -47,6 +49,7 @@ title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 title.TextTransparency = 1
 title.Parent = frame
 
+-- Close Button (Top-Right)
 local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 40, 0, 40)
 closeButton.Position = UDim2.new(1, -50, 0, 10)
@@ -64,6 +67,7 @@ closeStroke.Color = Color3.fromRGB(255, 0, 0)
 closeStroke.Transparency = 1
 closeStroke.Parent = closeButton
 
+-- ESP Toggle Button
 local espToggle = Instance.new("TextButton")
 espToggle.Size = UDim2.new(0, 280, 0, 70)
 espToggle.Position = UDim2.new(0.5, -140, 0, 80)
@@ -113,6 +117,8 @@ aimGradient.Color = ColorSequence.new({
 })
 aimGradient.Parent = aimToggle
 
+-- Animations
+-- Fade-In for GUI
 local fadeInInfo = TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local frameFadeIn = tweenService:Create(frame, fadeInInfo, {BackgroundTransparency = 0})
 local frameStrokeFadeIn = tweenService:Create(frameStroke, fadeInInfo, {Transparency = 0})
@@ -164,6 +170,7 @@ closeButton.MouseLeave:Connect(function()
     closeHoverOff:Play()
 end)
 
+-- Close Button Spin Animation
 local spinInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
 local closeSpin = tweenService:Create(closeButton, spinInfo, {Rotation = 180})
 
@@ -173,6 +180,7 @@ closeButton.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
+-- ESP with Boxes (Enemies Only, Arsenal Fix)
 local espEnabled = false
 local espBoxes = {}
 
@@ -200,9 +208,24 @@ local function updateESP()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character then
+                -- Arsenal-specific team check using TeamColor
                 local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
                 local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
-                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                -- Additional check for Arsenal's team structure
+                local isEnemy = true
+                if playerTeam and enemyTeam then
+                    if playerTeam == enemyTeam then
+                        isEnemy = false
+                    end
+                else
+                    -- Fallback: Check if player is in a team
+                    local playerTeamObj = player.Team
+                    local enemyTeamObj = v.Team
+                    if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
+                        isEnemy = false
+                    end
+                end
+                if isEnemy then
                     addESPBox(v.Character)
                 end
             end
@@ -218,7 +241,19 @@ for _, v in pairs(game.Players:GetPlayers()) do
             if espEnabled then
                 local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
                 local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
-                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                local isEnemy = true
+                if playerTeam and enemyTeam then
+                    if playerTeam == enemyTeam then
+                        isEnemy = false
+                    end
+                else
+                    local playerTeamObj = player.Team
+                    local enemyTeamObj = v.Team
+                    if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
+                        isEnemy = false
+                    end
+                end
+                if isEnemy then
                     addESPBox(char)
                 end
             end
@@ -231,13 +266,26 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
         if espEnabled then
             local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
             local enemyTeam = newPlayer:FindFirstChild("TeamColor") and newPlayer.TeamColor
-            if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+            local isEnemy = true
+            if playerTeam and enemyTeam then
+                if playerTeam == enemyTeam then
+                    isEnemy = false
+                end
+            else
+                local playerTeamObj = player.Team
+                local enemyTeamObj = newPlayer.Team
+                if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
+                    isEnemy = false
+                end
+            end
+            if isEnemy then
                 addESPBox(char)
             end
         end
     end)
 end)
 
+-- Aimbot: Hold Right-Click to Lock and Fire (Enemies Only)
 local aimEnabled = false
 local target = nil
 local locked = false
@@ -252,7 +300,19 @@ mouse.Button2Down:Connect(function()
             if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
                 local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
                 local enemyTeam = enemy:FindFirstChild("TeamColor") and enemy.TeamColor
-                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                local isEnemy = true
+                if playerTeam and enemyTeam then
+                    if playerTeam == enemyTeam then
+                        isEnemy = false
+                    end
+                else
+                    local playerTeamObj = player.Team
+                    local enemyTeamObj = enemy.Team
+                    if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
+                        isEnemy = false
+                    end
+                end
+                if isEnemy then
                     local head = enemy.Character.Head
                     local dist = (head.Position - mousePos).Magnitude
                     if dist < shortestDist then
@@ -297,6 +357,7 @@ runService.RenderStepped:Connect(function()
     end
 end)
 
+-- Toggle Logic with Slide Animation
 local toggleInfo = TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out)
 local espSlideOn = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -130, 0, 80)})
 local espSlideOff = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -140, 0, 80)})
@@ -310,7 +371,7 @@ espToggle.MouseButton1Click:Connect(function()
     if espEnabled then
         espSlideOn:Play()
     else
-       -espSlideOff:Play()
+        espSlideOff:Play()
     end
     updateESP()
 end)
