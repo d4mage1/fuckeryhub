@@ -2,7 +2,9 @@ local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
 local runService = game:GetService("RunService")
+local teams = game:GetService("Teams")
 
+-- GUI Setup
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
@@ -45,31 +47,35 @@ aimToggle.TextSize = 18
 aimToggle.Font = Enum.Font.Code
 aimToggle.Parent = frame
 
+-- ESP with Boxes (Enemies Only)
 local espEnabled = false
-local highlights = {}
+local espBoxes = {}
 
-local function addESP(target)
-    local highlight = Instance.new("Highlight")
-    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
-    highlight.Adornee = target
-    highlight.Parent = target
-    table.insert(highlights, highlight)
+local function addESPBox(target)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = target:GetExtentsSize() * 1.1
+    box.Adornee = target
+    box.AlwaysOnTop = true
+    box.ZIndex = 0
+    box.Transparency = 0.5
+    box.Color3 = Color3.fromRGB(255, 0, 0)
+    box.Parent = target
+    table.insert(espBoxes, box)
 end
 
 local function clearESP()
-    for _, highlight in pairs(highlights) do
-        highlight:Destroy()
+    for _, box in pairs(espBoxes) do
+        box:Destroy()
     end
-    highlights = {}
+    espBoxes = {}
 end
 
 local function updateESP()
     if espEnabled then
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character then
-                addESP(v.Character)
+            if v ~= player and v.Character and v.Team ~= player.Team then
+                addESPBox(v.Character)
             end
         end
     else
@@ -80,8 +86,8 @@ end
 for _, v in pairs(game.Players:GetPlayers()) do
     if v ~= player then
         v.CharacterAdded:Connect(function(char)
-            if espEnabled then
-                addESP(char)
+            if espEnabled and v.Team ~= player.Team then
+                addESPBox(char)
             end
         end)
     end
@@ -89,8 +95,8 @@ end
 
 game.Players.PlayerAdded:Connect(function(newPlayer)
     newPlayer.CharacterAdded:Connect(function(char)
-        if espEnabled then
-            addESP(char)
+        if espEnabled and newPlayer.Team ~= player.Team then
+            addESPBox(char)
         end
     end)
 end)
@@ -100,13 +106,13 @@ local target = nil
 local locked = false
 
 mouse.Button2Down:Connect(function()
-    if aimEnabled and not locked then
+    if aimEnabled then
         local closest = nil
         local shortestDist = math.huge
         local mousePos = mouse.Hit.Position
 
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Team ~= player.Team then -- Enemies only
                 local head = enemy.Character.Head
                 local dist = (head.Position - mousePos).Magnitude
                 if dist < shortestDist then
@@ -120,18 +126,37 @@ mouse.Button2Down:Connect(function()
             target = closest
             locked = true
         end
-    else
-        locked = false
-        target = nil
     end
+end)
+
+mouse.Button2Up:Connect(function()
+    locked = false
+    target = nil
 end)
 
 runService.RenderStepped:Connect(function()
     if aimEnabled and locked and target and target.Parent then
         camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
+        local char = player.Character
+        if char then
+            local tool = char:FindFirstChildOfClass("Tool")
+            if tool then
+                local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
+                if handle then
+                    local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
+                    if remotes then
+                        local fireEvent = remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Shoot")
+                        if fireEvent then
+                            fireEvent:FireServer(target.Position)
+                        end
+                    end
+                end
+            end
+        end
     end
 end)
 
+-- Toggle Logic
 espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     espToggle.Text = "ESP: " .. (espEnabled and "ON" or "OFF")
