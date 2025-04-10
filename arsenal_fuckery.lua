@@ -5,95 +5,115 @@ local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local tweenService = game:GetService("TweenService")
 
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 350)
-frame.Position = UDim2.new(0.5, -150, 0.5, -175)
-frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+frame.Size = UDim2.new(0, 320, 0, 380)
+frame.Position = UDim2.new(0.5, -160, 0.5, -190)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
-frame.BackgroundTransparency = 1 
+frame.BackgroundTransparency = 1
 frame.Parent = gui
 
+
 local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 2
+frameStroke.Thickness = 3
 frameStroke.Color = Color3.fromRGB(255, 0, 0)
 frameStroke.Transparency = 1
 frameStroke.Parent = frame
 
 local frameGradient = Instance.new("UIGradient")
 frameGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 20)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 0, 0))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
 })
-frameGradient.Rotation = 45
+frameGradient.Rotation = 90
 frameGradient.Parent = frame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
+title.Size = UDim2.new(1, 0, 0, 60)
 title.BackgroundTransparency = 1
 title.Text = "FUCKERY HUB"
 title.TextColor3 = Color3.fromRGB(255, 0, 0)
-title.TextSize = 24
-title.Font = Enum.Font.Antique
-title.TextStrokeTransparency = 0.5
+title.TextSize = 28
+title.Font = Enum.Font.Orbit
+title.TextStrokeTransparency = 0.4
 title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 title.TextTransparency = 1
 title.Parent = frame
 
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(1, -50, 0, 10)
+closeButton.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.TextSize = 20
+closeButton.Font = Enum.Font.Orbit
+closeButton.BackgroundTransparency = 1
+closeButton.Parent = frame
+
+local closeStroke = Instance.new("UIStroke")
+closeStroke.Thickness = 1
+closeStroke.Color = Color3.fromRGB(255, 0, 0)
+closeStroke.Transparency = 1
+closeStroke.Parent = closeButton
+
 local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(0, 250, 0, 60)
-espToggle.Position = UDim2.new(0.5, -125, 0, 70)
-espToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+espToggle.Size = UDim2.new(0, 280, 0, 70)
+espToggle.Position = UDim2.new(0.5, -140, 0, 80)
+espToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 espToggle.Text = "ESP: OFF"
 espToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
-espToggle.TextSize = 20
-espToggle.Font = Enum.Font.Antique
+espToggle.TextSize = 22
+espToggle.Font = Enum.Font.Orbit
 espToggle.BackgroundTransparency = 1
 espToggle.Parent = frame
 
 local espStroke = Instance.new("UIStroke")
-espStroke.Thickness = 1
+espStroke.Thickness = 2
 espStroke.Color = Color3.fromRGB(255, 0, 0)
 espStroke.Transparency = 1
 espStroke.Parent = espToggle
 
 local espGradient = Instance.new("UIGradient")
 espGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 0, 0))
 })
 espGradient.Parent = espToggle
 
+-- Aimbot Toggle Button
 local aimToggle = Instance.new("TextButton")
-aimToggle.Size = UDim2.new(0, 250, 0, 60)
-aimToggle.Position = UDim2.new(0.5, -125, 0, 140)
-aimToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+aimToggle.Size = UDim2.new(0, 280, 0, 70)
+aimToggle.Position = UDim2.new(0.5, -140, 0, 160)
+aimToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 aimToggle.Text = "AIMBOT: OFF"
 aimToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
-aimToggle.TextSize = 20
-aimToggle.Font = Enum.Font.Antique
+aimToggle.TextSize = 22
+aimToggle.Font = Enum.Font.Orbit
 aimToggle.BackgroundTransparency = 1
 aimToggle.Parent = frame
 
 local aimStroke = Instance.new("UIStroke")
-aimStroke.Thickness = 1
+aimStroke.Thickness = 2
 aimStroke.Color = Color3.fromRGB(255, 0, 0)
-aimStroke.Transparency = 1 
+aimStroke.Transparency = 1
 aimStroke.Parent = aimToggle
 
 local aimGradient = Instance.new("UIGradient")
 aimGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 0, 0))
 })
 aimGradient.Parent = aimToggle
 
-local fadeInInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+local fadeInInfo = TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local frameFadeIn = tweenService:Create(frame, fadeInInfo, {BackgroundTransparency = 0})
 local frameStrokeFadeIn = tweenService:Create(frameStroke, fadeInInfo, {Transparency = 0})
 local titleFadeIn = tweenService:Create(title, fadeInInfo, {TextTransparency = 0})
@@ -101,6 +121,8 @@ local espFadeIn = tweenService:Create(espToggle, fadeInInfo, {BackgroundTranspar
 local espStrokeFadeIn = tweenService:Create(espStroke, fadeInInfo, {Transparency = 0})
 local aimFadeIn = tweenService:Create(aimToggle, fadeInInfo, {BackgroundTransparency = 0})
 local aimStrokeFadeIn = tweenService:Create(aimStroke, fadeInInfo, {Transparency = 0})
+local closeFadeIn = tweenService:Create(closeButton, fadeInInfo, {BackgroundTransparency = 0})
+local closeStrokeFadeIn = tweenService:Create(closeStroke, fadeInInfo, {Transparency = 0})
 
 frameFadeIn:Play()
 frameStrokeFadeIn:Play()
@@ -109,12 +131,17 @@ espFadeIn:Play()
 espStrokeFadeIn:Play()
 aimFadeIn:Play()
 aimStrokeFadeIn:Play()
+closeFadeIn:Play()
+closeStrokeFadeIn:Play()
 
+-- Hover Effect for Buttons
 local hoverInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-local espHoverOn = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 260, 0, 65), BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
-local espHoverOff = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 250, 0, 60), BackgroundColor3 = Color3.fromRGB(30, 30, 30)})
-local aimHoverOn = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 260, 0, 65), BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
-local aimHoverOff = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 250, 0, 60), BackgroundColor3 = Color3.fromRGB(30, 30, 30)})
+local espHoverOn = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 290, 0, 75), BackgroundColor3 = Color3.fromRGB(55, 55, 55)})
+local espHoverOff = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 280, 0, 70), BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+local aimHoverOn = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 290, 0, 75), BackgroundColor3 = Color3.fromRGB(55, 55, 55)})
+local aimHoverOff = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 280, 0, 70), BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+local closeHoverOn = tweenService:Create(closeButton, hoverInfo, {BackgroundColor3 = Color3.fromRGB(80, 0, 0)})
+local closeHoverOff = tweenService:Create(closeButton, hoverInfo, {BackgroundColor3 = Color3.fromRGB(50, 0, 0)})
 
 espToggle.MouseEnter:Connect(function()
     espHoverOn:Play()
@@ -130,7 +157,22 @@ aimToggle.MouseLeave:Connect(function()
     aimHoverOff:Play()
 end)
 
--- ESP with Boxes (Enemies Only)
+closeButton.MouseEnter:Connect(function()
+    closeHoverOn:Play()
+end)
+closeButton.MouseLeave:Connect(function()
+    closeHoverOff:Play()
+end)
+
+local spinInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+local closeSpin = tweenService:Create(closeButton, spinInfo, {Rotation = 180})
+
+closeButton.MouseButton1Click:Connect(function()
+    closeSpin:Play()
+    wait(0.5)
+    gui:Destroy()
+end)
+
 local espEnabled = false
 local espBoxes = {}
 
@@ -157,8 +199,12 @@ local function updateESP()
     if espEnabled then
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character and v.Team ~= player.Team and v.Team ~= nil then
-                addESPBox(v.Character)
+            if v ~= player and v.Character then
+                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
+                local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
+                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                    addESPBox(v.Character)
+                end
             end
         end
     else
@@ -169,8 +215,12 @@ end
 for _, v in pairs(game.Players:GetPlayers()) do
     if v ~= player then
         v.CharacterAdded:Connect(function(char)
-            if espEnabled and v.Team ~= player.Team and v.Team ~= nil then
-                addESPBox(char)
+            if espEnabled then
+                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
+                local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
+                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                    addESPBox(char)
+                end
             end
         end)
     end
@@ -178,8 +228,12 @@ end
 
 game.Players.PlayerAdded:Connect(function(newPlayer)
     newPlayer.CharacterAdded:Connect(function(char)
-        if espEnabled and newPlayer.Team ~= player.Team and newPlayer.Team ~= nil then
-            addESPBox(char)
+        if espEnabled then
+            local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
+            local enemyTeam = newPlayer:FindFirstChild("TeamColor") and newPlayer.TeamColor
+            if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                addESPBox(char)
+            end
         end
     end)
 end)
@@ -195,12 +249,16 @@ mouse.Button2Down:Connect(function()
         local mousePos = mouse.Hit.Position
 
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Team ~= player.Team and enemy.Team ~= nil then
-                local head = enemy.Character.Head
-                local dist = (head.Position - mousePos).Magnitude
-                if dist < shortestDist then
-                    shortestDist = dist
-                    closest = head
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
+                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
+                local enemyTeam = enemy:FindFirstChild("TeamColor") and enemy.TeamColor
+                if playerTeam and enemyTeam and playerTeam ~= enemyTeam then
+                    local head = enemy.Character.Head
+                    local dist = (head.Position - mousePos).Magnitude
+                    if dist < shortestDist then
+                        shortestDist = dist
+                        closest = head
+                    end
                 end
             end
         end
@@ -240,10 +298,10 @@ runService.RenderStepped:Connect(function()
 end)
 
 local toggleInfo = TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out)
-local espSlideOn = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -115, 0, 70)})
-local espSlideOff = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -125, 0, 70)})
-local aimSlideOn = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -115, 0, 140)})
-local aimSlideOff = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -125, 0, 140)})
+local espSlideOn = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -130, 0, 80)})
+local espSlideOff = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -140, 0, 80)})
+local aimSlideOn = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -130, 0, 160)})
+local aimSlideOff = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -140, 0, 160)})
 
 espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
@@ -252,7 +310,7 @@ espToggle.MouseButton1Click:Connect(function()
     if espEnabled then
         espSlideOn:Play()
     else
-        espSlideOff:Play()
+       -espSlideOff:Play()
     end
     updateESP()
 end)
@@ -267,4 +325,3 @@ aimToggle.MouseButton1Click:Connect(function()
         aimSlideOff:Play()
     end
 end)
-print("This shit should work now")
