@@ -36,14 +36,14 @@ frameGradient.Color = ColorSequence.new({
 frameGradient.Rotation = 90
 frameGradient.Parent = frame
 
--- Title with a Futuristic Font
+-- Title with a Futuristic Font (Switched to SciFi)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 60)
 title.BackgroundTransparency = 1
 title.Text = "FUCKERY HUB"
 title.TextColor3 = Color3.fromRGB(255, 0, 0)
 title.TextSize = 28
-title.Font = Enum.Font.Orbit
+title.Font = Enum.Font.SciFi -- Valid font, looks futuristic
 title.TextStrokeTransparency = 0.4
 title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 title.TextTransparency = 1
@@ -57,7 +57,7 @@ closeButton.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
 closeButton.Text = "X"
 closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 closeButton.TextSize = 20
-closeButton.Font = Enum.Font.Orbit
+closeButton.Font = Enum.Font.SciFi -- Valid font
 closeButton.BackgroundTransparency = 1
 closeButton.Parent = frame
 
@@ -75,7 +75,7 @@ espToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 espToggle.Text = "ESP: OFF"
 espToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
 espToggle.TextSize = 22
-espToggle.Font = Enum.Font.Orbit
+espToggle.Font = Enum.Font.SciFi -- Valid font
 espToggle.BackgroundTransparency = 1
 espToggle.Parent = frame
 
@@ -100,7 +100,7 @@ aimToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 aimToggle.Text = "AIMBOT: OFF"
 aimToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
 aimToggle.TextSize = 22
-aimToggle.Font = Enum.Font.Orbit
+aimToggle.Font = Enum.Font.SciFi -- Valid font
 aimToggle.BackgroundTransparency = 1
 aimToggle.Parent = frame
 
@@ -208,21 +208,30 @@ local function updateESP()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character then
-                -- Arsenal-specific team check using TeamColor
+                -- Arsenal-specific team check using TeamColor and Status
                 local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
                 local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
-                -- Additional check for Arsenal's team structure
                 local isEnemy = true
                 if playerTeam and enemyTeam then
                     if playerTeam == enemyTeam then
                         isEnemy = false
                     end
                 else
-                    -- Fallback: Check if player is in a team
+                    -- Fallback: Check Team and Status (Arsenal-specific)
                     local playerTeamObj = player.Team
                     local enemyTeamObj = v.Team
                     if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
                         isEnemy = false
+                    end
+                    -- Arsenal-specific: Check "Status" for team assignment
+                    local playerStatus = player:FindFirstChild("Status")
+                    local enemyStatus = v:FindFirstChild("Status")
+                    if playerStatus and enemyStatus then
+                        local playerTeamValue = playerStatus:FindFirstChild("Team")
+                        local enemyTeamValue = enemyStatus:FindFirstChild("Team")
+                        if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
+                            isEnemy = false
+                        end
                     end
                 end
                 if isEnemy then
@@ -252,6 +261,15 @@ for _, v in pairs(game.Players:GetPlayers()) do
                     if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
                         isEnemy = false
                     end
+                    local playerStatus = player:FindFirstChild("Status")
+                    local enemyStatus = v:FindFirstChild("Status")
+                    if playerStatus and enemyStatus then
+                        local playerTeamValue = playerStatus:FindFirstChild("Team")
+                        local enemyTeamValue = enemyStatus:FindFirstChild("Team")
+                        if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
+                            isEnemy = false
+                        end
+                    end
                 end
                 if isEnemy then
                     addESPBox(char)
@@ -276,6 +294,15 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
                 local enemyTeamObj = newPlayer.Team
                 if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
                     isEnemy = false
+                end
+                local playerStatus = player:FindFirstChild("Status")
+                local enemyStatus = newPlayer:FindFirstChild("Status")
+                if playerStatus and enemyStatus then
+                    local playerTeamValue = playerStatus:FindFirstChild("Team")
+                    local enemyTeamValue = enemyStatus:FindFirstChild("Team")
+                    if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
+                        isEnemy = false
+                    end
                 end
             end
             if isEnemy then
@@ -310,6 +337,15 @@ mouse.Button2Down:Connect(function()
                     local enemyTeamObj = enemy.Team
                     if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
                         isEnemy = false
+                    end
+                    local playerStatus = player:FindFirstChild("Status")
+                    local enemyStatus = enemy:FindFirstChild("Status")
+                    if playerStatus and enemyStatus then
+                        local playerTeamValue = playerStatus:FindFirstChild("Team")
+                        local enemyTeamValue = enemyStatus:FindFirstChild("Team")
+                        if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
+                            isEnemy = false
+                        end
                     end
                 end
                 if isEnemy then
