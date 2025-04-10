@@ -267,3 +267,4 @@ aimToggle.MouseButton1Click:Connect(function()
         aimSlideOff:Play()
     end
 end)
+print("This shit should work now")
