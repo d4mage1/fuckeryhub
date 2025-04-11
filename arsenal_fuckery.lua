@@ -4,18 +4,18 @@ print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
 print([[
-                       _        _                 _ _  _                             __ 
+                      _        _                 _ _  _                             __ 
                      | |      | |               | | || |                           /_ |
   _ __ ___   __ _  __| | ___  | |__  _   _    __| | || |_ _ __ ___   __ _  __ _  ___| |
  | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
  | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| |  | | | | | | | | (_| | (_| |  __/ |
  |_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
                                       __/ |                                __/ |       
-                                     |___/                                |___/        
+                                     |___/                                |___/         
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.0 - Arsenal Edition")
+print("Version: 1.4.2 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -99,8 +99,18 @@ local success, err = pcall(function()
                 clearESP()
                 if fovCircle then fovCircle.Visible = false end
                 clearTracers()
+                Window:Notify({
+                    Title = "Panic Mode",
+                    Content = "All features disabled.",
+                    Duration = 3
+                })
             else
                 print("Panic Mode disabled - features can be re-enabled")
+                Window:Notify({
+                    Title = "Panic Mode",
+                    Content = "Features can now be re-enabled.",
+                    Duration = 3
+                })
             end
         end
     })
@@ -116,6 +126,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable aimbot - Panic Mode is active")
+                Window:Notify({
+                    Title = "Aimbot Error",
+                    Content = "Cannot enable aimbot - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             aimbotEnabled = Value
@@ -129,6 +144,7 @@ local success, err = pcall(function()
                 local currentPitch = math.asin(lookVector.Y)
                 local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
                 camera.CFrame = newCFrame
+                print("Aimbot disabled, camera reset")
             end
         end
     })
@@ -141,6 +157,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable aim assist - Panic Mode is active")
+                Window:Notify({
+                    Title = "Aim Assist Error",
+                    Content = "Cannot enable aim assist - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             aimAssistEnabled = Value
@@ -155,6 +176,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable silent aim - Panic Mode is active")
+                Window:Notify({
+                    Title = "Silent Aim Error",
+                    Content = "Cannot enable silent aim - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             silentAimEnabled = Value
@@ -169,6 +195,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable auto fire - Panic Mode is active")
+                Window:Notify({
+                    Title = "Auto Fire Error",
+                    Content = "Cannot enable auto fire - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             autoFireEnabled = Value
@@ -196,6 +227,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable hitbox extender - Panic Mode is active")
+                Window:Notify({
+                    Title = "Hitbox Extender Error",
+                    Content = "Cannot enable hitbox extender - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             hitboxExtenderEnabled = Value
@@ -215,6 +251,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable ESP - Panic Mode is active")
+                Window:Notify({
+                    Title = "ESP Error",
+                    Content = "Cannot enable ESP - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             espEnabled = Value
@@ -244,6 +285,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable tracers - Panic Mode is active")
+                Window:Notify({
+                    Title = "Tracers Error",
+                    Content = "Cannot enable tracers - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             tracersEnabled = Value
@@ -265,6 +311,11 @@ local success, err = pcall(function()
         Callback = function(Value)
             if panicModeEnabled then
                 print("Cannot enable FOV circle - Panic Mode is active")
+                Window:Notify({
+                    Title = "FOV Circle Error",
+                    Content = "Cannot enable FOV circle - Panic Mode is active.",
+                    Duration = 3
+                })
                 return
             end
             fovCircleEnabled = Value
@@ -345,19 +396,21 @@ local success, err = pcall(function()
                 playersWithTeam = playersWithTeam + 1
             end
         end
-        print("Players with teams: " .. playersWithTeam)
+        print("Players with teams: " .. playersWithTeam .. "/" .. #game.Players:GetPlayers())
         if playersWithTeam == 0 then
             print("Detected FFA mode (no players have teams)")
             return true
         end
+        print("Detected Team mode")
         return false
     end
 
     local function isEnemyPlayer(enemy)
+        if enemy == player then return false end
         local ffa = isFFA()
         if ffa then
             print("Enemy check (FFA): " .. enemy.Name .. " is an enemy")
-            return enemy ~= player
+            return true
         else
             local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
             print("Enemy check (Team mode): " .. enemy.Name .. " is " .. (isEnemy and "an enemy" or "not an enemy"))
@@ -417,7 +470,10 @@ local success, err = pcall(function()
 
     -- Tracers Functions
     local function addTracer(target)
-        if not target or not target:FindFirstChild("HumanoidRootPart") or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        if not target or not target:FindFirstChild("HumanoidRootPart") or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            print("Failed to add tracer for " .. (target and target.Name or "nil") .. ": Missing HumanoidRootPart")
+            return
+        end
         local line = Drawing.new("Line")
         line.Transparency = 0.7
         line.Thickness = 1
@@ -439,7 +495,10 @@ local success, err = pcall(function()
             return
         end
         clearTracers()
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            print("Cannot update tracers: Player character or HumanoidRootPart missing")
+            return
+        end
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
                 addTracer(v.Character)
@@ -475,7 +534,7 @@ local success, err = pcall(function()
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
                     if isEnemyPlayer(enemy) then
-                        local dist = (head.Position - camera.CFrame.Position).Magnitude
+                        local dist = (head.Position - (player.Character and player.Character:FindFirstChild("Head") and player.Character.Head.Position or camera.CFrame.Position)).Magnitude
                         if dist < shortestDist then
                             shortestDist = dist
                             closest = head
@@ -484,23 +543,37 @@ local success, err = pcall(function()
                 end
             end
         end
+        if closest then
+            print("Closest enemy found: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
+        else
+            print("No closest enemy found")
+        end
         return closest
     end
 
     local function hookFireServer()
         if hooked then return end
-        -- Arsenal's shooting remote is in ReplicatedStorage.Comm.HitPart (confirmed as of April 2025)
         local comm = game.ReplicatedStorage:WaitForChild("Comm", 5)
         if not comm then
             print("Error: Could not find Comm in ReplicatedStorage")
+            Window:Notify({
+                Title = "Hook Error",
+                Content = "Could not find Comm in ReplicatedStorage. Some features may not work.",
+                Duration = 5
+            })
             return
         end
         local hitPart = comm:WaitForChild("HitPart", 5)
         if not hitPart then
             print("Error: Could not find HitPart in Comm")
+            Window:Notify({
+                Title = "Hook Error",
+                Content = "Could not find HitPart in Comm. Silent Aim, Hitbox Extender, and Auto Fire may not work.",
+                Duration = 5
+            })
             return
         end
-        print("Hooked Arsenal HitPart event")
+        print("Successfully hooked Arsenal HitPart event")
         originalFireServer = hitPart.FireServer
         hitPart.FireServer = function(self, hit, position, ...)
             if silentAimEnabled then
@@ -552,9 +625,11 @@ local success, err = pcall(function()
                         local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
                         if onScreen then
                             local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                            if dist < fovSize and dist < shortestDist then
-                                shortestDist = dist
-                                closest = head
+                            if forAimAssist or dist < fovSize then -- Aim assist doesn't need FOV check
+                                if dist < shortestDist then
+                                    shortestDist = dist
+                                    closest = head
+                                end
                             end
                         end
                     end
@@ -564,33 +639,54 @@ local success, err = pcall(function()
         if closest then
             print("Found target: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
         else
-            print("No target found within FOV")
+            print("No target found within " .. (forAimAssist and "screen" or "FOV"))
         end
         return closest
     end
 
     mouse.Button2Down:Connect(function()
-        if not aimbotEnabled or panicModeEnabled then return end
+        if not aimbotEnabled or panicModeEnabled then
+            print("Cannot lock aimbot: " .. (not aimbotEnabled and "Aimbot disabled" or "Panic Mode active"))
+            return
+        end
+        print("Right-click detected, attempting to lock aimbot")
         target = findTarget(false)
         if target then
             locked = true
             print("Aimbot locked onto: " .. target.Parent.Name)
+            Window:Notify({
+                Title = "Aimbot",
+                Content = "Locked onto " .. target.Parent.Name,
+                Duration = 2
+            })
         else
             print("No aimbot target found")
+            Window:Notify({
+                Title = "Aimbot",
+                Content = "No target found within FOV.",
+                Duration = 2
+            })
         end
     end)
 
     mouse.Button2Up:Connect(function()
-        locked = false
-        target = nil
-        print("Aimbot unlocked")
-        local currentCFrame = camera.CFrame
-        local lookVector = currentCFrame.LookVector
-        local flatLook = lookVector * Vector3.new(1, 0, 1)
-        local newLook = currentCFrame.Position + flatLook.Unit * 10
-        local currentPitch = math.asin(lookVector.Y)
-        local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
-        camera.CFrame = newCFrame
+        if locked then
+            locked = false
+            target = nil
+            print("Aimbot unlocked")
+            Window:Notify({
+                Title = "Aimbot",
+                Content = "Aimbot unlocked.",
+                Duration = 2
+            })
+            local currentCFrame = camera.CFrame
+            local lookVector = currentCFrame.LookVector
+            local flatLook = lookVector * Vector3.new(1, 0, 1)
+            local newLook = currentCFrame.Position + flatLook.Unit * 10
+            local currentPitch = math.asin(lookVector.Y)
+            local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+            camera.CFrame = newCFrame
+        end
     end)
 
     -- Auto Fire Logic
@@ -598,11 +694,13 @@ local success, err = pcall(function()
     mouse.Button1Down:Connect(function()
         if autoFireEnabled and not panicModeEnabled then
             isFiring = true
+            print("Left-click down: Auto fire started")
         end
     end)
 
     mouse.Button1Up:Connect(function()
         isFiring = false
+        print("Left-click up: Auto fire stopped")
     end)
 
     runService.RenderStepped:Connect(function()
@@ -621,7 +719,6 @@ local success, err = pcall(function()
             fovCircle.Radius = fovCircleSize
             fovCircle.Color = fovCircleColor
             fovCircle.Visible = true
-            print("FOV Circle Position: " .. tostring(centerPos))
         end
 
         -- Update ESP
@@ -664,7 +761,7 @@ local success, err = pcall(function()
                 local hitPart = game.ReplicatedStorage:FindFirstChild("Comm") and game.ReplicatedStorage.Comm:FindFirstChild("HitPart")
                 if hitPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local targetPart = target or mouse.Target
-                    if not targetPart or not targetPart.Parent:FindChild("Humanoid") then
+                    if not targetPart or not targetPart.Parent:FindFirstChild("Humanoid") then
                         targetPart = player.Character.HumanoidRootPart
                     end
                     local successFire, fireErr = pcall(function()
@@ -690,6 +787,11 @@ local success, err = pcall(function()
                 if not target then
                     locked = false
                     print("No aimbot target, resetting camera")
+                    Window:Notify({
+                        Title = "Aimbot",
+                        Content = "Target lost. Aimbot unlocked.",
+                        Duration = 2
+                    })
                     local currentCFrame = camera.CFrame
                     local lookVector = currentCFrame.LookVector
                     local flatLook = lookVector * Vector3.new(1, 0, 1)
@@ -727,7 +829,7 @@ local success, err = pcall(function()
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v2.0 by d4mage1 - Fixed all features, improved game mode detection, added more debug prints")
+    print("Fuckery Hub Arsenal script loaded - v2.1 by d4mage1 - Fixed aimbot lock, fixed all features, added notifications")
 end)
 
 if not success then
