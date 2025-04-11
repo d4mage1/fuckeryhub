@@ -1,12 +1,12 @@
 # 🛠️ Fuckery Hub  
-Fuckery Hub is a dope mod menu for Arsenal on Roblox, built by me, d4mage1. It’s packed with features like aimbot, ESP, and a suggestion system to send ideas straight to my Discord. Whether you’re tryna dominate, mess around, or just vibe, this menu’s got you covered. I made it clean and sleek with a ZYHPERION-style GUI, so it looks fire while you’re using it.
+Fuckery Hub is a dope mod menu for Arsenal on Roblox, built by me, d4mage1. It’s packed with features like aimbot, ESP, and a suggestion system to send ideas straight to my Discord. Whether you’re tryna dominate, mess around, or just vibe, this gui got you covered.
 
 Why settle for basic when you can have some fuckery?
 
 ---
 
 ## 💡 Why Open-Source?  
-Real shit—modding should be about learning and sharing, not gatekeeping. I’ve seen too many scripts locked behind paywalls or obfuscated to hell, and that ain’t the vibe. That’s why Fuckery Hub is open-source.
+Real shit—exploits should be about learning and sharing, not gatekeeping. I’ve seen too many scripts locked behind paywalls or obfuscated to hell, and that ain’t the vibe. That’s why Fuckery Hub is open-source.
 
 I’m putting my code out there so:  
 ✅ You can learn how exploits(LuaU) work  
@@ -14,7 +14,7 @@ I’m putting my code out there so:
 ✅ Build on my work (just give me credits, yk)  
 ✅ Keep exploiting free for everyone  
 
-If you wanna use my code, go for it—but give me a shoutout somewhere in your project. Let’s keep the modding scene collaborative and real. No paywalls, no bullshit, just good scripts.
+If you wanna use my code, go for it—but give me a shoutout somewhere in your project. Let’s keep the exploiting scene collaborative and real. No paywalls, no bullshit, just good scripts.
 
 ---
 
