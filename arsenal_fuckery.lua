@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.6 - Arsenal Edition")
+print("Version: 1.5 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -74,6 +74,37 @@ local success, err = pcall(function()
         KeySystem = false
     })
 
+    -- Main Tab (for Panic Mode)
+    local MainTab = Window:CreateTab("Main")
+
+    local panicModeEnabled = false
+    MainTab:CreateToggle({
+        Name = "Panic Mode (Disables All Features)",
+        CurrentValue = false,
+        Flag = "PanicModeToggle",
+        Callback = function(Value)
+            panicModeEnabled = Value
+            if panicModeEnabled then
+                print("Panic Mode enabled - disabling all features")
+                aimbotEnabled = false
+                aimAssistEnabled = false
+                hitboxExtenderEnabled = false
+                espEnabled = false
+                fovCircleEnabled = false
+                autoFireEnabled = false
+                tracersEnabled = false
+                silentAimEnabled = false
+                locked = false
+                target = nil
+                clearESP()
+                if fovCircle then fovCircle.Visible = false end
+                clearTracers()
+            else
+                print("Panic Mode disabled - features can be re-enabled")
+            end
+        end
+    })
+
     -- Combat Tab
     local CombatTab = Window:CreateTab("Combat")
 
@@ -83,16 +114,18 @@ local success, err = pcall(function()
         CurrentValue = false,
         Flag = "AimbotToggle",
         Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable aimbot - Panic Mode is active")
+                return
+            end
             aimbotEnabled = Value
             if not Value then
                 locked = false
                 target = nil
-                -- Reset camera without downward dip
                 local currentCFrame = camera.CFrame
                 local lookVector = currentCFrame.LookVector
-                local flatLook = lookVector * Vector3.new(1, 0, 1) -- Zero out Y to avoid dip
+                local flatLook = lookVector * Vector3.new(1, 0, 1)
                 local newLook = currentCFrame.Position + flatLook.Unit * 10
-                -- Preserve the current pitch (up/down angle)
                 local currentPitch = math.asin(lookVector.Y)
                 local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
                 camera.CFrame = newCFrame
@@ -106,7 +139,39 @@ local success, err = pcall(function()
         CurrentValue = false,
         Flag = "AimAssistToggle",
         Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable aim assist - Panic Mode is active")
+                return
+            end
             aimAssistEnabled = Value
+        end
+    })
+
+    local silentAimEnabled = false
+    CombatTab:CreateToggle({
+        Name = "Enable Silent Aim",
+        CurrentValue = false,
+        Flag = "SilentAimToggle",
+        Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable silent aim - Panic Mode is active")
+                return
+            end
+            silentAimEnabled = Value
+        end
+    })
+
+    local autoFireEnabled = false
+    CombatTab:CreateToggle({
+        Name = "Enable Auto Fire",
+        CurrentValue = false,
+        Flag = "AutoFireToggle",
+        Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable auto fire - Panic Mode is active")
+                return
+            end
+            autoFireEnabled = Value
         end
     })
 
@@ -129,6 +194,10 @@ local success, err = pcall(function()
         CurrentValue = false,
         Flag = "HitboxToggle",
         Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable hitbox extender - Panic Mode is active")
+                return
+            end
             hitboxExtenderEnabled = Value
         end
     })
@@ -144,6 +213,10 @@ local success, err = pcall(function()
         CurrentValue = false,
         Flag = "ESPToggle",
         Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable ESP - Panic Mode is active")
+                return
+            end
             espEnabled = Value
             if not espEnabled then
                 clearESP()
@@ -160,6 +233,26 @@ local success, err = pcall(function()
         end
     })
 
+    local tracersEnabled = false
+    local tracers = {}
+    local tracerColorEnemy = Color3.fromRGB(255, 0, 0)
+    local tracerColorTeam = Color3.fromRGB(0, 255, 0)
+    VisualsTab:CreateToggle({
+        Name = "Enable Tracers",
+        CurrentValue = false,
+        Flag = "TracersToggle",
+        Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable tracers - Panic Mode is active")
+                return
+            end
+            tracersEnabled = Value
+            if not tracersEnabled then
+                clearTracers()
+            end
+        end
+    })
+
     local fovCircleEnabled = false
     local fovCircleSize = 150
     local fovCircleColor = Color3.fromRGB(255, 255, 255)
@@ -170,6 +263,10 @@ local success, err = pcall(function()
         CurrentValue = false,
         Flag = "FOVCircleToggle",
         Callback = function(Value)
+            if panicModeEnabled then
+                print("Cannot enable FOV circle - Panic Mode is active")
+                return
+            end
             fovCircleEnabled = Value
             if fovCircleEnabled then
                 if not fovCircle then
@@ -263,7 +360,7 @@ local success, err = pcall(function()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
-                local isEnemy = (player.Team ~= v.Team) or not player.Team or not v.Team
+                local isEnemy = isEnemyPlayer(v)
                 if isEnemy then
                     addESP(v.Character)
                 end
@@ -285,25 +382,126 @@ local success, err = pcall(function()
         end)
     end)
 
-    -- Hitbox Extender Logic
+    -- Tracers Functions
+    local function addTracer(target)
+        if not target or not target:FindFirstChild("HumanoidRootPart") or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        local line = Drawing.new("Line")
+        line.Transparency = 0.7
+        line.Thickness = 1
+        line.Color = (player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy
+        line.Visible = true
+        table.insert(tracers, {line = line, target = target})
+    end
+
+    local function clearTracers()
+        for _, tracer in pairs(tracers) do
+            if tracer.line then tracer.line:Remove() end
+        end
+        tracers = {}
+    end
+
+    local function updateTracers()
+        if not tracersEnabled then
+            clearTracers()
+            return
+        end
+        clearTracers()
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
+                addTracer(v.Character)
+            end
+        end
+    end
+
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player then
+            v.CharacterAdded:Connect(function()
+                if tracersEnabled then updateTracers() end
+            end)
+        end
+    end
+
+    game.Players.PlayerAdded:Connect(function(newPlayer)
+        newPlayer.CharacterAdded:Connect(function()
+            if tracersEnabled then updateTracers() end
+        end)
+    end)
+
+    -- Game Mode Detection and Enemy Check
+    local function isFFA()
+        -- Check if teams are disabled (FFA mode)
+        local teamCount = #teams:GetChildren()
+        if teamCount == 0 then
+            return true -- No teams means FFA
+        end
+        -- Check if players have no team assigned (FFA)
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= player and v.Team ~= nil then
+                return false -- If players have teams, it's not FFA
+            end
+        end
+        return true
+    end
+
+    local function isEnemyPlayer(enemy)
+        if isFFA() then
+            return enemy ~= player -- In FFA, everyone except the local player is an enemy
+        else
+            return (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
+        end
+    end
+
+    -- Silent Aim, Hitbox Extender, and Auto Fire Logic
     local hooked = false
     local originalFireServer
+    local lastFireTime = 0
+    local fireRate = 0.1
+
+    local function findClosestEnemy()
+        local closest, shortestDist = nil, math.huge
+        for _, enemy in pairs(game.Players:GetPlayers()) do
+            if enemy ~= player and enemy.Character then
+                local head = enemy.Character:FindFirstChild("Head")
+                local humanoid = enemy.Character:FindFirstChild("Humanoid")
+                if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+                    local isEnemy = isEnemyPlayer(enemy)
+                    if isEnemy then
+                        local dist = (head.Position - camera.CFrame.Position).Magnitude
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closest = head
+                        end
+                    end
+                end
+            end
+        end
+        return closest
+    end
+
     local function hookFireServer()
         if hooked then return end
-        local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
-        if remotes then
-            local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit") or remotes:FindFirstChild("Bullet")
-            if shootEvent then
-                print("Hooked shoot event: " .. shootEvent.Name)
-                originalFireServer = shootEvent.FireServer
-                shootEvent.FireServer = function(self, targetPos, ...)
-                    if hitboxExtenderEnabled then
+        local comm = game.ReplicatedStorage:FindFirstChild("Comm")
+        if comm then
+            local hitPart = comm:FindFirstChild("HitPart")
+            if hitPart then
+                print("Hooked Arsenal HitPart event")
+                originalFireServer = hitPart.FireServer
+                hitPart.FireServer = function(self, hit, position, ...)
+                    if silentAimEnabled then
+                        local closestEnemy = findClosestEnemy()
+                        if closestEnemy then
+                            print("Silent Aim: Redirecting shot to " .. closestEnemy.Parent.Name)
+                            hit = closestEnemy
+                            position = closestEnemy.Position
+                        end
+                    elseif hitboxExtenderEnabled then
                         local closestEnemy, shortestDist = nil, 10
                         for _, enemy in pairs(game.Players:GetPlayers()) do
                             if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
-                                local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
+                                local isEnemy = isEnemyPlayer(enemy)
                                 if isEnemy then
-                                    local dist = (enemy.Character.Head.Position - targetPos).Magnitude
+                                    local dist = (enemy.Character.Head.Position - position).Magnitude
                                     if dist < shortestDist then
                                         shortestDist = dist
                                         closestEnemy = enemy.Character.Head
@@ -313,17 +511,18 @@ local success, err = pcall(function()
                         end
                         if closestEnemy then
                             print("Hitbox Extender: Redirecting shot to " .. closestEnemy.Parent.Name)
-                            targetPos = closestEnemy.Position
+                            hit = closestEnemy
+                            position = closestEnemy.Position
                         end
                     end
-                    return originalFireServer(self, targetPos, ...)
+                    return originalFireServer(self, hit, position, ...)
                 end
                 hooked = true
             else
-                print("Could not find shoot event for hitbox extender")
+                print("Could not find HitPart event in Comm")
             end
         else
-            print("Could not find remotes for hitbox extender")
+            print("Could not find Comm in ReplicatedStorage")
         end
     end
 
@@ -341,7 +540,7 @@ local success, err = pcall(function()
                 local head = enemy.Character:FindFirstChild("Head")
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
-                    local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not v.Team
+                    local isEnemy = isEnemyPlayer(enemy)
                     if isEnemy then
                         local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
                         if onScreen then
@@ -359,7 +558,7 @@ local success, err = pcall(function()
     end
 
     mouse.Button2Down:Connect(function()
-        if not aimbotEnabled then return end
+        if not aimbotEnabled or panicModeEnabled then return end
         target = findTarget(false)
         if target then
             locked = true
@@ -382,7 +581,21 @@ local success, err = pcall(function()
         camera.CFrame = newCFrame
     end)
 
+    -- Auto Fire Logic
+    local isFiring = false
+    mouse.Button1Down:Connect(function()
+        if autoFireEnabled and not panicModeEnabled then
+            isFiring = true
+        end
+    end)
+
+    mouse.Button1Up:Connect(function()
+        isFiring = false
+    end)
+
     runService.RenderStepped:Connect(function()
+        if panicModeEnabled then return end
+
         -- Calculate mouse movement speed for aim assist
         local currentMousePos = Vector2.new(mouse.X, mouse.Y)
         mouseSpeed = (currentMousePos - lastMousePos).Magnitude
@@ -399,11 +612,50 @@ local success, err = pcall(function()
             print("FOV Circle Position: " .. tostring(centerPos))
         end
 
-        -- ESP Update
+        -- Update ESP
         if espEnabled then updateESP() else clearESP() end
 
-        -- Hitbox Extender
-        if hitboxExtenderEnabled then hookFireServer() end
+        -- Update Tracers
+        if tracersEnabled then
+            for _, tracer in pairs(tracers) do
+                if tracer.target and tracer.target:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local startPos = camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
+                    local endPos, onScreen = camera:WorldToScreenPoint(tracer.target.HumanoidRootPart.Position)
+                    if onScreen then
+                        tracer.line.From = Vector2.new(startPos.X, startPos.Y)
+                        tracer.line.To = Vector2.new(endPos.X, endPos.Y)
+                        tracer.line.Visible = true
+                    else
+                        tracer.line.Visible = false
+                    end
+                else
+                    tracer.line.Visible = false
+                end
+            end
+            updateTracers()
+        else
+            clearTracers()
+        end
+
+        -- Hook FireServer for Silent Aim, Hitbox Extender, and Auto Fire
+        if silentAimEnabled or hitboxExtenderEnabled or autoFireEnabled then hookFireServer() end
+
+        -- Auto Fire
+        if autoFireEnabled and (isFiring or (aimbotEnabled and locked and target)) then
+            local currentTime = tick()
+            if currentTime - lastFireTime >= fireRate then
+                local hitPart = game.ReplicatedStorage:FindFirstChild("Comm") and game.ReplicatedStorage.Comm:FindFirstChild("HitPart")
+                if hitPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetPart = target or mouse.Target
+                    if not targetPart or not targetPart.Parent:FindFirstChild("Humanoid") then
+                        targetPart = player.Character.HumanoidRootPart
+                    end
+                    hitPart:FireServer(targetPart, targetPart.Position)
+                    lastFireTime = currentTime
+                    print("Auto Fire: Shot fired at " .. targetPart.Parent.Name)
+                end
+            end
+        end
 
         -- Aimbot
         if aimbotEnabled and locked then
@@ -429,7 +681,7 @@ local success, err = pcall(function()
             camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
         end
 
-        -- Aim Assist (Sticky Behavior)
+        -- Aim Assist
         if aimAssistEnabled and not locked then
             local assistTarget = findTarget(true)
             if assistTarget then
@@ -437,10 +689,9 @@ local success, err = pcall(function()
                 if onScreen then
                     local cursorPos = Vector2.new(mouse.X, mouse.Y)
                     local distToTarget = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                    -- Dynamic Lerp strength: stronger pull when close, weaker when moving fast
-                    local baseStrength = 0.3
-                    local stickiness = math.clamp(1 - (distToTarget / fovSize), 0, 1) -- Stronger pull when closer
-                    local speedFactor = math.clamp(mouseSpeed / 50, 0, 1) -- Reduce pull if moving fast
+                    local baseStrength = 0.15
+                    local stickiness = math.clamp(1 - (distToTarget / fovSize), 0, 1)
+                    local speedFactor = math.clamp(mouseSpeed / 30, 0, 1)
                     local finalStrength = baseStrength * stickiness * (1 - speedFactor)
                     local currentCFrame = camera.CFrame
                     local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
@@ -451,7 +702,7 @@ local success, err = pcall(function()
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v1.6 by d4mage1 - Fixed aimbot camera dip, updated aim assist")
+    print("Fuckery Hub Arsenal script loaded - v1.9 by d4mage1 - Fixed game mode support (2 Teams, 4 Teams, FFA), added silent aim")
 end)
 
 if not success then
