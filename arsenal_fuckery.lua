@@ -28,18 +28,16 @@ local uis = game:GetService("UserInputService")
 
 -- Load Rayfield UI Library with Better Error Handling
 local Rayfield
-local rayfieldUrl = "https://sirius.menu/rayfield" -- Primary URL
-local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source" -- Fallback URL
+local rayfieldUrl = "https://sirius.menu/rayfield"
+local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source"
 local rawScript
 
--- Try the primary URL first
 local success, errorMsg = pcall(function()
     rawScript = game:HttpGet(rayfieldUrl)
 end)
 
 if not success then
     print("Failed to fetch Rayfield from primary URL: " .. tostring(errorMsg))
-    -- Try the fallback URL
     success, errorMsg = pcall(function()
         rawScript = game:HttpGet(rayfieldFallbackUrl)
     end)
@@ -54,7 +52,6 @@ if not success then
     end
 end
 
--- Now try to load the script with loadstring
 success, errorMsg = pcall(function()
     Rayfield = loadstring(rawScript)()
 end)
@@ -180,7 +177,7 @@ end
 
 local hitboxExtenderEnabled = false
 local hitboxSize = 5
-local originalHitboxSizes = {}
+local hitboxParts = {} -- Store custom hitbox parts
 local hitboxToggleSuccess, hitboxToggleError = pcall(function()
     CombatTab:CreateToggle({
         Name = "Enable Hitbox Extender",
@@ -194,16 +191,13 @@ local hitboxToggleSuccess, hitboxToggleError = pcall(function()
                 Duration = 3
             })
             if not hitboxExtenderEnabled then
-                for _, enemy in pairs(game.Players:GetPlayers()) do
-                    if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
-                        local head = enemy.Character.Head
-                        if originalHitboxSizes[enemy] then
-                            head.Size = originalHitboxSizes[enemy]
-                            head.Transparency = 0
-                        end
+                -- Clean up custom hitbox parts
+                for _, part in pairs(hitboxParts) do
+                    if part then
+                        part:Destroy()
                     end
                 end
-                originalHitboxSizes = {}
+                hitboxParts = {}
             end
         end
     })
@@ -221,7 +215,7 @@ end
 local hitboxSliderSuccess, hitboxSliderError = pcall(function()
     CombatTab:CreateSlider({
         Name = "Hitbox Size",
-        Range = {2, 20},
+        Range = {2, 10}, -- Reduced max size to prevent freezing
         Increment = 1,
         Suffix = "Studs",
         CurrentValue = 5,
@@ -370,100 +364,38 @@ else
                         return
                     end
 
+                    -- Function to recursively change colors
+                    local function updateColors(obj, bgColor, textColor, buttonColor)
+                        if obj:IsA("Frame") or obj:IsA("ScrollingFrame") then
+                            obj.BackgroundColor3 = bgColor
+                        end
+                        if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                            obj.TextColor3 = textColor
+                            if obj:IsA("TextButton") then
+                                obj.BackgroundColor3 = buttonColor
+                            end
+                        end
+                        for _, child in pairs(obj:GetChildren()) do
+                            updateColors(child, bgColor, textColor, buttonColor)
+                        end
+                    end
+
                     if Option == "Dark" then
-                        if window then
-                            window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                        end
-                        if tabList then
-                            for _, tab in pairs(tabList:GetChildren()) do
-                                if tab:IsA("Frame") then
-                                    tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
-                                    if tabText then
-                                        tabText.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                    end
-                                end
-                            end
-                        end
-                        if content then
-                            for _, element in pairs(content:GetDescendants()) do
-                                if element:IsA("Frame") then
-                                    element.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-                                end
-                                if element:IsA("TextLabel") or element:IsA("TextButton") then
-                                    element.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                    if element:IsA("TextButton") then
-                                        element.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                                    end
-                                end
-                            end
-                        end
+                        updateColors(window, Color3.fromRGB(30, 30, 30), Color3.fromRGB(255, 255, 255), Color3.fromRGB(50, 50, 50))
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Dark theme, cuhh!",
                             Duration = 3
                         })
                     elseif Option == "Light" then
-                        if window then
-                            window.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-                        end
-                        if tabList then
-                            for _, tab in pairs(tabList:GetChildren()) do
-                                if tab:IsA("Frame") then
-                                    tab.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
-                                    if tabText then
-                                        tabText.TextColor3 = Color3.fromRGB(0, 0, 0)
-                                    end
-                                end
-                            end
-                        end
-                        if content then
-                            for _, element in pairs(content:GetDescendants()) do
-                                if element:IsA("Frame") then
-                                    element.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
-                                end
-                                if element:IsA("TextLabel") or element:IsA("TextButton") then
-                                    element.TextColor3 = Color3.fromRGB(0, 0, 0)
-                                    if element:IsA("TextButton") then
-                                        element.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
-                                    end
-                                end
-                            end
-                        end
+                        updateColors(window, Color3.fromRGB(220, 220, 220), Color3.fromRGB(0, 0, 0), Color3.fromRGB(180, 180, 180))
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Light theme, cuhh!",
                             Duration = 3
                         })
                     elseif Option == "Fuckery" then
-                        if window then
-                            window.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
-                        end
-                        if tabList then
-                            for _, tab in pairs(tabList:GetChildren()) do
-                                if tab:IsA("Frame") then
-                                    tab.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
-                                    if tabText then
-                                        tabText.TextColor3 = Color3.fromRGB(255, 0, 0)
-                                    end
-                                end
-                            end
-                        end
-                        if content then
-                            for _, element in pairs(content:GetDescendants()) do
-                                if element:IsA("Frame") then
-                                    element.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-                                end
-                                if element:IsA("TextLabel") or element:IsA("TextButton") then
-                                    element.TextColor3 = Color3.fromRGB(255, 0, 0)
-                                    if element:IsA("TextButton") then
-                                        element.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
-                                    end
-                                end
-                            end
-                        end
+                        updateColors(window, Color3.fromRGB(20, 0, 0), Color3.fromRGB(255, 0, 0), Color3.fromRGB(50, 0, 0))
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Fuckery theme, cuhh! Red and black vibes!",
@@ -492,8 +424,12 @@ else
 end
 
 -- ESP Functions
-local function addESP(target)
+local function addESP(target, playerName)
     if not target or not target:FindFirstChild("HumanoidRootPart") then return end
+    if target == player.Character then
+        print("Attempted to add ESP to local player, skipping: " .. playerName)
+        return
+    end
     local box = Instance.new("BoxHandleAdornment")
     box.Size = target:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
     box.Adornee = target
@@ -523,7 +459,7 @@ local function updateESP()
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
         if v == player then
-            print("Skipping local player: " .. v.Name)
+            print("Skipping local player in ESP loop: " .. v.Name)
             continue
         end
         if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
@@ -531,15 +467,15 @@ local function updateESP()
             local enemyTeam = v.Team
             local isEnemy = true
             if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                print("Skipping teammate: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")")
+                print("Skipping teammate in ESP: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")")
                 isEnemy = false
             elseif not playerTeam or not enemyTeam then
-                print("No teams detected, treating as enemy: " .. v.Name)
+                print("No teams detected, treating as enemy in ESP: " .. v.Name)
                 isEnemy = true
             end
             if isEnemy then
                 print("Adding ESP for enemy: " .. v.Name)
-                addESP(v.Character)
+                addESP(v.Character, v.Name)
             end
         end
     end
@@ -563,22 +499,45 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
+-- Hitbox Extender Logic (Using Custom Parts)
+local function createHitboxPart(character)
+    if not character or not character:FindFirstChild("Head") then return end
+    local head = character.Head
+    local hitboxPart = Instance.new("Part")
+    hitboxPart.Name = "ExtendedHitbox"
+    hitboxPart.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+    hitboxPart.Transparency = 0.7
+    hitboxPart.CanCollide = false
+    hitboxPart.Anchored = false
+    hitboxPart.Position = head.Position
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = head
+    weld.Part1 = hitboxPart
+    weld.Parent = hitboxPart
+    hitboxPart.Parent = character
+    table.insert(hitboxParts, hitboxPart)
+    return hitboxPart
+end
+
+-- Main Loop
 runService.RenderStepped:Connect(function()
+    -- ESP Update
     if espEnabled then
         updateESP()
     else
         clearESP()
     end
 
+    -- Hitbox Extender Update
     if hitboxExtenderEnabled then
         for _, enemy in pairs(game.Players:GetPlayers()) do
             if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
-                local head = enemy.Character.Head
-                if not originalHitboxSizes[enemy] then
-                    originalHitboxSizes[enemy] = head.Size
+                local existingHitbox = enemy.Character:FindFirstChild("ExtendedHitbox")
+                if not existingHitbox then
+                    createHitboxPart(enemy.Character)
+                else
+                    existingHitbox.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
                 end
-                head.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-                head.Transparency = 0.5
             end
         end
     end
@@ -588,14 +547,6 @@ end)
 local target = nil
 local locked = false
 local lastLookVector = camera.CFrame.LookVector
-
-local function isVisible(targetPos)
-    local origin = camera.CFrame.Position
-    local direction = (targetPos - origin).Unit * 500
-    local ray = Ray.new(origin, direction)
-    local hit, pos = game.Workspace:FindPartOnRayWithIgnoreList(ray, {player.Character or {}})
-    return hit == nil or (pos - targetPos).Magnitude < 1
-end
 
 mouse.Button2Down:Connect(function()
     if not aimbotEnabled then return end
@@ -618,7 +569,7 @@ mouse.Button2Down:Connect(function()
             if isEnemy then
                 local head = enemy.Character.Head
                 local dist = (head.Position - mousePos).Magnitude
-                if dist < fovSize and dist < shortestDist and isVisible(head.Position) then
+                if dist < fovSize and dist < shortestDist then
                     shortestDist = dist
                     closest = head
                 end
@@ -629,6 +580,11 @@ mouse.Button2Down:Connect(function()
     if closest then
         target = closest
         locked = true
+        Rayfield:Notify({
+            Title = "Aimbot",
+            Content = "Locked onto " .. closest.Parent.Name .. ", cuhh!",
+            Duration = 3
+        })
     end
 end)
 
@@ -653,14 +609,12 @@ runService.RenderStepped:Connect(function()
         if char then
             local tool = char:FindFirstChildOfClass("Tool")
             if tool then
-                local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
-                if handle then
-                    local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
-                    if remotes then
-                        local fireEvent = remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Shoot")
-                        if fireEvent then
-                            fireEvent:FireServer(target.Position)
-                        end
+                -- Arsenal-specific firing logic
+                local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
+                if remotes then
+                    local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire")
+                    if shootEvent then
+                        shootEvent:FireServer(target.Position)
                     end
                 end
             end
