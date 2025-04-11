@@ -4,11 +4,12 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
-  __  __    _    ____  _____     ______   __    ____  _  _   __  __    _    ____ _____ _ 
- |  \/  |  / \  |  _ \| ____|   | __ ) \ / /   |  _ \| || | |  \/  |  / \  / ___| ____/ |
- | |\/| | / _ \ | | | |  _|     |  _ \\ V /    | | | | || |_| |\/| | / _ \| |  _|  _| | |
- | |  | |/ ___ \| |_| | |___    | |_) || |     | |_| |__   _| |  | |/ ___ \ |_| | |___| |
- |_|  |_/_/   \_\____/|_____|   |____/ |_|     |____/   |_| |_|  |_/_/   \_\____|_____|_|
+ __  __       _        ______   ______   __   __       _        ______   _    _       ______   __     __  _____   ______   ______   ______   ______  
+|  \/  |     (_)      |  ____| |  __ \  \ \ / /      (_)      |  ____| | |  | |     |  ____|  \ \   / / |  __ \ |  __ \ |  __ \ |  __ \ |  ____| 
+| \  / | __ _ _  ___  | |__    | |  | |  \ V /  __ _ _  ___  | |__    | |__| |     | |__  _  \ \_/ /  | |  | || |  | || |  | || |  | || |__   
+| |\/| |/ _` | |/ _ \ |  __|   | |  | |   > <  / _` | |/ _ \ |  __|   |  __  |     |  __|| |  \   /   | |  | || |  | || |  | || |  | ||  __|  
+| |  | | (_| | |  __/ | |      | |__| |  / . \ | (_| | |  __/ | |      | |  | |     | |   | |   | |    | |__| || |__| || |__| || |__| || |____ 
+|_|  |_|__,_|_|_|___| |_|      |_____/  /_/ \_\__,_|_|_|___| |_|      |_|  |_|     |_|   |_|   |_|    |_____/ |_____/ |_____/ |_____/ |______|
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -25,7 +26,19 @@ local uis = game:GetService("UserInputService")
 local httpService = game:GetService("HttpService")
 
 -- Load Rayfield UI Library
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
+
+if not success then
+    warn("Failed to load Rayfield UI Library. Roblox might be blocking the request, or the URL is down.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Failed to load Rayfield UI. Check your executor or try again later.",
+        Duration = 5
+    })
+    return
+end
 
 -- Create Rayfield Window
 local Window = Rayfield:CreateWindow({
@@ -57,7 +70,7 @@ local aimbotToggle = CombatTab:CreateToggle({
         aimbotEnabled = Value
         Rayfield:Notify({
             Title = "Aimbot",
-            Content = aimbotEnabled and "Aimbot enabled!" or "Aimbot disabled!",
+            Content = aimbotEnabled and "Aimbot enabled, cuhh!" or "Aimbot disabled, cuhh!",
             Duration = 3
         })
     end
@@ -89,7 +102,7 @@ local espToggle = VisualsTab:CreateToggle({
         espEnabled = Value
         Rayfield:Notify({
             Title = "ESP",
-            Content = espEnabled and "ESP enabled!" or "ESP disabled!",
+            Content = espEnabled and "ESP enabled, cuhh!" or "ESP disabled, cuhh!",
             Duration = 3
         })
         if not espEnabled then
@@ -101,9 +114,10 @@ local espToggle = VisualsTab:CreateToggle({
 -- Suggest Tab
 local SuggestTab = Window:CreateTab("Suggest", "rbxassetid://4483362458")
 
-local suggestionInput = SuggestTab:CreateInput({
+local suggestionInput
+suggestionInput = SuggestTab:CreateInput({
     Name = "Suggestion",
-    PlaceholderText = "Type your suggestion here...",
+    PlaceholderText = "Type your suggestion here, cuhh...",
     RemoveTextAfterFocusLost = false,
     Flag = "SuggestionInput",
     Callback = function(Text)
@@ -118,7 +132,7 @@ local sendButton = SuggestTab:CreateButton({
         if suggestion == "" then
             Rayfield:Notify({
                 Title = "Error",
-                Content = "Suggestion cannot be empty.",
+                Content = "Suggestion can't be empty, cuhh.",
                 Duration = 3
             })
             return
@@ -296,7 +310,7 @@ function sendSuggestion(suggestion)
     if currentTime - lastSubmit < cooldown then
         Rayfield:Notify({
             Title = "Cooldown",
-            Content = "Wait " .. math.ceil(cooldown - (currentTime - lastSubmit)) .. " seconds.",
+            Content = "Wait " .. math.ceil(cooldown - (currentTime - lastSubmit)) .. " seconds, cuhh.",
             Duration = 3
         })
         return
@@ -305,7 +319,7 @@ function sendSuggestion(suggestion)
     if containsBlockedWords(suggestion) then
         Rayfield:Notify({
             Title = "Error",
-            Content = "Suggestion contains blocked words.",
+            Content = "Suggestion got blocked words, cuhh.",
             Duration = 3
         })
         return
@@ -323,13 +337,13 @@ function sendSuggestion(suggestion)
         lastSubmit = currentTime
         Rayfield:Notify({
             Title = "Success",
-            Content = "Suggestion sent successfully!",
+            Content = "Suggestion sent, cuhh!",
             Duration = 3
         })
     else
         Rayfield:Notify({
             Title = "Error",
-            Content = "Failed to send suggestion: " .. tostring(err),
+            Content = "Failed to send suggestion: " .. tostring(err) .. ", cuhh.",
             Duration = 5
         })
     end
