@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.1 - Arsenal Edition")
+print("Version: 1.2 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -70,7 +70,6 @@ CombatTab:CreateToggle({
         if not Value then
             locked = false
             target = nil
-            -- Snap camera to neutral when toggled off
             local currentCFrame = camera.CFrame
             local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
             camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
@@ -78,9 +77,19 @@ CombatTab:CreateToggle({
     end
 })
 
+local aimAssistEnabled = false
+CombatTab:CreateToggle({
+    Name = "Enable Aim Assist",
+    CurrentValue = false,
+    Flag = "AimAssistToggle",
+    Callback = function(Value)
+        aimAssistEnabled = Value
+    end
+})
+
 local fovSize = 150
 CombatTab:CreateSlider({
-    Name = "Aimbot FOV Size",
+    Name = "Aimbot/Assist FOV Size",
     Range = {50, 350},
     Increment = 1,
     Suffix = "Units",
@@ -106,6 +115,7 @@ local VisualsTab = Window:CreateTab("Visuals")
 
 local espEnabled = false
 local espBoxes = {}
+local espColor = Color3.fromRGB(255, 0, 0)
 VisualsTab:CreateToggle({
     Name = "Enable ESP",
     CurrentValue = false,
@@ -118,29 +128,96 @@ VisualsTab:CreateToggle({
     end
 })
 
+VisualsTab:CreateColorPicker({
+    Name = "ESP Color",
+    Color = espColor,
+    Flag = "ESPColorPicker",
+    Callback = function(Value)
+        espColor = Value
+    end
+})
+
+local fovCircleEnabled = false
+local fovCircleSize = 150
+local fovCircleColor = Color3.fromRGB(255, 255, 255)
+local fovCircle = nil
+
+VisualsTab:CreateToggle({
+    Name = "Enable FOV Circle",
+    CurrentValue = false,
+    Flag = "FOVCircleToggle",
+    Callback = function(Value)
+        fovCircleEnabled = Value
+        if fovCircleEnabled then
+            if not fovCircle then
+                fovCircle = Drawing.new("Circle")
+                fovCircle.Thickness = 2
+                fovCircle.NumSides = 64
+                fovCircle.Radius = fovCircleSize
+                fovCircle.Position = Vector2.new(mouse.X, mouse.Y)
+                fovCircle.Color = fovCircleColor
+                fovCircle.Visible = true
+            end
+        else
+            if fovCircle then
+                fovCircle.Visible = false
+            end
+        end
+    end
+})
+
+VisualsTab:CreateSlider({
+    Name = "FOV Circle Size",
+    Range = {50, 350},
+    Increment = 1,
+    Suffix = "Units",
+    CurrentValue = 150,
+    Flag = "FOVCircleSizeSlider",
+    Callback = function(Value)
+        fovCircleSize = Value
+        if fovCircle then
+            fovCircle.Radius = fovCircleSize
+        end
+    end
+})
+
+VisualsTab:CreateColorPicker({
+    Name = "FOV Circle Color",
+    Color = fovCircleColor,
+    Flag = "FOVCircleColorPicker",
+    Callback = function(Value)
+        fovCircleColor = Value
+        if fovCircle then
+            fovCircle.Color = fovCircleColor
+        end
+    end
+})
+
 -- Discord Fix Tab
 local DiscordTab = Window:CreateTab("Discord Fix")
 DiscordTab:CreateButton({
     Name = "Copy Discord Invite",
     Callback = function()
-        setclipboard(discordInvite)
-        Rayfield:Notify({
-            Title = "Discord Invite Copied",
-            Content = "Paste this in your browser to join: " .. discordInvite,
-            Duration = 5,
-            Image = "rbxassetid://4483345998"
-        })
+        local success, err = pcall(function()
+            setclipboard(discordInvite)
+        end)
+        if success then
+            print("Copied Discord invite to clipboard: " .. discordInvite)
+        else
+            print("Failed to copy Discord invite: " .. tostring(err))
+            -- Fallback: Print the link in the output
+            print("Join the Discord here: " .. discordInvite)
+        end
     end
 })
 
 -- ESP Functions
-local function addESP(target, playerName)
-    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
-    if target == player.Character then return end
+local function addESP(target)
+    if not target or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then return end
     local box = Instance.new("BoxHandleAdornment")
     box.Size = Vector3.new(4, 6, 4)
-    box.Adornee = target:FindFirstChild("HumanoidRootPart")
-    box.Color3 = Color3.fromRGB(255, 0, 0)
+    box.Adornee = target.HumanoidRootPart
+    box.Color3 = espColor
     box.Transparency = 0.5
     box.AlwaysOnTop = true
     box.ZIndex = 10
@@ -162,10 +239,10 @@ local function updateESP()
     end
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+        if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
             local isEnemy = (player.Team ~= v.Team) or not player.Team or not v.Team
             if isEnemy then
-                addESP(v.Character, v.Name)
+                addESP(v.Character)
             end
         end
     end
@@ -219,17 +296,11 @@ local function hookFireServer()
     end
 end
 
--- Main Loop
-runService.RenderStepped:Connect(function()
-    if espEnabled then updateESP() else clearESP() end
-    if hitboxExtenderEnabled then hookFireServer() end
-end)
-
--- Aimbot Logic
+-- Aimbot and Aim Assist Logic
 local target = nil
 local locked = false
 
-local function findNewTarget()
+local function findTarget(forAimAssist)
     local closest, shortestDist = nil, math.huge
     local cursorPos = Vector2.new(mouse.X, mouse.Y)
     for _, enemy in pairs(game.Players:GetPlayers()) do
@@ -256,12 +327,12 @@ end
 
 mouse.Button2Down:Connect(function()
     if not aimbotEnabled then return end
-    target = findNewTarget()
+    target = findTarget(false)
     if target then
         locked = true
-        print("Locked onto: " .. target.Parent.Name)
+        print("Aimbot locked onto: " .. target.Parent.Name)
     else
-        print("No target found")
+        print("No aimbot target found")
     end
 end)
 
@@ -269,31 +340,55 @@ mouse.Button2Up:Connect(function()
     locked = false
     target = nil
     print("Aimbot unlocked")
-    -- Snap camera to neutral on release
     local currentCFrame = camera.CFrame
     local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
     camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
 end)
 
 runService.RenderStepped:Connect(function()
+    -- Update FOV Circle
+    if fovCircleEnabled and fovCircle then
+        fovCircle.Position = Vector2.new(mouse.X, mouse.Y)
+        fovCircle.Radius = fovCircleSize
+        fovCircle.Color = fovCircleColor
+        fovCircle.Visible = true
+    end
+
+    -- ESP Update
+    if espEnabled then updateESP() else clearESP() end
+
+    -- Hitbox Extender
+    if hitboxExtenderEnabled then hookFireServer() end
+
+    -- Aimbot
     if aimbotEnabled and locked then
         if not target or not target.Parent or not target.Parent:FindFirstChild("Humanoid") or target.Parent.Humanoid.Health <= 0 or target.Parent.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
-            print("Target invalid: " .. (target and target.Parent.Name or "nil"))
-            target = findNewTarget()
+            print("Aimbot target invalid: " .. (target and target.Parent.Name or "nil"))
+            target = findTarget(false)
             if not target then
                 locked = false
-                print("No target, snapping camera")
+                print("No aimbot target, resetting camera")
                 local currentCFrame = camera.CFrame
                 local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
                 camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
                 return
             end
-            print("New target: " .. target.Parent.Name)
+            print("Aimbot new target: " .. target.Parent.Name)
         end
         local currentCFrame = camera.CFrame
         local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
         camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
     end
+
+    -- Aim Assist
+    if aimAssistEnabled and not locked then
+        local assistTarget = findTarget(true)
+        if assistTarget then
+            local currentCFrame = camera.CFrame
+            local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
+            camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2) -- Smoother for aim assist
+        end
+    end
 end)
 
-print("Script updated to v1.1 by d4mage1 - Fixed aimbot looking down and added Discord button.")
+print("Script updated to v1.2 by d4mage1 - Fixed aimbot, ESP, Discord, added aim assist, FOV circle, and ESP color picker.")
