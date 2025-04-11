@@ -4,18 +4,18 @@ print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
 print([[
-                      _         _                  _ _  _                             __ 
-                     | |       | |                | | || |                           /_ |
-  _ __ ___   __ _  __| | ___   | |__  _   _     __| | || |_ _ __ ___   __ _  __ _  ___| |
- | '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |   / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
- | | | | | | (_| | (_| |  __/  | |_) | |_| |  | (_| |  | | | | | | | | (_| | (_| |  __/ |
- |_| |_| |_|\__,_|\__,_|\___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
-                                       __/ |                                 __/ |       
-                                      |___/                                 |___/        
+                       _        _                 _ _  _                             __ 
+                     | |      | |               | | || |                           /_ |
+  _ __ ___   __ _  __| | ___  | |__  _   _    __| | || |_ _ __ ___   __ _  __ _  ___| |
+ | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
+ | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| |  | | | | | | | | (_| | (_| |  __/ |
+ |_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
+                                      __/ |                                __/ |       
+                                     |___/                                |___/        
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.5 - Arsenal Edition")
+print("Version: 2.0 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -88,12 +88,12 @@ local success, err = pcall(function()
                 print("Panic Mode enabled - disabling all features")
                 aimbotEnabled = false
                 aimAssistEnabled = false
+                silentAimEnabled = false
                 hitboxExtenderEnabled = false
                 espEnabled = false
                 fovCircleEnabled = false
                 autoFireEnabled = false
                 tracersEnabled = false
-                silentAimEnabled = false
                 locked = false
                 target = nil
                 clearESP()
@@ -331,6 +331,40 @@ local success, err = pcall(function()
         end
     })
 
+    -- Game Mode Detection and Enemy Check
+    local function isFFA()
+        local teamCount = #teams:GetChildren()
+        print("Team count: " .. teamCount)
+        if teamCount == 0 then
+            print("Detected FFA mode (no teams)")
+            return true
+        end
+        local playersWithTeam = 0
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v.Team ~= nil then
+                playersWithTeam = playersWithTeam + 1
+            end
+        end
+        print("Players with teams: " .. playersWithTeam)
+        if playersWithTeam == 0 then
+            print("Detected FFA mode (no players have teams)")
+            return true
+        end
+        return false
+    end
+
+    local function isEnemyPlayer(enemy)
+        local ffa = isFFA()
+        if ffa then
+            print("Enemy check (FFA): " .. enemy.Name .. " is an enemy")
+            return enemy ~= player
+        else
+            local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
+            print("Enemy check (Team mode): " .. enemy.Name .. " is " .. (isEnemy and "an enemy" or "not an enemy"))
+            return isEnemy
+        end
+    end
+
     -- ESP Functions
     local function addESP(target)
         if not target or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then return end
@@ -360,8 +394,7 @@ local success, err = pcall(function()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
-                local isEnemy = isEnemyPlayer(v)
-                if isEnemy then
+                if isEnemyPlayer(v) then
                     addESP(v.Character)
                 end
             end
@@ -428,30 +461,6 @@ local success, err = pcall(function()
         end)
     end)
 
-    -- Game Mode Detection and Enemy Check
-    local function isFFA()
-        -- Check if teams are disabled (FFA mode)
-        local teamCount = #teams:GetChildren()
-        if teamCount == 0 then
-            return true -- No teams means FFA
-        end
-        -- Check if players have no team assigned (FFA)
-        for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Team ~= nil then
-                return false -- If players have teams, it's not FFA
-            end
-        end
-        return true
-    end
-
-    local function isEnemyPlayer(enemy)
-        if isFFA() then
-            return enemy ~= player -- In FFA, everyone except the local player is an enemy
-        else
-            return (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
-        end
-    end
-
     -- Silent Aim, Hitbox Extender, and Auto Fire Logic
     local hooked = false
     local originalFireServer
@@ -465,8 +474,7 @@ local success, err = pcall(function()
                 local head = enemy.Character:FindFirstChild("Head")
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
-                    local isEnemy = isEnemyPlayer(enemy)
-                    if isEnemy then
+                    if isEnemyPlayer(enemy) then
                         local dist = (head.Position - camera.CFrame.Position).Magnitude
                         if dist < shortestDist then
                             shortestDist = dist
@@ -481,49 +489,49 @@ local success, err = pcall(function()
 
     local function hookFireServer()
         if hooked then return end
-        local comm = game.ReplicatedStorage:FindFirstChild("Comm")
-        if comm then
-            local hitPart = comm:FindFirstChild("HitPart")
-            if hitPart then
-                print("Hooked Arsenal HitPart event")
-                originalFireServer = hitPart.FireServer
-                hitPart.FireServer = function(self, hit, position, ...)
-                    if silentAimEnabled then
-                        local closestEnemy = findClosestEnemy()
-                        if closestEnemy then
-                            print("Silent Aim: Redirecting shot to " .. closestEnemy.Parent.Name)
-                            hit = closestEnemy
-                            position = closestEnemy.Position
-                        end
-                    elseif hitboxExtenderEnabled then
-                        local closestEnemy, shortestDist = nil, 10
-                        for _, enemy in pairs(game.Players:GetPlayers()) do
-                            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
-                                local isEnemy = isEnemyPlayer(enemy)
-                                if isEnemy then
-                                    local dist = (enemy.Character.Head.Position - position).Magnitude
-                                    if dist < shortestDist then
-                                        shortestDist = dist
-                                        closestEnemy = enemy.Character.Head
-                                    end
-                                end
+        -- Arsenal's shooting remote is in ReplicatedStorage.Comm.HitPart (confirmed as of April 2025)
+        local comm = game.ReplicatedStorage:WaitForChild("Comm", 5)
+        if not comm then
+            print("Error: Could not find Comm in ReplicatedStorage")
+            return
+        end
+        local hitPart = comm:WaitForChild("HitPart", 5)
+        if not hitPart then
+            print("Error: Could not find HitPart in Comm")
+            return
+        end
+        print("Hooked Arsenal HitPart event")
+        originalFireServer = hitPart.FireServer
+        hitPart.FireServer = function(self, hit, position, ...)
+            if silentAimEnabled then
+                local closestEnemy = findClosestEnemy()
+                if closestEnemy then
+                    print("Silent Aim: Redirecting shot to " .. closestEnemy.Parent.Name)
+                    hit = closestEnemy
+                    position = closestEnemy.Position
+                end
+            elseif hitboxExtenderEnabled then
+                local closestEnemy, shortestDist = nil, 10
+                for _, enemy in pairs(game.Players:GetPlayers()) do
+                    if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
+                        if isEnemyPlayer(enemy) then
+                            local dist = (enemy.Character.Head.Position - position).Magnitude
+                            if dist < shortestDist then
+                                shortestDist = dist
+                                closestEnemy = enemy.Character.Head
                             end
                         end
-                        if closestEnemy then
-                            print("Hitbox Extender: Redirecting shot to " .. closestEnemy.Parent.Name)
-                            hit = closestEnemy
-                            position = closestEnemy.Position
-                        end
                     end
-                    return originalFireServer(self, hit, position, ...)
                 end
-                hooked = true
-            else
-                print("Could not find HitPart event in Comm")
+                if closestEnemy then
+                    print("Hitbox Extender: Redirecting shot to " .. closestEnemy.Parent.Name)
+                    hit = closestEnemy
+                    position = closestEnemy.Position
+                end
             end
-        else
-            print("Could not find Comm in ReplicatedStorage")
+            return originalFireServer(self, hit, position, ...)
         end
+        hooked = true
     end
 
     -- Aimbot and Aim Assist Logic
@@ -540,8 +548,7 @@ local success, err = pcall(function()
                 local head = enemy.Character:FindFirstChild("Head")
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
-                    local isEnemy = isEnemyPlayer(enemy)
-                    if isEnemy then
+                    if isEnemyPlayer(enemy) then
                         local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
                         if onScreen then
                             local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
@@ -553,6 +560,11 @@ local success, err = pcall(function()
                     end
                 end
             end
+        end
+        if closest then
+            print("Found target: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
+        else
+            print("No target found within FOV")
         end
         return closest
     end
@@ -601,7 +613,7 @@ local success, err = pcall(function()
         mouseSpeed = (currentMousePos - lastMousePos).Magnitude
         lastMousePos = currentMousePos
 
-        -- Update FOV Circle (Locked to Center of Screen)
+        -- Update FOV Circle
         if fovCircleEnabled and fovCircle then
             local screenSize = camera.ViewportSize
             local centerPos = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
@@ -638,7 +650,12 @@ local success, err = pcall(function()
         end
 
         -- Hook FireServer for Silent Aim, Hitbox Extender, and Auto Fire
-        if silentAimEnabled or hitboxExtenderEnabled or autoFireEnabled then hookFireServer() end
+        if silentAimEnabled or hitboxExtenderEnabled or autoFireEnabled then
+            local successHook, hookErr = pcall(hookFireServer)
+            if not successHook then
+                print("Failed to hook FireServer: " .. tostring(hookErr))
+            end
+        end
 
         -- Auto Fire
         if autoFireEnabled and (isFiring or (aimbotEnabled and locked and target)) then
@@ -647,12 +664,20 @@ local success, err = pcall(function()
                 local hitPart = game.ReplicatedStorage:FindFirstChild("Comm") and game.ReplicatedStorage.Comm:FindFirstChild("HitPart")
                 if hitPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local targetPart = target or mouse.Target
-                    if not targetPart or not targetPart.Parent:FindFirstChild("Humanoid") then
+                    if not targetPart or not targetPart.Parent:FindChild("Humanoid") then
                         targetPart = player.Character.HumanoidRootPart
                     end
-                    hitPart:FireServer(targetPart, targetPart.Position)
-                    lastFireTime = currentTime
-                    print("Auto Fire: Shot fired at " .. targetPart.Parent.Name)
+                    local successFire, fireErr = pcall(function()
+                        hitPart:FireServer(targetPart, targetPart.Position)
+                    end)
+                    if successFire then
+                        lastFireTime = currentTime
+                        print("Auto Fire: Shot fired at " .. targetPart.Parent.Name)
+                    else
+                        print("Auto Fire failed: " .. tostring(fireErr))
+                    end
+                else
+                    print("Auto Fire failed: HitPart or player character not found")
                 end
             end
         end
@@ -702,7 +727,7 @@ local success, err = pcall(function()
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v1.9 by d4mage1 - Fixed game mode support (2 Teams, 4 Teams, FFA), added silent aim")
+    print("Fuckery Hub Arsenal script loaded - v2.0 by d4mage1 - Fixed all features, improved game mode detection, added more debug prints")
 end)
 
 if not success then
