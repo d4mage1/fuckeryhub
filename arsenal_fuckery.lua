@@ -4,7 +4,6 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
-
   __  __            _____   ______     ____ __     __    _____   _  _    __  __            _____  ______  __ 
  |  \/  |    /\    |  __ \ |  ____|   |  _ \\ \   / /   |  __ \ | || |  |  \/  |    /\    / ____||  ____|/_ |
  | \  / |   /  \   | |  | || |__      | |_) |\ \_/ /    | |  | || || |_ | \  / |   /  \  | |  __ | |__    | |
@@ -13,12 +12,10 @@ print([[
  |_|  |_|/_/    \_\|_____/ |______|   |____/   |_|      |_____/    |_|  |_|  |_|/_/    \_\\_____||______| |_|
                                                                                                              
                                                                                                              
-
 ]])
 print(" ")
 print("Loaded by: d4mage1")
 print("Version: 1.0 - Arsenal Edition")
-print(" ")
 
 -- Services
 local player = game.Players.LocalPlayer
@@ -95,14 +92,14 @@ game.StarterGui:SetCore("SendNotification", {
 -- Combat Tab
 local CombatTab
 local CombatTabSuccess, CombatTabError = pcall(function()
-    CombatTab = Window:CreateTab("Combat", "rbxassetid://4483362458")
+    CombatTab = Window:CreateTab("Combat") -- Removed the icon argument
 end)
 
 if not CombatTabSuccess or not CombatTab then
     warn("Failed to create Combat Tab: " .. tostring(CombatTabError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Combat Tab: " .. tostring(CombatTabError) .. ", cuhh.",
+        Text = "Couldn't create Combat Tab: " .. tostring(CombatTabError) .. ", cuhh. Try a different executor, cuhh.",
         Duration = 5
     })
     return
@@ -161,7 +158,7 @@ end
 -- Visuals Tab
 local VisualsTab
 local VisualsTabSuccess, VisualsTabError = pcall(function()
-    VisualsTab = Window:CreateTab("Visuals", "rbxassetid://4483362458")
+    VisualsTab = Window:CreateTab("Visuals") -- Removed the icon argument
 end)
 
 if not VisualsTabSuccess or not VisualsTab then
@@ -207,7 +204,7 @@ end
 -- Suggest Tab
 local SuggestTab
 local SuggestTabSuccess, SuggestTabError = pcall(function()
-    SuggestTab = Window:CreateTab("Suggest", "rbxassetid://4483362458")
+    SuggestTab = Window:CreateTab("Suggest") -- Removed the icon argument
 end)
 
 if not SuggestTabSuccess or not SuggestTab then
@@ -272,7 +269,7 @@ end
 -- About Me Tab
 local AboutTab
 local AboutTabSuccess, AboutTabError = pcall(function()
-    AboutTab = Window:CreateTab("About Me", "rbxassetid://4483362458")
+    AboutTab = Window:CreateTab("About Me") -- Removed the icon argument
 end)
 
 if not AboutTabSuccess or not AboutTab then
@@ -287,8 +284,8 @@ else
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
         AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
         AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 11th 2025")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
     end)
     if not aboutLabelSuccess then
         warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
@@ -303,7 +300,7 @@ end
 -- Settings Tab
 local SettingsTab
 local SettingsTabSuccess, SettingsTabError = pcall(function()
-    SettingsTab = Window:CreateTab("Settings", "rbxassetid://4483362458")
+    SettingsTab = Window:CreateTab("Settings") -- Removed the icon argument
 end)
 
 if not SettingsTabSuccess or not SettingsTab then
@@ -322,7 +319,6 @@ else
             Flag = "ThemeDropdown",
             Callback = function(Option)
                 if Option == "Dark" then
-                    -- Rayfield doesn't support direct theme changes, so we simulate it
                     game.StarterGui:SetCore("SendNotification", {
                         Title = "Theme",
                         Text = "Switched to Dark theme, cuhh! (Default Rayfield look)",
