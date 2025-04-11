@@ -16,6 +16,7 @@ print([[
 print(" ")
 print("Loaded by: d4mage1")
 print("Version: 1.0 - Arsenal Edition")
+print(" ")
 
 -- Services
 local player = game.Players.LocalPlayer
