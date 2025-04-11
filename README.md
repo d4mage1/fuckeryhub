@@ -1,43 +1,48 @@
-# 🛠️ Fuckery Hub  
-Fuckery Hub is a dope mod menu for Arsenal on Roblox, built by me, d4mage1. It’s packed with features like aimbot, ESP, and a suggestion system to send ideas straight to my Discord. Whether you’re tryna dominate, mess around, or just vibe, this gui got you covered.
+# 🛠️ Fuckery Hub
 
-Why settle for basic when you can have some fuckery?
+Fuckery Hub is a mod menu for Roblox, developed by me, d4mage1. It currently supports Arsenal with a dedicated script that includes features like aimbot, aim assist, ESP, hitbox extender, and a customizable FOV circle. The hub itself acts as a central menu, allowing you to load game-specific scripts like the Arsenal one with ease. This project is designed for players who want to enhance their gameplay and experiment with exploits in a safe, open environment.
 
+Why settle for the default experience when you can elevate your game with Fuckery Hub?
 ---
+# 💡 Why Open-Source?
 
-## 💡 Why Open-Source?  
-Real shit—exploits should be about learning and sharing, not gatekeeping. I’ve seen too many scripts locked behind paywalls or obfuscated to hell, and that ain’t the vibe. That’s why Fuckery Hub is open-source.
+I believe exploits should be about learning and collaboration, not exclusivity. Too many scripts are hidden behind paywalls or obfuscated, which goes against the spirit of the community. That’s why Fuckery Hub is fully open-source.
 
-I’m putting my code out there so:  
-✅ You can learn how exploits(LuaU) work  
-✅ Experiment with your own ideas  
-✅ Build on my work (just give me credits, yk)  
-✅ Keep exploiting free for everyone  
+I’m sharing my code so you can:
 
-If you wanna use my code, go for it—but give me a shoutout somewhere in your project. Let’s keep the exploiting scene collaborative and real. No paywalls, no bullshit, just good scripts.
+✅ Learn how exploits (LuaU) function
 
+✅ Experiment and create your own modifications
+
+✅ Build on my work (just give credit where it’s due)
+
+✅ Keep the exploiting community free and accessible
+
+If you use my code, I only ask that you credit me in your project. Let’s keep the exploiting scene open and collaborative—no paywalls, no nonsense, just solid scripts for everyone.
 ---
+# 📜 Can I Use This Code?
 
-## 📜 Can I Use This Code?  
-Hell yeah, you can! But you gotta play fair. This project is under the **GPL-3.0 License**, so:  
-- If you use my code, your project gotta be open-source too.  
-- Give me credit (just say “Made using Fuckery Hub by d4mage1” or some shit).  
-- Don’t be shady with it.  
+Yes, you can use my code, but there are rules to keep things fair. This project is licensed under the GPL-3.0 License, which means:
 
-Wanna collab or need help? Hit me up on Discord or wherever you can find me. Let’s make some fire scripts together, cuhh.
+If you use my code, your project must also be open-source.
+You need to give me credit (e.g., “Made using Fuckery Hub by d4mage1”).
+Don’t misuse or misrepresent my work.
+If you’re interested in collaborating or need help with your project, reach out to me on Discord: https://discord.gg/mAFyAPnVA4. I’m always open to working together and creating something great.
 
-“Don’t steal my vibe, bro.”  
-🎮 (Or do, but at least say my name, yk?)
+“Don’t take my work without giving credit.”
 
+🎮 (If you do, at least mention my name.)
 ---
+#📥 Installation Instructions
 
-## 📥 Installation (Easy as Fuck)  
-1️⃣ Clone this repo or download the latest `arsenal_fuckery.lua` from [here](https://github.com/d4mage1/fuckeryhub).  
-2️⃣ Open your executor (I use Xeno, but any should work).  
-3️⃣ Paste this into your executor and run it:  
-4️⃣ Join Arsenal, and the GUI should pop up. Done. Go fuck shit up. 🔥
+Clone this repository or download the latest fuckery_hub.lua file from the repo.
+Open your executor (I use Xeno, but most should work fine).
+Copy and paste this into your executor, then run it:
+oadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/fuckery_hub.lua"))()
 
+Join Arsenal, open the GUI (default key: Right Shift), and select “Load Arsenal Script” from the “Select Game” tab. The Arsenal GUI will appear, and you’re ready to go.
 # ⚠️ Disclaimer
-## This script ain’t affiliated with Roblox, Arsenal, or ROLVe Community. It’s not endorsed or sponsored by them either. Use at your own risk—I ain’t responsible if you get banned. Portions of the materials here are property of Roblox Corporation. © 2025 Roblox Corporation.
 
-Stay safe, use an alt, and don’t go too crazy, yk.
+### This script is not affiliated with Roblox, Arsenal, or the ROLVe Community, nor is it endorsed or sponsored by them. Use it at your own risk—I’m not responsible for any bans or issues that may arise. Portions of the materials used are property of Roblox Corporation. © 2025 Roblox Corporation.
+
+**For your safety, consider using an alternate account and avoid excessive use.**
