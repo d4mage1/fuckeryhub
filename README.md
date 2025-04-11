@@ -38,9 +38,9 @@ If you’re interested in collaborating or need help with your project, reach ou
 Clone this repository or download the latest fuckery_hub.lua file from the repo.
 Open your executor (I use Xeno, but most should work fine).
 Copy and paste this into your executor, then run it:
-oadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/fuckery_hub.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/fuckery_hub.lua"))()
 
-Join Arsenal, open the GUI (default key: Right Shift), and select “Load Arsenal Script” from the “Select Game” tab. The Arsenal GUI will appear, and you’re ready to go.
+Join Arsenal, open the GUI (default key: K), and select “Load Arsenal Script” from the “Select Game” tab. The Arsenal GUI will appear, and you’re ready to go.
 # ⚠️ Disclaimer
 
 ### This script is not affiliated with Roblox, Arsenal, or the ROLVe Community, nor is it endorsed or sponsored by them. Use it at your own risk—I’m not responsible for any bans or issues that may arise. Portions of the materials used are property of Roblox Corporation. © 2025 Roblox Corporation.
