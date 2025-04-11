@@ -1,4 +1,3 @@
--- Load Confirmation with ASCII Art
 print(" ")
 print("=====================================")
 print("     FUCKERY HUB LOADED - LET'S GO!  ")
