@@ -1,10 +1,9 @@
 print(" ")
 print("=====================================")
-print("     FUCKERY HUB LOADED - LET'S GO!  ")
+print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
 print([[
-  
                       _         _                  _ _  _                             __ 
                      | |       | |                | | || |                           /_ |
   _ __ ___   __ _  __| | ___   | |__  _   _     __| | || |_ _ __ ___   __ _  __ _  ___| |
@@ -13,7 +12,7 @@ print([[
  |_| |_| |_|\__,_|\__,_|\___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
                                        __/ |                                 __/ |       
                                       |___/                                 |___/        
-]])
+]])__
 print(" ")
 print("Loaded by: d4mage1")
 print("Version: 1.2 - Arsenal Edition")
@@ -39,11 +38,11 @@ if not success then
 end
 Rayfield = loadstring(rawScript)()
 
--- Create Window
+-- Create Window (Integrated with Hub)
 local discordInvite = "https://discord.gg/mAFyAPnVA4"
 local Window = Rayfield:CreateWindow({
-    Name = "Fuckery Hub",
-    LoadingTitle = "Fuckery Hub",
+    Name = "Fuckery Hub - Arsenal",
+    LoadingTitle = "Fuckery Hub - Arsenal",
     LoadingSubtitle = "by d4mage1",
     ConfigurationSaving = {
         Enabled = true,
@@ -206,7 +205,6 @@ DiscordTab:CreateButton({
             print("Copied Discord invite to clipboard: " .. discordInvite)
         else
             print("Failed to copy Discord invite: " .. tostring(err))
-            -- Fallback: Print the link in the output
             print("Join the Discord here: " .. discordInvite)
         end
     end
@@ -387,9 +385,9 @@ runService.RenderStepped:Connect(function()
         if assistTarget then
             local currentCFrame = camera.CFrame
             local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
-            camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2) -- Smoother for aim assist
+            camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2)
         end
     end
 end)
 
-print("Script updated to v1.2 by d4mage1 - Fixed aimbot, ESP, Discord, added aim assist, FOV circle, and ESP color picker.")
+print("Fuckery Hub Arsenal script loaded - v1.2 by d4mage1")
