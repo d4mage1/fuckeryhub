@@ -15,20 +15,36 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.2 - Main Hub")
+print("Version: 1.3 - Main Hub")
 print(" ")
 
 -- Load Rayfield UI Library
 local Rayfield
 local rayfieldUrl = "https://sirius.menu/rayfield"
-local success, rawScript = pcall(function()
-    return game:HttpGet(rayfieldUrl)
+local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source"
+local rawScript
+
+local success, err = pcall(function()
+    rawScript = game:HttpGet(rayfieldUrl)
 end)
 if not success then
-    print("Failed to load Rayfield: " .. tostring(rawScript))
+    print("Failed to load Rayfield from primary URL: " .. tostring(err))
+    success, err = pcall(function()
+        rawScript = game:HttpGet(rayfieldFallbackUrl)
+    end)
+    if not success then
+        print("Failed to load Rayfield from fallback URL: " .. tostring(err))
+        return
+    end
+end
+
+success, err = pcall(function()
+    Rayfield = loadstring(rawScript)()
+end)
+if not success or not Rayfield then
+    print("Failed to initialize Rayfield: " .. tostring(err))
     return
 end
-Rayfield = loadstring(rawScript)()
 
 -- Create Main Hub Window
 local Window = Rayfield:CreateWindow({
@@ -44,19 +60,20 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Select Game Tab
-local SelectGameTab = Window:CreateTab("Select Game")
+local SelectGameTab = Window:CreateTab("Games")
 
 SelectGameTab:CreateButton({
     Name = "Load Arsenal Script",
     Callback = function()
         print("Loading Arsenal script...")
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua"))()
+        local success, result = pcall(function()
+            local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua")
+            return loadstring(scriptContent)()
         end)
         if success then
             print("Arsenal script loaded successfully!")
         else
-            print("Failed to load Arsenal script: " .. tostring(err))
+            print("Failed to load Arsenal script: " .. tostring(result))
         end
     end
 })
