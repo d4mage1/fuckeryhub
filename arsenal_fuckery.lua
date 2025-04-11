@@ -4,14 +4,12 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
-  
-  __  __            _____   ______     ____ __     __    _____   _  _    __  __            _____  ______  __ 
- |  \/  |    /\    |  __ \ |  ____|   |  _ \\ \   / /   |  __ \ | || |  |  \/  |    /\    / ____||  ____|/_ |
- | \  / |   /  \   | |  | || |__      | |_) |\ \_/ /    | |  | || || |_ | \  / |   /  \  | |  __ | |__    | |
- | |\/| |  / /\ \  | |  | ||  __|     |  _ <  \   /     | |  | ||__   _|| |\/| |  / /\ \ | | |_ ||  __|   | |
- | |  | | / ____ \ | |__| || |____    | |_) |  | |      | |__| |   | |  | |  | | / ____ \| |__| || |____  | |
- |_|  |_|/_/    \_\|_____/ |______|   |____/   |_|      |_____/    |_|  |_|  |_|/_/    \_\\_____||______| |_|
-                                                                                                            
+ __  __       _        ______   ______   __   __       _        ______   _    _       ______   __     __  _____   ______   ______   ______   ______  
+|  \/  |     (_)      |  ____| |  __ \  \ \ / /      (_)      |  ____| | |  | |     |  ____|  \ \   / / |  __ \ |  __ \ |  __ \ |  __ \ |  ____| 
+| \  / | __ _ _  ___  | |__    | |  | |  \ V /  __ _ _  ___  | |__    | |__| |     | |__  _  \ \_/ /  | |  | || |  | || |  | || |  | || |__   
+| |\/| |/ _` | |/ _ \ |  __|   | |  | |   > <  / _` | |/ _ \ |  __|   |  __  |     |  __|| |  \   /   | |  | || |  | || |  | || |  | ||  __|  
+| |  | | (_| | |  __/ | |      | |__| |  / . \ | (_| | |  __/ | |      | |  | |     | |   | |   | |    | |__| || |__| || |__| || |__| || |____ 
+|_|  |_|__,_|_|_|___| |_|      |_____/  /_/ \_\__,_|_|_|___| |_|      |_|  |_|     |_|   |_|   |_|    |_____/ |_____/ |_____/ |_____/ |______|
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -27,121 +25,244 @@ local teams = game:GetService("Teams")
 local uis = game:GetService("UserInputService")
 local httpService = game:GetService("HttpService")
 
--- Load Rayfield UI Library
-local success, Rayfield = pcall(function()
-    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Load Rayfield UI Library with Error Handling
+local Rayfield
+local success, errorMsg = pcall(function()
+    Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 end)
 
 if not success then
-    warn("Failed to load Rayfield UI Library. Roblox might be blocking the request, or the URL is down.")
+    warn("Failed to load Rayfield UI Library: " .. tostring(errorMsg))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Failed to load Rayfield UI. Check your executor or try again later.",
+        Text = "Couldn't load Rayfield UI. Error: " .. tostring(errorMsg) .. ". Try a different executor, cuhh.",
+        Duration = 5
+    })
+    return
+end
+
+if not Rayfield then
+    warn("Rayfield UI Library is nil after loading.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Rayfield UI didn't load properly. Try a different executor, cuhh.",
         Duration = 5
     })
     return
 end
 
 -- Create Rayfield Window
-local Window = Rayfield:CreateWindow({
-    Name = "Fuckery Hub",
-    LoadingTitle = "Fuckery Hub",
-    LoadingSubtitle = "by d4mage1",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "FuckeryHub",
-        FileName = "ArsenalConfig"
-    },
-    Discord = {
-        Enabled = false,
-        Invite = "",
-        RememberJoins = true
-    },
-    KeySystem = false
+local WindowSuccess, Window = pcall(function()
+    return Rayfield:CreateWindow({
+        Name = "Fuckery Hub",
+        LoadingTitle = "Fuckery Hub",
+        LoadingSubtitle = "by d4mage1",
+        ConfigurationSaving = {
+            Enabled = true,
+            FolderName = "FuckeryHub",
+            FileName = "ArsenalConfig"
+        },
+        Discord = {
+            Enabled = false,
+            Invite = "",
+            RememberJoins = true
+        },
+        KeySystem = false
+    })
+end)
+
+if not WindowSuccess or not Window then
+    warn("Failed to create Rayfield Window: " .. tostring(Window))
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Rayfield Window. Try a different executor, cuhh.",
+        Duration = 5
+    })
+    return
+end
+
+-- Notify that the GUI loaded successfully
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Success",
+    Text = "Fuckery Hub loaded, cuhh! Press Right Shift to toggle the GUI.",
+    Duration = 5
 })
 
 -- Combat Tab
-local CombatTab = Window:CreateTab("Combat", "rbxassetid://4483362458")
+local CombatTabSuccess, CombatTab = pcall(function()
+    return Window:CreateTab("Combat", "rbxassetid://4483362458")
+end)
+
+if not CombatTabSuccess or not CombatTab then
+    warn("Failed to create Combat Tab.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Combat Tab, cuhh.",
+        Duration = 5
+    })
+    return
+end
 
 local aimbotEnabled = false
-local aimbotToggle = CombatTab:CreateToggle({
-    Name = "Enable Aimbot",
-    CurrentValue = false,
-    Flag = "AimbotToggle",
-    Callback = function(Value)
-        aimbotEnabled = Value
-        Rayfield:Notify({
-            Title = "Aimbot",
-            Content = aimbotEnabled and "Aimbot enabled, cuhh!" or "Aimbot disabled, cuhh!",
-            Duration = 3
-        })
-    end
-})
+local aimbotToggleSuccess, aimbotToggle = pcall(function()
+    return CombatTab:CreateToggle({
+        Name = "Enable Aimbot",
+        CurrentValue = false,
+        Flag = "AimbotToggle",
+        Callback = function(Value)
+            aimbotEnabled = Value
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = aimbotEnabled and "Aimbot enabled, cuhh!" or "Aimbot disabled, cuhh!",
+                Duration = 3
+            })
+        end
+    })
+end)
+
+if not aimbotToggleSuccess then
+    warn("Failed to create Aimbot Toggle.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Aimbot Toggle, cuhh.",
+        Duration = 5
+    })
+end
 
 local fovSize = 150
-local fovSlider = CombatTab:CreateSlider({
-    Name = "FOV Size",
-    Range = {50, 350},
-    Increment = 1,
-    Suffix = "Units",
-    CurrentValue = 150,
-    Flag = "FOVSlider",
-    Callback = function(Value)
-        fovSize = Value
-    end
-})
+local fovSliderSuccess, fovSlider = pcall(function()
+    return CombatTab:CreateSlider({
+        Name = "FOV Size",
+        Range = {50, 350},
+        Increment = 1,
+        Suffix = "Units",
+        CurrentValue = 150,
+        Flag = "FOVSlider",
+        Callback = function(Value)
+            fovSize = Value
+        end
+    })
+end)
+
+if not fovSliderSuccess then
+    warn("Failed to create FOV Slider.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create FOV Slider, cuhh.",
+        Duration = 5
+    })
+end
 
 -- Visuals Tab
-local VisualsTab = Window:CreateTab("Visuals", "rbxassetid://4483362458")
+local VisualsTabSuccess, VisualsTab = pcall(function()
+    return Window:CreateTab("Visuals", "rbxassetid://4483362458")
+end)
+
+if not VisualsTabSuccess or not VisualsTab then
+    warn("Failed to create Visuals Tab.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Visuals Tab, cuhh.",
+        Duration = 5
+    })
+    return
+end
 
 local espEnabled = false
 local espBoxes = {}
-local espToggle = VisualsTab:CreateToggle({
-    Name = "Enable ESP",
-    CurrentValue = false,
-    Flag = "ESPToggle",
-    Callback = function(Value)
-        espEnabled = Value
-        Rayfield:Notify({
-            Title = "ESP",
-            Content = espEnabled and "ESP enabled, cuhh!" or "ESP disabled, cuhh!",
-            Duration = 3
-        })
-        if not espEnabled then
-            clearESP()
-        end
-    end
-})
-
--- Suggest Tab
-local SuggestTab = Window:CreateTab("Suggest", "rbxassetid://4483362458")
-
-local suggestionInput
-suggestionInput = SuggestTab:CreateInput({
-    Name = "Suggestion",
-    PlaceholderText = "Type your suggestion here, cuhh...",
-    RemoveTextAfterFocusLost = false,
-    Flag = "SuggestionInput",
-    Callback = function(Text)
-        -- Store the input for the send button
-    end
-})
-
-local sendButton = SuggestTab:CreateButton({
-    Name = "Send Suggestion",
-    Callback = function()
-        local suggestion = suggestionInput.CurrentText or ""
-        if suggestion == "" then
+local espToggleSuccess, espToggle = pcall(function()
+    return VisualsTab:CreateToggle({
+        Name = "Enable ESP",
+        CurrentValue = false,
+        Flag = "ESPToggle",
+        Callback = function(Value)
+            espEnabled = Value
             Rayfield:Notify({
-                Title = "Error",
-                Content = "Suggestion can't be empty, cuhh.",
+                Title = "ESP",
+                Content = espEnabled and "ESP enabled, cuhh!" or "ESP disabled, cuhh!",
                 Duration = 3
             })
-            return
+            if not espEnabled then
+                clearESP()
+            end
         end
-        sendSuggestion(suggestion)
-    end
-})
+    })
+end)
+
+if not espToggleSuccess then
+    warn("Failed to create ESP Toggle.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create ESP Toggle, cuhh.",
+        Duration = 5
+    })
+end
+
+-- Suggest Tab
+local SuggestTabSuccess, SuggestTab = pcall(function()
+    return Window:CreateTab("Suggest", "rbxassetid://4483362458")
+end)
+
+if not SuggestTabSuccess or not SuggestTab then
+    warn("Failed to create Suggest Tab.")
+    game.StarterGui:Set禁止:SendNotification({
+        Title = "Error",
+        Text = "Couldn't create Suggest Tab, cuhh.",
+        Duration = 5
+    })
+    return
+end
+
+local suggestionInput
+local suggestionInputSuccess, suggestionInputResult = pcall(function()
+    return SuggestTab:CreateInput({
+        Name = "Suggestion",
+        PlaceholderText = "Type your suggestion here, cuhh...",
+        RemoveTextAfterFocusLost = false,
+        Flag = "SuggestionInput",
+        Callback = function(Text)
+            -- Store the input for the send button
+        end
+    })
+end)
+
+if suggestionInputSuccess then
+    suggestionInput = suggestionInputResult
+else
+    warn("Failed to create Suggestion Input.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Suggestion Input, cuhh.",
+        Duration = 5
+    })
+end
+
+local sendButtonSuccess, sendButton = pcall(function()
+    return SuggestTab:CreateButton({
+        Name = "Send Suggestion",
+        Callback = function()
+            local suggestion = suggestionInput and suggestionInput.CurrentText or ""
+            if suggestion == "" then
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Suggestion can't be empty, cuhh.",
+                    Duration = 3
+                })
+                return
+            end
+            sendSuggestion(suggestion)
+        end
+    })
+end)
+
+if not sendButtonSuccess then
+    warn("Failed to create Send Suggestion Button.")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Send Suggestion Button, cuhh.",
+        Duration = 5
+    })
+end
 
 -- ESP Functions
 local function addESP(target)
