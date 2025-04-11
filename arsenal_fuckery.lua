@@ -12,10 +12,10 @@ print([[
  |_| |_| |_|\__,_|\__,_|\___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
                                        __/ |                                 __/ |       
                                       |___/                                 |___/        
-]])__
+]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.2 - Arsenal Edition")
+print("Version: 1.3 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -29,16 +29,32 @@ local uis = game:GetService("UserInputService")
 -- Load Rayfield UI Library
 local Rayfield
 local rayfieldUrl = "https://sirius.menu/rayfield"
-local success, rawScript = pcall(function()
-    return game:HttpGet(rayfieldUrl)
+local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source"
+local rawScript
+
+local success, err = pcall(function()
+    rawScript = game:HttpGet(rayfieldUrl)
 end)
 if not success then
-    print("Failed to load Rayfield: " .. tostring(rawScript))
+    print("Failed to load Rayfield from primary URL: " .. tostring(err))
+    success, err = pcall(function()
+        rawScript = game:HttpGet(rayfieldFallbackUrl)
+    end)
+    if not success then
+        print("Failed to load Rayfield from fallback URL: " .. tostring(err))
+        return
+    end
+end
+
+success, err = pcall(function()
+    Rayfield = loadstring(rawScript)()
+end)
+if not success or not Rayfield then
+    print("Failed to initialize Rayfield: " .. tostring(err))
     return
 end
-Rayfield = loadstring(rawScript)()
 
--- Create Window (Integrated with Hub)
+-- Create Window
 local discordInvite = "https://discord.gg/mAFyAPnVA4"
 local Window = Rayfield:CreateWindow({
     Name = "Fuckery Hub - Arsenal",
@@ -194,7 +210,7 @@ VisualsTab:CreateColorPicker({
 })
 
 -- Discord Fix Tab
-local DiscordTab = Window:CreateTab("Discord Fix")
+local DiscordTab = Window:CreateTab("Discord")
 DiscordTab:CreateButton({
     Name = "Copy Discord Invite",
     Callback = function()
@@ -390,4 +406,4 @@ runService.RenderStepped:Connect(function()
     end
 end)
 
-print("Fuckery Hub Arsenal script loaded - v1.2 by d4mage1")
+print("Fuckery Hub Arsenal script loaded - v1.3 by d4mage1")
