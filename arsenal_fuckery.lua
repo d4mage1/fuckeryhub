@@ -649,3 +649,4 @@ submitButton.MouseButton1Click:Connect(function()
     lastSubmit = currentTime
     print("Suggestion sent!")
 end)
+print("-- This script is licensed under the GNU General Public License v3.0 Copyright (C) 2025 d4mage1 You can use, modify, and share this script as long as you keep it open-source and give credit.")
