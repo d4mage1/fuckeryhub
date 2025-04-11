@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.3 - Arsenal Edition")
+print("Version: 1.4 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -210,7 +210,7 @@ VisualsTab:CreateColorPicker({
 })
 
 -- Discord Fix Tab
-local DiscordTab = Window:CreateTab("Discord")
+local DiscordTab = Window:CreateTab("Discord Fix")
 DiscordTab:CreateButton({
     Name = "Copy Discord Invite",
     Callback = function()
@@ -361,12 +361,15 @@ mouse.Button2Up:Connect(function()
 end)
 
 runService.RenderStepped:Connect(function()
-    -- Update FOV Circle
+    -- Update FOV Circle (Fixed to Stay Centered on Cursor)
     if fovCircleEnabled and fovCircle then
-        fovCircle.Position = Vector2.new(mouse.X, mouse.Y)
+        local cursorPos = Vector2.new(mouse.X, mouse.Y)
+        fovCircle.Position = cursorPos
         fovCircle.Radius = fovCircleSize
         fovCircle.Color = fovCircleColor
         fovCircle.Visible = true
+        -- Debug print to confirm position
+        print("FOV Circle Position: " .. tostring(cursorPos))
     end
 
     -- ESP Update
@@ -406,4 +409,4 @@ runService.RenderStepped:Connect(function()
     end
 end)
 
-print("Fuckery Hub Arsenal script loaded - v1.3 by d4mage1")
+print("Fuckery Hub Arsenal script loaded - v1.4 by d4mage1 - Fixed FOV circle glitch")
