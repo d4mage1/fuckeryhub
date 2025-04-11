@@ -1,29 +1,43 @@
-# Fuckery Hub
-Yo, welcome to **Fuckery Hub**—a straight-up Roblox script that’s here to fuck shit up in Arsenal (or wherever you wanna run it). ESP for spotting enemies through walls and an aimbot that locks heads when you hold right-click. GUI’s got that neon glow, draggable and slick as hell. No bullshit, just hacks.
+# 🛠️ Fuckery Hub  
+Fuckery Hub is a dope mod menu for Arsenal on Roblox, built by me, d4mage1. It’s packed with features like aimbot, ESP, and a suggestion system to send ideas straight to my Discord. Whether you’re tryna dominate, mess around, or just vibe, this menu’s got you covered. I made it clean and sleek with a ZYHPERION-style GUI, so it looks fire while you’re using it.
 
-## What’s Inside
-- **ESP**: Boxes on enemies only—red as fuck, works with Arsenal’s messy team system. Toggle it on, watch ‘em glow.
-- **Aimbot**: Hold right-click, it snaps to heads and tries to fire if your tool’s set up right. Toggleable too.
-- **GUI**: Draggable frame, neon borders, fade-in animations, and a close button that spins out. SciFi font for that futuristic drip.
+Why settle for basic when you can have some fuckery?
 
-## How to Use
-1. Grab this script (you’re already here, dumbass).
-2. Slap it into your favorite Roblox executor—Synapse, KRNL, whatever works.
-3. Run it. GUI pops up in the middle of your screen.
-4. Click **ESP: OFF** to turn it on—goes green, slides a bit, and enemies light up.
-5. Click **AIMBOT: OFF** to flip it on—same deal, green means go.
-6. Hold right-click for aimbot to lock and (maybe) shoot. Depends on the game’s remotes.
-7. Hit the **X** to close it when you’re done fuckin’ around.
+---
 
-## Shit You Should Know
-- **Game**: Built for Arsenal, but tweak the team checks if you’re runnin’ it somewhere else.
-- **Fonts**: Uses `SciFi`—if it’s blank, your executor’s trippin’. Swap to `Code` or somethin’ if it’s broke.
-- **Detection**: Roblox don’t play nice with this shit. Use at your own risk—I ain’t your babysitter.
-- **Bugs**: ESP might miss a dude if Arsenal’s team system gets weird. Aimbot’s fire depends on remotes being named right (`Fire` or `Shoot`).
+## 💡 Why Open-Source?  
+Real shit—modding should be about learning and sharing, not gatekeeping. I’ve seen too many scripts locked behind paywalls or obfuscated to hell, and that ain’t the vibe. That’s why Fuckery Hub is open-source.
 
-## Why This Exists
-Cuz fuck playin’ fair, that’s why. Made it for the lulz and to flex some Lua. If you got ideas or fixes, fork it and hit me up.
+I’m putting my code out there so:  
+✅ You can learn how exploits(LuaU) work  
+✅ Experiment with your own ideas  
+✅ Build on my work (just give me credits, yk)  
+✅ Keep exploiting free for everyone  
 
-## Props
-- Built by [d4mage].
-- No cap, just me and some caffeine.
+If you wanna use my code, go for it—but give me a shoutout somewhere in your project. Let’s keep the modding scene collaborative and real. No paywalls, no bullshit, just good scripts.
+
+---
+
+## 📜 Can I Use This Code?  
+Hell yeah, you can! But you gotta play fair. This project is under the **GPL-3.0 License**, so:  
+- If you use my code, your project gotta be open-source too.  
+- Give me credit (just say “Made using Fuckery Hub by d4mage1” or some shit).  
+- Don’t be shady with it.  
+
+Wanna collab or need help? Hit me up on Discord or wherever you can find me. Let’s make some fire scripts together, cuhh.
+
+“Don’t steal my vibe, bro.”  
+🎮 (Or do, but at least say my name, yk?)
+
+---
+
+## 📥 Installation (Easy as Fuck)  
+1️⃣ Clone this repo or download the latest `arsenal_fuckery.lua` from [here](https://github.com/d4mage1/fuckeryhub).  
+2️⃣ Open your executor (I use Xeno, but any should work).  
+3️⃣ Paste this into your executor and run it:  
+4️⃣ Join Arsenal, and the GUI should pop up. Done. Go fuck shit up. 🔥
+
+# ⚠️ Disclaimer
+## This script ain’t affiliated with Roblox, Arsenal, or ROLVe Community. It’s not endorsed or sponsored by them either. Use at your own risk—I ain’t responsible if you get banned. Portions of the materials here are property of Roblox Corporation. © 2025 Roblox Corporation.
+
+Stay safe, use an alt, and don’t go too crazy, yk.
