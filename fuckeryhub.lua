@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.3 - Main Hub")
+print("Version: 1.3.1 - Main Hub")
 print(" ")
 
 -- Load Rayfield UI Library
