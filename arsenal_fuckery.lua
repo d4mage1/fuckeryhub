@@ -4,13 +4,18 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
- _  _   __   ____  ____    ____  _  _    ____   ___  _  _   __    ___  ____ 
-( \/ ) / _\ (    \(  __)  (  _ \( \/ )  (    \ / _ \( \/ ) / _\  / __)(  __)
-/ \/ \/    \ ) D ( ) _)    ) _ ( )  /    ) D ((__  (/ \/ \/    \( (_ \ ) _) 
-\_)(_/\_/\_/(____/(____)  (____/(__/    (____/  (__/\_)(_/\_/\_/ \___/(____)
+ _____ ______   ________  ________  _______           ________      ___    ___      ________  ___   ___  _____ ______   ________  ________  _______      
+|\   _ \  _   \|\   __  \|\   ___ \|\  ___ \         |\   __  \    |\  \  /  /|    |\   ___ \|\  \ |\  \|\   _ \  _   \|\   __  \|\   ____\|\  ___ \     
+\ \  \\\__\ \  \ \  \|\  \ \  \_|\ \ \   __/|        \ \  \|\ /_   \ \  \/  / /    \ \  \_|\ \ \  \\_\  \ \  \\\__\ \  \ \  \|\  \ \  \___|\ \   __/|    
+ \ \  \\|__| \  \ \   __  \ \  \ \\ \ \  \_|/__       \ \   __  \   \ \    / /      \ \  \ \\ \ \______  \ \  \\|__| \  \ \   __  \ \  \  __\ \  \_|/__  
+  \ \  \    \ \  \ \  \ \  \ \  \_\\ \ \  \_|\ \       \ \  \|\  \   \/  /  /        \ \  \_\\ \|_____|\  \ \  \    \ \  \ \  \ \  \ \  \|\  \ \  \_|\ \ 
+   \ \__\    \ \__\ \__\ \__\ \_______\ \_______\       \ \_______\__/  / /           \ \_______\     \ \__\ \__\    \ \__\ \__\ \__\ \_______\ \_______\
+    \|__|     \|__|\|__|\|__|\|_______|\|_______|        \|_______|\___/ /             \|_______|      \|__|\|__|     \|__|\|__|\|__|\|_______|\|_______|
+                                                                  \|___|/                                                                                
+
 ]])
 print(" ")
-print("Loaded by: d4mage")
+print("Loaded by: d4mage1")
 print("Version: 1.0 - Arsenal Edition")
 print(" ")
 
@@ -21,8 +26,8 @@ local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local tweenService = game:GetService("TweenService")
 local uis = game:GetService("UserInputService")
+local httpService = game:GetService("HttpService")
 
--- GUI Setup (ZYHPERION Style)
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
@@ -30,16 +35,21 @@ gui.Parent = game.CoreGui
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 500, 0, 350)
 mainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundTransparency = 1
 mainFrame.Parent = gui
 
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 8)
+mainCorner.CornerRadius = UDim.new(0, 12)
 mainCorner.Parent = mainFrame
 
--- Make GUI Draggable
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(255, 0, 0)
+mainStroke.Thickness = 2
+mainStroke.Transparency = 0.5
+mainStroke.Parent = mainFrame
+
 local dragging
 local dragInput
 local dragStart
@@ -75,83 +85,109 @@ uis.InputChanged:Connect(function(input)
     end
 end)
 
--- Side Panel (Tabs)
 local sidePanel = Instance.new("Frame")
 sidePanel.Size = UDim2.new(0, 120, 1, 0)
-sidePanel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+sidePanel.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
 sidePanel.BorderSizePixel = 0
 sidePanel.BackgroundTransparency = 1
 sidePanel.Parent = mainFrame
 
 local sideCorner = Instance.new("UICorner")
-sideCorner.CornerRadius = UDim.new(0, 8)
+sideCorner.CornerRadius = UDim.new(0, 12)
 sideCorner.Parent = sidePanel
+
+local sideStroke = Instance.new("UIStroke")
+sideStroke.Color = Color3.fromRGB(255, 0, 0)
+sideStroke.Thickness = 2
+sideStroke.Transparency = 0.5
+sideStroke.Parent = sidePanel
 
 local sidePanelList = Instance.new("UIListLayout")
 sidePanelList.SortOrder = Enum.SortOrder.LayoutOrder
-sidePanelList.Padding = UDim.new(0, 5)
+sidePanelList.Padding = UDim.new(0, 8)
 sidePanelList.Parent = sidePanel
 
--- Tab Buttons
 local combatTabButton = Instance.new("TextButton")
 combatTabButton.Size = UDim2.new(1, -10, 0, 40)
 combatTabButton.Position = UDim2.new(0, 5, 0, 5)
-combatTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+combatTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 combatTabButton.Text = "Combat"
-combatTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-combatTabButton.TextSize = 16
-combatTabButton.Font = Enum.Font.SourceSansBold
+combatTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+combatTabButton.TextSize = 18
+combatTabButton.Font = Enum.Font.GothamBold
 combatTabButton.BackgroundTransparency = 1
 combatTabButton.Parent = sidePanel
 
 local combatCorner = Instance.new("UICorner")
-combatCorner.CornerRadius = UDim.new(0, 6)
+combatCorner.CornerRadius = UDim.new(0, 8)
 combatCorner.Parent = combatTabButton
+
+local combatStroke = Instance.new("UIStroke")
+combatStroke.Color = Color3.fromRGB(255, 0, 0)
+combatStroke.Thickness = 1
+combatStroke.Transparency = 0.7
+combatStroke.Parent = combatTabButton
 
 local visualsTabButton = Instance.new("TextButton")
 visualsTabButton.Size = UDim2.new(1, -10, 0, 40)
-visualsTabButton.Position = UDim2.new(0, 5, 0, 50)
-visualsTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+visualsTabButton.Position = UDim2.new(0, 5, 0, 53)
+visualsTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 visualsTabButton.Text = "Visuals"
-visualsTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-visualsTabButton.TextSize = 16
-visualsTabButton.Font = Enum.Font.SourceSansBold
+visualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+visualsTabButton.TextSize = 18
+visualsTabButton.Font = Enum.Font.GothamBold
 visualsTabButton.BackgroundTransparency = 1
 visualsTabButton.Parent = sidePanel
 
 local visualsCorner = Instance.new("UICorner")
-visualsCorner.CornerRadius = UDim.new(0, 6)
+visualsCorner.CornerRadius = UDim.new(0, 8)
 visualsCorner.Parent = visualsTabButton
+
+local visualsStroke = Instance.new("UIStroke")
+visualsStroke.Color = Color3.fromRGB(255, 0, 0)
+visualsStroke.Thickness = 1
+visualsStroke.Transparency = 0.7
+visualsStroke.Parent = visualsTabButton
 
 local suggestTabButton = Instance.new("TextButton")
 suggestTabButton.Size = UDim2.new(1, -10, 0, 40)
-suggestTabButton.Position = UDim2.new(0, 5, 0, 95)
-suggestTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+suggestTabButton.Position = UDim2.new(0, 5, 0, 101)
+suggestTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 suggestTabButton.Text = "Suggest"
-suggestTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-suggestTabButton.TextSize = 16
-suggestTabButton.Font = Enum.Font.SourceSansBold
+suggestTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+suggestTabButton.TextSize = 18
+suggestTabButton.Font = Enum.Font.GothamBold
 suggestTabButton.BackgroundTransparency = 1
 suggestTabButton.Parent = sidePanel
 
 local suggestCorner = Instance.new("UICorner")
-suggestCorner.CornerRadius = UDim.new(0, 6)
+suggestCorner.CornerRadius = UDim.new(0, 8)
 suggestCorner.Parent = suggestTabButton
 
--- Content Area
+local suggestStroke = Instance.new("UIStroke")
+suggestStroke.Color = Color3.fromRGB(255, 0, 0)
+suggestStroke.Thickness = 1
+suggestStroke.Transparency = 0.7
+suggestStroke.Parent = suggestTabButton
+
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(0, 380, 1, 0)
 contentFrame.Position = UDim2.new(0, 120, 0, 0)
-contentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+contentFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 contentFrame.BorderSizePixel = 0
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
 
 local contentCorner = Instance.new("UICorner")
-contentCorner.CornerRadius = UDim.new(0, 8)
+contentCorner.CornerRadius = UDim.new(0, 12)
 contentCorner.Parent = contentFrame
 
--- Combat Tab Content
+local contentStroke = Instance.new("UIStroke")
+contentStroke.Color = Color3.fromRGB(255, 0, 0)
+contentStroke.Thickness = 2
+contentStroke.Transparency = 0.5
+contentStroke.Parent = contentFrame
+
 local combatTab = Instance.new("Frame")
 combatTab.Size = UDim2.new(1, 0, 1, 0)
 combatTab.BackgroundTransparency = 1
@@ -164,11 +200,10 @@ combatList.Padding = UDim.new(0, 15)
 combatList.Parent = combatTab
 
 local combatPadding = Instance.new("UIPadding")
-combatPadding.PaddingLeft = UDim.new(0, 15)
-combatPadding.PaddingTop = UDim.new(0, 15)
+combatPadding.PaddingLeft = UDim.new(0, 20)
+combatPadding.PaddingTop = UDim.new(0, 20)
 combatPadding.Parent = combatTab
 
--- Aimbot Toggle
 local aimbotFrame = Instance.new("Frame")
 aimbotFrame.Size = UDim2.new(1, 0, 0, 30)
 aimbotFrame.BackgroundTransparency = 1
@@ -178,27 +213,32 @@ local aimbotLabel = Instance.new("TextLabel")
 aimbotLabel.Size = UDim2.new(0, 200, 1, 0)
 aimbotLabel.BackgroundTransparency = 1
 aimbotLabel.Text = "Enable Aimbot"
-aimbotLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+aimbotLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 aimbotLabel.TextSize = 16
-aimbotLabel.Font = Enum.Font.SourceSans
+aimbotLabel.Font = Enum.Font.Gotham
 aimbotLabel.TextXAlignment = Enum.TextXAlignment.Left
 aimbotLabel.Parent = aimbotFrame
 
 local aimbotToggle = Instance.new("TextButton")
 aimbotToggle.Size = UDim2.new(0, 50, 0, 25)
-aimbotToggle.Position = UDim2.new(1, -60, 0.5, -12.5)
-aimbotToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+aimbotToggle.Position = UDim2.new(1, -70, 0.5, -12.5)
+aimbotToggle.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 aimbotToggle.Text = "OFF"
 aimbotToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
 aimbotToggle.TextSize = 14
-aimbotToggle.Font = Enum.Font.SourceSans
+aimbotToggle.Font = Enum.Font.Gotham
 aimbotToggle.Parent = aimbotFrame
 
 local aimbotCorner = Instance.new("UICorner")
-aimbotCorner.CornerRadius = UDim.new(0, 6)
+aimbotCorner.CornerRadius = UDim.new(0, 8)
 aimbotCorner.Parent = aimbotToggle
 
--- FOV Slider
+local aimbotStroke = Instance.new("UIStroke")
+aimbotStroke.Color = Color3.fromRGB(255, 0, 0)
+aimbotStroke.Thickness = 1
+aimbotStroke.Transparency = 0.7
+aimbotStroke.Parent = aimbotToggle
+
 local fovFrame = Instance.new("Frame")
 fovFrame.Size = UDim2.new(1, 0, 0, 30)
 fovFrame.BackgroundTransparency = 1
@@ -208,16 +248,16 @@ local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.new(0, 200, 1, 0)
 fovLabel.BackgroundTransparency = 1
 fovLabel.Text = "FOV Size"
-fovLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+fovLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 fovLabel.TextSize = 16
-fovLabel.Font = Enum.Font.SourceSans
+fovLabel.Font = Enum.Font.Gotham
 fovLabel.TextXAlignment = Enum.TextXAlignment.Left
 fovLabel.Parent = fovFrame
 
 local fovSlider = Instance.new("TextButton")
 fovSlider.Size = UDim2.new(0, 150, 0, 8)
 fovSlider.Position = UDim2.new(1, -160, 0.5, -4)
-fovSlider.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+fovSlider.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 fovSlider.Text = ""
 fovSlider.Parent = fovFrame
 
@@ -240,12 +280,11 @@ fovValue.Size = UDim2.new(0, 50, 1, 0)
 fovValue.Position = UDim2.new(1, -50, 0, 0)
 fovValue.BackgroundTransparency = 1
 fovValue.Text = "150"
-fovValue.TextColor3 = Color3.fromRGB(200, 200, 200)
+fovValue.TextColor3 = Color3.fromRGB(220, 220, 220)
 fovValue.TextSize = 16
-fovValue.Font = Enum.Font.SourceSans
+fovValue.Font = Enum.Font.Gotham
 fovValue.Parent = fovFrame
 
--- Visuals Tab Content
 local visualsTab = Instance.new("Frame")
 visualsTab.Size = UDim2.new(1, 0, 1, 0)
 visualsTab.BackgroundTransparency = 1
@@ -258,11 +297,10 @@ visualsList.Padding = UDim.new(0, 15)
 visualsList.Parent = visualsTab
 
 local visualsPadding = Instance.new("UIPadding")
-visualsPadding.PaddingLeft = UDim.new(0, 15)
-visualsPadding.PaddingTop = UDim.new(0, 15)
+visualsPadding.PaddingLeft = UDim.new(0, 20)
+visualsPadding.PaddingTop = UDim.new(0, 20)
 visualsPadding.Parent = visualsTab
 
--- ESP Toggle
 local espFrame = Instance.new("Frame")
 espFrame.Size = UDim2.new(1, 0, 0, 30)
 espFrame.BackgroundTransparency = 1
@@ -272,27 +310,32 @@ local espLabel = Instance.new("TextLabel")
 espLabel.Size = UDim2.new(0, 200, 1, 0)
 espLabel.BackgroundTransparency = 1
 espLabel.Text = "Enable ESP"
-espLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+espLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 espLabel.TextSize = 16
-espLabel.Font = Enum.Font.SourceSans
+espLabel.Font = Enum.Font.Gotham
 espLabel.TextXAlignment = Enum.TextXAlignment.Left
 espLabel.Parent = espFrame
 
 local espToggle = Instance.new("TextButton")
 espToggle.Size = UDim2.new(0, 50, 0, 25)
-espToggle.Position = UDim2.new(1, -60, 0.5, -12.5)
-espToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+espToggle.Position = UDim2.new(1, -70, 0.5, -12.5)
+espToggle.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 espToggle.Text = "OFF"
 espToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
 espToggle.TextSize = 14
-espToggle.Font = Enum.Font.SourceSans
+espToggle.Font = Enum.Font.Gotham
 espToggle.Parent = espFrame
 
 local espCorner = Instance.new("UICorner")
-espCorner.CornerRadius = UDim.new(0, 6)
+espCorner.CornerRadius = UDim.new(0, 8)
 espCorner.Parent = espToggle
 
--- Suggest Tab Content
+local espStroke = Instance.new("UIStroke")
+espStroke.Color = Color3.fromRGB(255, 0, 0)
+espStroke.Thickness = 1
+espStroke.Transparency = 0.7
+espStroke.Parent = espToggle
+
 local suggestTab = Instance.new("Frame")
 suggestTab.Size = UDim2.new(1, 0, 1, 0)
 suggestTab.BackgroundTransparency = 1
@@ -305,45 +348,66 @@ suggestList.Padding = UDim.new(0, 15)
 suggestList.Parent = suggestTab
 
 local suggestPadding = Instance.new("UIPadding")
-suggestPadding.PaddingLeft = UDim.new(0, 15)
-suggestPadding.PaddingTop = UDim.new(0, 15)
+suggestPadding.PaddingLeft = UDim.new(0, 20)
+suggestPadding.PaddingTop = UDim.new(0, 20)
 suggestPadding.Parent = suggestTab
 
--- Textbox for suggestion
 local suggestBox = Instance.new("TextBox")
-suggestBox.Size = UDim2.new(1, -30, 0, 100)
+suggestBox.Size = UDim2.new(1, -40, 0, 100)
 suggestBox.Position = UDim2.new(0, 0, 0, 0)
-suggestBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-suggestBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+suggestBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+suggestBox.TextColor3 = Color3.fromRGB(220, 220, 220)
 suggestBox.TextSize = 16
-suggestBox.Font = Enum.Font.SourceSans
+suggestBox.Font = Enum.Font.Gotham
 suggestBox.PlaceholderText = "Type your suggestion here..."
+suggestBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
 suggestBox.TextWrapped = true
 suggestBox.TextXAlignment = Enum.TextXAlignment.Left
 suggestBox.TextYAlignment = Enum.TextYAlignment.Top
 suggestBox.Parent = suggestTab
 
 local suggestBoxCorner = Instance.new("UICorner")
-suggestBoxCorner.CornerRadius = UDim.new(0, 6)
+suggestBoxCorner.CornerRadius = UDim.new(0, 8)
 suggestBoxCorner.Parent = suggestBox
 
--- Submit Button
-local submitButton = Instance.new("TextButton")
-submitButton.Size = UDim2.new(0, 100, 0, 30)
-submitButton.Position = UDim2.new(0.5, -50, 0, 120)
-submitButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-submitButton.Text = "Submit"
-submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-submitButton.TextSize = 16
-submitButton.Font = Enum.Font.SourceSansBold
-submitButton.Parent = suggestTab
+local suggestBoxStroke = Instance.new("UIStroke")
+suggestBoxStroke.Color = Color3.fromRGB(255, 0, 0)
+suggestBoxStroke.Thickness = 1
+suggestBoxStroke.Transparency = 0.7
+suggestBoxStroke.Parent = suggestBox
 
-local submitCorner = Instance.new("UICorner")
-submitCorner.CornerRadius = UDim.new(0, 6)
-submitCorner.Parent = submitButton
+local usernameLabel = Instance.new("TextLabel")
+usernameLabel.Size = UDim2.new(0, 200, 0, 20)
+usernameLabel.Position = UDim2.new(1, -220, 0, 5)
+usernameLabel.BackgroundTransparency = 1
+usernameLabel.Text = "User: " .. player.Name
+usernameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+usernameLabel.TextSize = 14
+usernameLabel.Font = Enum.Font.GothamBold
+usernameLabel.TextXAlignment = Enum.TextXAlignment.Right
+usernameLabel.Parent = suggestTab
 
--- Animations
-local fadeInInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+local sendButton = Instance.new("TextButton")
+sendButton.Size = UDim2.new(0, 80, 0, 30)
+sendButton.Position = UDim2.new(0.5, -40, 0, 120)
+sendButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+sendButton.Text = "Send!"
+sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+sendButton.TextSize = 16
+sendButton.Font = Enum.Font.GothamBold
+sendButton.Parent = suggestTab
+
+local sendCorner = Instance.new("UICorner")
+sendCorner.CornerRadius = UDim.new(0, 8)
+sendCorner.Parent = sendButton
+
+local sendStroke = Instance.new("UIStroke")
+sendStroke.Color = Color3.fromRGB(255, 255, 255)
+sendStroke.Thickness = 1
+sendStroke.Transparency = 0.5
+sendStroke.Parent = sendButton
+
+local fadeInInfo = TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local mainFadeIn = tweenService:Create(mainFrame, fadeInInfo, {BackgroundTransparency = 0})
 local sideFadeIn = tweenService:Create(sidePanel, fadeInInfo, {BackgroundTransparency = 0})
 local contentFadeIn = tweenService:Create(contentFrame, fadeInInfo, {BackgroundTransparency = 0})
@@ -358,44 +422,51 @@ combatFadeIn:Play()
 visualsFadeIn:Play()
 suggestFadeIn:Play()
 
--- Tab Switching
 combatTabButton.MouseButton1Click:Connect(function()
     combatTab.Visible = true
     visualsTab.Visible = false
     suggestTab.Visible = false
-    combatTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    combatTabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     combatTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    visualsTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    visualsTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-    suggestTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    suggestTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+    combatStroke.Transparency = 0
+    visualsTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    visualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    visualsStroke.Transparency = 0.7
+    suggestTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    suggestTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    suggestStroke.Transparency = 0.7
 end)
 
 visualsTabButton.MouseButton1Click:Connect(function()
     combatTab.Visible = false
     visualsTab.Visible = true
     suggestTab.Visible = false
-    combatTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    combatTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-    visualsTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    combatTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    combatTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    combatStroke.Transparency = 0.7
+    visualsTabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     visualsTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    suggestTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    suggestTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+    visualsStroke.Transparency = 0
+    suggestTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    suggestTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    suggestStroke.Transparency = 0.7
 end)
 
 suggestTabButton.MouseButton1Click:Connect(function()
     combatTab.Visible = false
     visualsTab.Visible = false
     suggestTab.Visible = true
-    combatTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    combatTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-    visualsTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    visualsTabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-    suggestTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    combatTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    combatTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    combatStroke.Transparency = 0.7
+    visualsTabButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    visualsTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    visualsStroke.Transparency = 0.7
+    suggestTabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
     suggestTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    suggestStroke.Transparency = 0
 end)
 
--- FOV Slider Logic
 local fovSize = 150
 local draggingSlider = false
 
@@ -415,30 +486,33 @@ uis.InputChanged:Connect(function(input)
         local sliderPos = fovSlider.AbsolutePosition
         local sliderSize = fovSlider.AbsoluteSize
         local relativeX = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-        fovSize = 50 + (relativeX * 300) -- Range: 50 to 350
+        fovSize = 50 + (relativeX * 300)
         fovFill.Size = UDim2.new(relativeX, 0, 1, 0)
         fovValue.Text = math.floor(fovSize)
     end
 end)
 
--- ESP with SelectionBox (Box around enemies)
 local espEnabled = false
 local espBoxes = {}
 
 local function addESP(target)
-    local box = Instance.new("SelectionBox")
-    box.Adornee = target
-    box.LineThickness = 0.01
-    box.Color3 = Color3.fromRGB(255, 0, 0)
-    box.SurfaceColor3 = Color3.fromRGB(255, 0, 0)
-    box.Transparency = 0.9
-    box.Parent = target
-    table.insert(espBoxes, box)
+    if target and target:FindFirstChild("HumanoidRootPart") then
+        local box = Instance.new("SelectionBox")
+        box.Adornee = target
+        box.LineThickness = 0.02
+        box.Color3 = Color3.fromRGB(255, 0, 0)
+        box.SurfaceColor3 = Color3.fromRGB(255, 0, 0)
+        box.Transparency = 0.8
+        box.Parent = target
+        table.insert(espBoxes, box)
+    end
 end
 
 local function clearESP()
     for _, box in pairs(espBoxes) do
-        box:Destroy()
+        if box then
+            box:Destroy()
+        end
     end
     espBoxes = {}
 end
@@ -447,28 +521,13 @@ local function updateESP()
     if espEnabled then
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character then
-                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
-                local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
+            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor or player.Team
+                local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor or v.Team
                 local isEnemy = true
                 if playerTeam and enemyTeam then
                     if playerTeam == enemyTeam then
                         isEnemy = false
-                    end
-                else
-                    local playerTeamObj = player.Team
-                    local enemyTeamObj = v.Team
-                    if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
-                        isEnemy = false
-                    end
-                    local playerStatus = player:FindFirstChild("Status")
-                    local enemyStatus = v:FindFirstChild("Status")
-                    if playerStatus and enemyStatus then
-                        local playerTeamValue = playerStatus:FindFirstChild("Team")
-                        local enemyTeamValue = enemyStatus:FindFirstChild("Team")
-                        if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
-                            isEnemy = false
-                        end
                     end
                 end
                 if isEnemy then
@@ -499,7 +558,12 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Aimbot: Hold Right-Click to Lock and Fire (Enemies Only)
+runService.RenderStepped:Connect(function()
+    if espEnabled then
+        updateESP()
+    end
+end)
+
 local aimEnabled = false
 local target = nil
 local locked = false
@@ -511,34 +575,19 @@ mouse.Button2Down:Connect(function()
         local mousePos = mouse.Hit.Position
 
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
-                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
-                local enemyTeam = enemy:FindFirstChild("TeamColor") and enemy.TeamColor
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
+                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor or player.Team
+                local enemyTeam = enemy:FindFirstChild("TeamColor") and enemy.TeamColor or enemy.Team
                 local isEnemy = true
                 if playerTeam and enemyTeam then
                     if playerTeam == enemyTeam then
                         isEnemy = false
                     end
-                else
-                    local playerTeamObj = player.Team
-                    local enemyTeamObj = enemy.Team
-                    if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
-                        isEnemy = false
-                    end
-                    local playerStatus = player:FindFirstChild("Status")
-                    local enemyStatus = enemy:FindFirstChild("Status")
-                    if playerStatus and enemyStatus then
-                        local playerTeamValue = playerStatus:FindFirstChild("Team")
-                        local enemyTeamValue = enemyStatus:FindFirstChild("Team")
-                        if playerTeamValue and enemyTeamValue and playerTeamValue.Value == enemyTeamValue.Value then
-                            isEnemy = false
-                        end
-                    end
                 end
                 if isEnemy then
                     local head = enemy.Character.Head
                     local dist = (head.Position - mousePos).Magnitude
-                    if dist < fovSize then -- Use FOV size
+                    if dist < fovSize then
                         if dist < shortestDist then
                             shortestDist = dist
                             closest = head
@@ -558,8 +607,10 @@ end)
 mouse.Button2Up:Connect(function()
     locked = false
     target = nil
-    -- Reset camera to prevent aiming down
-    camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
+    local camPos = camera.CFrame.Position
+    local lookVector = camera.CFrame.LookVector
+    local newLookAt = camPos + (lookVector * 100)
+    camera.CFrame = CFrame.new(camPos, newLookAt)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -581,18 +632,18 @@ runService.RenderStepped:Connect(function()
                 end
             end
         end
-        -- Check if target is dead
         local humanoid = target.Parent:FindFirstChild("Humanoid")
         if humanoid and humanoid.Health <= 0 then
             locked = false
             target = nil
-            -- Reset camera to prevent aiming down
-            camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
+            local camPos = camera.CFrame.Position
+            local lookVector = camera.CFrame.LookVector
+            local newLookAt = camPos + (lookVector * 100)
+            camera.CFrame = CFrame.new(camPos, newLookAt)
         end
     end
 end)
 
--- Toggle Logic
 espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     espToggle.Text = espEnabled and "ON" or "OFF"
@@ -606,11 +657,10 @@ aimbotToggle.MouseButton1Click:Connect(function()
     aimbotToggle.TextColor3 = aimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
 
--- Discord Webhook Suggestion Logic
-local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq" -- Replace with your webhook URL
+local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq"
 local cooldown = 30
 local lastSubmit = 0
-local blockedWords = {"nigger", "slur", "@everyone", "@here","nigga","kys"}
+local blockedWords = {"nigger", "slur", "@everyone", "@here", "nigga", "kys"}
 
 local function containsBlockedWords(text)
     for _, word in pairs(blockedWords) do
@@ -621,32 +671,58 @@ local function containsBlockedWords(text)
     return false
 end
 
-submitButton.MouseButton1Click:Connect(function()
+sendButton.MouseButton1Click:Connect(function()
     local currentTime = tick()
     if currentTime - lastSubmit < cooldown then
-        print("Cooldown active. Wait " .. math.ceil(cooldown - (currentTime - lastSubmit)) .. " seconds.")
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Cooldown",
+            Text = "Wait " .. math.ceil(cooldown - (currentTime - lastSubmit)) .. " seconds.",
+            Duration = 3
+        })
         return
     end
 
     local suggestion = suggestBox.Text
     if suggestion == "" then
-        print("Suggestion cannot be empty.")
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Suggestion cannot be empty.",
+            Duration = 3
+        })
         return
     end
 
     if containsBlockedWords(suggestion) then
-        print("Suggestion contains blocked words.")
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Suggestion contains blocked words.",
+            Duration = 3
+        })
         return
     end
 
-    -- Send to Discord Webhook
-    local data = {
-        ["content"] = "New Suggestion from " .. player.Name .. ": " .. suggestion
-    }
-    local jsonData = game:GetService("HttpService"):JSONEncode(data)
-    game:GetService("HttpService"):PostAsync(webhookUrl, jsonData, Enum.HttpContentType.ApplicationJson)
+    local success, err = pcall(function()
+        local data = {
+            ["content"] = "New Suggestion from " .. player.Name .. ": " .. suggestion
+        }
+        local jsonData = httpService:JSONEncode(data)
+        httpService:PostAsync(webhookUrl, jsonData, Enum.HttpContentType.ApplicationJson)
+    end)
 
-    lastSubmit = currentTime
-    print("Suggestion sent!")
+    if success then
+        lastSubmit = currentTime
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Success",
+            Text = "Suggestion sent!",
+            Duration = 3
+        })
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Failed to send suggestion.",
+            Duration = 3
+        })
+    end
 end)
-print("-- This script is licensed under the GNU General Public License v3.0 Copyright (C) 2025 d4mage1 You can use, modify, and share this script as long as you keep it open-source and give credit.")
+
+print("This script is licensed under the GNU General Public License v3.0 Copyright (C) 2025 d4mage1 You can use, modify, and share this script as long as you keep it open-source and give credit.")
