@@ -12,7 +12,7 @@ print([[
    \ \__\    \ \__\ \__\ \__\ \_______\ \_______\       \ \_______\__/  / /           \ \_______\     \ \__\ \__\    \ \__\ \__\ \__\ \_______\ \_______\
     \|__|     \|__|\|__|\|__|\|_______|\|_______|        \|_______|\___/ /             \|_______|      \|__|\|__|     \|__|\|__|\|__|\|_______|\|_______|
                                                                   \|___|/                                                                                
-
+                                                                                                                                                    
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -497,12 +497,13 @@ local espBoxes = {}
 
 local function addESP(target)
     if target and target:FindFirstChild("HumanoidRootPart") then
-        local box = Instance.new("SelectionBox")
+        local box = Instance.new("BoxHandleAdornment")
+        box.Size = target:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
         box.Adornee = target
-        box.LineThickness = 0.02
         box.Color3 = Color3.fromRGB(255, 0, 0)
-        box.SurfaceColor3 = Color3.fromRGB(255, 0, 0)
-        box.Transparency = 0.8
+        box.Transparency = 0.5
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
         box.Parent = target
         table.insert(espBoxes, box)
     end
@@ -658,7 +659,7 @@ aimbotToggle.MouseButton1Click:Connect(function()
 end)
 
 local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq"
-local cooldown = 10
+local cooldown = 30
 local lastSubmit = 0
 local blockedWords = {"nigger", "slur", "@everyone", "@here", "nigga", "kys"}
 
