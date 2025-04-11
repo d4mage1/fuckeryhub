@@ -4,16 +4,12 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
-
-  __  __            _____   ______     ____ __     __    _____   _  _    __  __            _____  ______  __ 
- |  \/  |    /\    |  __ \ |  ____|   |  _ \\ \   / /   |  __ \ | || |  |  \/  |    /\    / ____||  ____|/_ |
- | \  / |   /  \   | |  | || |__      | |_) |\ \_/ /    | |  | || || |_ | \  / |   /  \  | |  __ | |__    | |
- | |\/| |  / /\ \  | |  | ||  __|     |  _ <  \   /     | |  | ||__   _|| |\/| |  / /\ \ | | |_ ||  __|   | |
- | |  | | / ____ \ | |__| || |____    | |_) |  | |      | |__| |   | |  | |  | | / ____ \| |__| || |____  | |
- |_|  |_|/_/    \_\|_____/ |______|   |____/   |_|      |_____/    |_|  |_|  |_|/_/    \_\\_____||______| |_|
-                                                                                                             
-                                                                                                             
-
+ __  __       _        ______   ______   __   __       _        ______   _    _       ______   __     __  _____   ______   ______   ______   ______  
+|  \/  |     (_)      |  ____| |  __ \  \ \ / /      (_)      |  ____| | |  | |     |  ____|  \ \   / / |  __ \ |  __ \ |  __ \ |  __ \ |  ____| 
+| \  / | __ _ _  ___  | |__    | |  | |  \ V /  __ _ _  ___  | |__    | |__| |     | |__  _  \ \_/ /  | |  | || |  | || |  | || |  | || |__   
+| |\/| |/ _` | |/ _ \ |  __|   | |  | |   > <  / _` | |/ _ \ |  __|   |  __  |     |  __|| |  \   /   | |  | || |  | || |  | || |  | ||  __|  
+| |  | | (_| | |  __/ | |      | |__| |  / . \ | (_| | |  __/ | |      | |  | |     | |   | |   | |    | |__| || |__| || |__| || |__| || |____ 
+|_|  |_|__,_|_|_|___| |_|      |_____/  /_/ \_\__,_|_|_|___| |_|      |_|  |_|     |_|   |_|   |_|    |_____/ |_____/ |_____/ |_____/ |______|
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -88,28 +84,29 @@ end
 -- Notify that the GUI loaded successfully
 game.StarterGui:SetCore("SendNotification", {
     Title = "Success",
-    Text = "Fuckery Hub loaded, cuhh! Press Right Shift to toggle the GUI.",
+    Text = "Fuckery Hub window loaded, cuhh! Press Right Shift to toggle the GUI.",
     Duration = 5
 })
 
 -- Combat Tab
-local CombatTabSuccess, CombatTab = pcall(function()
-    return Window:CreateTab("Combat", "") -- Removed the icon
+local CombatTab
+local CombatTabSuccess, CombatTabError = pcall(function()
+    CombatTab = Window:CreateTab("Combat", "rbxassetid://4483362458")
 end)
 
 if not CombatTabSuccess or not CombatTab then
-    warn("Failed to create Combat Tab.")
+    warn("Failed to create Combat Tab: " .. tostring(CombatTabError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Combat Tab, cuhh.",
+        Text = "Couldn't create Combat Tab: " .. tostring(CombatTabError) .. ", cuhh.",
         Duration = 5
     })
     return
 end
 
 local aimbotEnabled = false
-local aimbotToggleSuccess, aimbotToggle = pcall(function()
-    return CombatTab:CreateToggle({
+local aimbotToggleSuccess, aimbotToggleError = pcall(function()
+    CombatTab:CreateToggle({
         Name = "Enable Aimbot",
         CurrentValue = false,
         Flag = "AimbotToggle",
@@ -125,17 +122,17 @@ local aimbotToggleSuccess, aimbotToggle = pcall(function()
 end)
 
 if not aimbotToggleSuccess then
-    warn("Failed to create Aimbot Toggle.")
+    warn("Failed to create Aimbot Toggle: " .. tostring(aimbotToggleError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Aimbot Toggle, cuhh.",
+        Text = "Couldn't create Aimbot Toggle: " .. tostring(aimbotToggleError) .. ", cuhh.",
         Duration = 5
     })
 end
 
 local fovSize = 150
-local fovSliderSuccess, fovSlider = pcall(function()
-    return CombatTab:CreateSlider({
+local fovSliderSuccess, fovSliderError = pcall(function()
+    CombatTab:CreateSlider({
         Name = "FOV Size",
         Range = {50, 350},
         Increment = 1,
@@ -149,24 +146,25 @@ local fovSliderSuccess, fovSlider = pcall(function()
 end)
 
 if not fovSliderSuccess then
-    warn("Failed to create FOV Slider.")
+    warn("Failed to create FOV Slider: " .. tostring(fovSliderError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create FOV Slider, cuhh.",
+        Text = "Couldn't create FOV Slider: " .. tostring(fovSliderError) .. ", cuhh.",
         Duration = 5
     })
 end
 
 -- Visuals Tab
-local VisualsTabSuccess, VisualsTab = pcall(function()
-    return Window:CreateTab("Visuals", "") -- Removed the icon
+local VisualsTab
+local VisualsTabSuccess, VisualsTabError = pcall(function()
+    VisualsTab = Window:CreateTab("Visuals", "rbxassetid://4483362458")
 end)
 
 if not VisualsTabSuccess or not VisualsTab then
-    warn("Failed to create Visuals Tab.")
+    warn("Failed to create Visuals Tab: " .. tostring(VisualsTabError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Visuals Tab, cuhh.",
+        Text = "Couldn't create Visuals Tab: " .. tostring(VisualsTabError) .. ", cuhh.",
         Duration = 5
     })
     return
@@ -174,8 +172,8 @@ end
 
 local espEnabled = false
 local espBoxes = {}
-local espToggleSuccess, espToggle = pcall(function()
-    return VisualsTab:CreateToggle({
+local espToggleSuccess, espToggleError = pcall(function()
+    VisualsTab:CreateToggle({
         Name = "Enable ESP",
         CurrentValue = false,
         Flag = "ESPToggle",
@@ -194,32 +192,33 @@ local espToggleSuccess, espToggle = pcall(function()
 end)
 
 if not espToggleSuccess then
-    warn("Failed to create ESP Toggle.")
+    warn("Failed to create ESP Toggle: " .. tostring(espToggleError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create ESP Toggle, cuhh.",
+        Text = "Couldn't create ESP Toggle: " .. tostring(espToggleError) .. ", cuhh.",
         Duration = 5
     })
 end
 
 -- Suggest Tab
-local SuggestTabSuccess, SuggestTab = pcall(function()
-    return Window:CreateTab("Suggest", "") -- Removed the icon
+local SuggestTab
+local SuggestTabSuccess, SuggestTabError = pcall(function()
+    SuggestTab = Window:CreateTab("Suggest", "rbxassetid://4483362458")
 end)
 
 if not SuggestTabSuccess or not SuggestTab then
-    warn("Failed to create Suggest Tab.")
+    warn("Failed to create Suggest Tab: " .. tostring(SuggestTabError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Suggest Tab, cuhh.",
+        Text = "Couldn't create Suggest Tab: " .. tostring(SuggestTabError) .. ", cuhh.",
         Duration = 5
     })
     return
 end
 
 local suggestionInput
-local suggestionInputSuccess, suggestionInputResult = pcall(function()
-    return SuggestTab:CreateInput({
+local suggestionInputSuccess, suggestionInputError = pcall(function()
+    suggestionInput = SuggestTab:CreateInput({
         Name = "Suggestion",
         PlaceholderText = "Type your suggestion here, cuhh...",
         RemoveTextAfterFocusLost = false,
@@ -230,19 +229,17 @@ local suggestionInputSuccess, suggestionInputResult = pcall(function()
     })
 end)
 
-if suggestionInputSuccess then
-    suggestionInput = suggestionInputResult
-else
-    warn("Failed to create Suggestion Input.")
+if not suggestionInputSuccess then
+    warn("Failed to create Suggestion Input: " .. tostring(suggestionInputError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Suggestion Input, cuhh.",
+        Text = "Couldn't create Suggestion Input: " .. tostring(suggestionInputError) .. ", cuhh.",
         Duration = 5
     })
 end
 
-local sendButtonSuccess, sendButton = pcall(function()
-    return SuggestTab:CreateButton({
+local sendButtonSuccess, sendButtonError = pcall(function()
+    SuggestTab:CreateButton({
         Name = "Send Suggestion",
         Callback = function()
             local suggestion = suggestionInput and suggestionInput.CurrentText or ""
@@ -260,12 +257,97 @@ local sendButtonSuccess, sendButton = pcall(function()
 end)
 
 if not sendButtonSuccess then
-    warn("Failed to create Send Suggestion Button.")
+    warn("Failed to create Send Suggestion Button: " .. tostring(sendButtonError))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Send Suggestion Button, cuhh.",
+        Text = "Couldn't create Send Suggestion Button: " .. tostring(sendButtonError) .. ", cuhh.",
         Duration = 5
     })
+end
+
+-- About Me Tab
+local AboutTab
+local AboutTabSuccess, AboutTabError = pcall(function()
+    AboutTab = Window:CreateTab("About Me", "rbxassetid://4483362458")
+end)
+
+if not AboutTabSuccess or not AboutTab then
+    warn("Failed to create About Me Tab: " .. tostring(AboutTabError))
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create About Me Tab: " .. tostring(AboutTabError) .. ", cuhh.",
+        Duration = 5
+    })
+else
+    local aboutLabelSuccess, aboutLabelError = pcall(function()
+        AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
+        AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
+        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 11th 2025")
+    end)
+    if not aboutLabelSuccess then
+        warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Couldn't create About Me Labels: " .. tostring(aboutLabelError) .. ", cuhh.",
+            Duration = 5
+        })
+    end
+end
+
+-- Settings Tab
+local SettingsTab
+local SettingsTabSuccess, SettingsTabError = pcall(function()
+    SettingsTab = Window:CreateTab("Settings", "rbxassetid://4483362458")
+end)
+
+if not SettingsTabSuccess or not SettingsTab then
+    warn("Failed to create Settings Tab: " .. tostring(SettingsTabError))
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Settings Tab: " .. tostring(SettingsTabError) .. ", cuhh.",
+        Duration = 5
+    })
+else
+    local themeDropdownSuccess, themeDropdownError = pcall(function()
+        SettingsTab:CreateDropdown({
+            Name = "Theme",
+            Options = {"Dark", "Light", "Fuckery"},
+            CurrentOption = "Dark",
+            Flag = "ThemeDropdown",
+            Callback = function(Option)
+                if Option == "Dark" then
+                    -- Rayfield doesn't support direct theme changes, so we simulate it
+                    game.StarterGui:SetCore("SendNotification", {
+                        Title = "Theme",
+                        Text = "Switched to Dark theme, cuhh! (Default Rayfield look)",
+                        Duration = 3
+                    })
+                elseif Option == "Light" then
+                    game.StarterGui:SetCore("SendNotification", {
+                        Title = "Theme",
+                        Text = "Switched to Light theme, cuhh! (Not fully supported, but we vibin')",
+                        Duration = 3
+                    })
+                elseif Option == "Fuckery" then
+                    game.StarterGui:SetCore("SendNotification", {
+                        Title = "Theme",
+                        Text = "Switched to Fuckery theme, cuhh! (Red and black vibes)",
+                        Duration = 3
+                    })
+                end
+            end
+        })
+    end)
+    if not themeDropdownSuccess then
+        warn("Failed to create Theme Dropdown: " .. tostring(themeDropdownError))
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Couldn't create Theme Dropdown: " .. tostring(themeDropdownError) .. ", cuhh.",
+            Duration = 5
+        })
+    end
 end
 
 -- ESP Functions
@@ -293,23 +375,27 @@ local function clearESP()
 end
 
 local function updateESP()
-    if espEnabled then
+    if not espEnabled then
         clearESP()
-        for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                local playerTeam = player.Team
-                local enemyTeam = v.Team
-                local isEnemy = true
-                if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                    isEnemy = false
-                end
-                if isEnemy then
-                    addESP(v.Character)
-                end
+        return
+    end
+
+    clearESP()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v == player then
+            continue -- Skip the local player
+        end
+        if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local playerTeam = player.Team
+            local enemyTeam = v.Team
+            local isEnemy = true
+            if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                isEnemy = false -- Skip teammates
+            end
+            if isEnemy then
+                addESP(v.Character)
             end
         end
-    else
-        clearESP()
     end
 end
 
@@ -334,6 +420,8 @@ end)
 runService.RenderStepped:Connect(function()
     if espEnabled then
         updateESP()
+    else
+        clearESP()
     end
 end)
 
@@ -343,36 +431,35 @@ local locked = false
 local lastLookVector = camera.CFrame.LookVector
 
 mouse.Button2Down:Connect(function()
-    if aimbotEnabled then
-        local closest = nil
-        local shortestDist = math.huge
-        local mousePos = mouse.Hit.Position
+    if not aimbotEnabled then return end
 
-        for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
-                local playerTeam = player.Team
-                local enemyTeam = enemy.Team
-                local isEnemy = true
-                if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                    isEnemy = false
-                end
-                if isEnemy then
-                    local head = enemy.Character.Head
-                    local dist = (head.Position - mousePos).Magnitude
-                    if dist < fovSize then
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            closest = head
-                        end
-                    end
+    local closest = nil
+    local shortestDist = math.huge
+    local mousePos = mouse.Hit.Position
+
+    for _, enemy in pairs(game.Players:GetPlayers()) do
+        if enemy == player then continue end
+        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
+            local playerTeam = player.Team
+            local enemyTeam = enemy.Team
+            local isEnemy = true
+            if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                isEnemy = false
+            end
+            if isEnemy then
+                local head = enemy.Character.Head
+                local dist = (head.Position - mousePos).Magnitude
+                if dist < fovSize and dist < shortestDist then
+                    shortestDist = dist
+                    closest = head
                 end
             end
         end
+    end
 
-        if closest then
-            target = closest
-            locked = true
-        end
+    if closest then
+        target = closest
+        locked = true
     end
 end)
 
@@ -457,20 +544,21 @@ function sendSuggestion(suggestion)
             ["content"] = "New Suggestion from " .. player.Name .. ": " .. suggestion
         }
         local jsonData = httpService:JSONEncode(data)
-        httpService:PostAsync(webhookUrl, jsonData, Enum.HttpContentType.ApplicationJson)
+        local response = httpService:PostAsync(webhookUrl, jsonData, Enum.HttpContentType.ApplicationJson)
+        return response
     end)
 
     if success then
         lastSubmit = currentTime
         Rayfield:Notify({
             Title = "Success",
-            Content = "Suggestion sent, cuhh!",
+            Content = "Suggestion sent to Discord, cuhh!",
             Duration = 3
         })
     else
         Rayfield:Notify({
             Title = "Error",
-            Content = "Failed to send suggestion: " .. tostring(err) .. ", cuhh.",
+            Content = "Failed to send suggestion: " .. tostring(err) .. ", cuhh. Check if the webhook URL is valid.",
             Duration = 5
         })
     end
