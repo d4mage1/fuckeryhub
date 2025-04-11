@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.0 - Arsenal Edition")
+print("Version: 1.1 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -26,189 +26,119 @@ local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local uis = game:GetService("UserInputService")
 
--- Load Rayfield UI Library with Better Error Handling
+-- Load Rayfield UI Library
 local Rayfield
 local rayfieldUrl = "https://sirius.menu/rayfield"
-local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source"
-local rawScript
-
-local success, errorMsg = pcall(function()
-    rawScript = game:HttpGet(rayfieldUrl)
+local success, rawScript = pcall(function()
+    return game:HttpGet(rayfieldUrl)
 end)
-
 if not success then
-    print("Failed to fetch Rayfield from primary URL: " .. tostring(errorMsg))
-    success, errorMsg = pcall(function()
-        rawScript = game:HttpGet(rayfieldFallbackUrl)
-    end)
-    if not success then
-        print("Failed to fetch Rayfield from fallback URL: " .. tostring(errorMsg))
-        return
-    end
-end
-
-success, errorMsg = pcall(function()
-    Rayfield = loadstring(rawScript)()
-end)
-
-if not success or not Rayfield then
-    print("Failed to load Rayfield UI Library: " .. tostring(errorMsg))
+    print("Failed to load Rayfield: " .. tostring(rawScript))
     return
 end
+Rayfield = loadstring(rawScript)()
 
--- Create Rayfield Window with Discord Join Requirement
-local discordInvite = "https://discord.gg/tqSz4aVBg9" -- Replace with your Discord server invite link
-local WindowSuccess, Window = pcall(function()
-    return Rayfield:CreateWindow({
-        Name = "Fuckery Hub",
-        LoadingTitle = "Fuckery Hub",
-        LoadingSubtitle = "by d4mage1",
-        ConfigurationSaving = {
-            Enabled = true,
-            FolderName = "FuckeryHub",
-            FileName = "ArsenalConfig"
-        },
-        Discord = {
-            Enabled = true,
-            Invite = discordInvite,
-            RememberJoins = true
-        },
-        KeySystem = false
-    })
-end)
-
-if not WindowSuccess or not Window then
-    print("Failed to create Rayfield Window: " .. tostring(Window))
-    return
-end
+-- Create Window
+local discordInvite = "https://discord.gg/mAFyAPnVA4"
+local Window = Rayfield:CreateWindow({
+    Name = "Fuckery Hub",
+    LoadingTitle = "Fuckery Hub",
+    LoadingSubtitle = "by d4mage1",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "FuckeryHub",
+        FileName = "ArsenalConfig"
+    },
+    Discord = {
+        Enabled = true,
+        Invite = discordInvite,
+        RememberJoins = true
+    },
+    KeySystem = false
+})
 
 -- Combat Tab
-local CombatTab
-local CombatTabSuccess, CombatTabError = pcall(function()
-    CombatTab = Window:CreateTab("Combat")
-end)
-
-if not CombatTabSuccess or not CombatTab then
-    print("Failed to create Combat Tab: " .. tostring(CombatTabError))
-    return
-end
+local CombatTab = Window:CreateTab("Combat")
 
 local aimbotEnabled = false
-local aimbotToggleSuccess, aimbotToggleError = pcall(function()
-    CombatTab:CreateToggle({
-        Name = "Enable Aimbot",
-        CurrentValue = false,
-        Flag = "AimbotToggle",
-        Callback = function(Value)
-            aimbotEnabled = Value
+CombatTab:CreateToggle({
+    Name = "Enable Aimbot",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value)
+        aimbotEnabled = Value
+        if not Value then
+            locked = false
+            target = nil
+            -- Snap camera to neutral when toggled off
+            local currentCFrame = camera.CFrame
+            local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
+            camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
         end
-    })
-end)
-
-if not aimbotToggleSuccess then
-    print("Failed to create Aimbot Toggle: " .. tostring(aimbotToggleError))
-end
+    end
+})
 
 local fovSize = 150
-local fovSliderSuccess, fovSliderError = pcall(function()
-    CombatTab:CreateSlider({
-        Name = "Aimbot FOV Size",
-        Range = {50, 350},
-        Increment = 1,
-        Suffix = "Units",
-        CurrentValue = 150,
-        Flag = "FOVSlider",
-        Callback = function(Value)
-            fovSize = Value
-        end
-    })
-end)
-
-if not fovSliderSuccess then
-    print("Failed to create FOV Slider: " .. tostring(fovSliderError))
-end
+CombatTab:CreateSlider({
+    Name = "Aimbot FOV Size",
+    Range = {50, 350},
+    Increment = 1,
+    Suffix = "Units",
+    CurrentValue = 150,
+    Flag = "FOVSlider",
+    Callback = function(Value)
+        fovSize = Value
+    end
+})
 
 local hitboxExtenderEnabled = false
-local hitboxSize = 10 -- Virtual hitbox range (10 studs)
-local hitboxToggleSuccess, hitboxToggleError = pcall(function()
-    CombatTab:CreateToggle({
-        Name = "Enable Hitbox Extender",
-        CurrentValue = false,
-        Flag = "HitboxToggle",
-        Callback = function(Value)
-            hitboxExtenderEnabled = Value
-        end
-    })
-end)
-
-if not hitboxToggleSuccess then
-    print("Failed to create Hitbox Extender Toggle: " .. tostring(hitboxToggleError))
-end
+CombatTab:CreateToggle({
+    Name = "Enable Hitbox Extender",
+    CurrentValue = false,
+    Flag = "HitboxToggle",
+    Callback = function(Value)
+        hitboxExtenderEnabled = Value
+    end
+})
 
 -- Visuals Tab
-local VisualsTab
-local VisualsTabSuccess, VisualsTabError = pcall(function()
-    VisualsTab = Window:CreateTab("Visuals")
-end)
-
-if not VisualsTabSuccess or not VisualsTab then
-    print("Failed to create Visuals Tab: " .. tostring(VisualsTabError))
-    return
-end
+local VisualsTab = Window:CreateTab("Visuals")
 
 local espEnabled = false
 local espBoxes = {}
-local espToggleSuccess, espToggleError = pcall(function()
-    VisualsTab:CreateToggle({
-        Name = "Enable ESP",
-        CurrentValue = false,
-        Flag = "ESPToggle",
-        Callback = function(Value)
-            espEnabled = Value
-            if not espEnabled then
-                clearESP()
-            end
+VisualsTab:CreateToggle({
+    Name = "Enable ESP",
+    CurrentValue = false,
+    Flag = "ESPToggle",
+    Callback = function(Value)
+        espEnabled = Value
+        if not espEnabled then
+            clearESP()
         end
-    })
-end)
-
-if not espToggleSuccess then
-    print("Failed to create ESP Toggle: " .. tostring(espToggleError))
-end
-
--- About Me Tab
-local AboutTab
-local AboutTabSuccess, AboutTabError = pcall(function()
-    AboutTab = Window:CreateTab("About Me")
-end)
-
-if not AboutTabSuccess or not AboutTab then
-    print("Failed to create About Me Tab: " .. tostring(AboutTabError))
-else
-    local aboutLabelSuccess, aboutLabelError = pcall(function()
-        AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
-        AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
-        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
-    end)
-    if not aboutLabelSuccess then
-        print("Failed to create About Me Labels: " .. tostring(aboutLabelError))
     end
-end
+})
 
--- ESP Functions (Fixed BoxHandleAdornment Method)
+-- Discord Fix Tab
+local DiscordTab = Window:CreateTab("Discord Fix")
+DiscordTab:CreateButton({
+    Name = "Copy Discord Invite",
+    Callback = function()
+        setclipboard(discordInvite)
+        Rayfield:Notify({
+            Title = "Discord Invite Copied",
+            Content = "Paste this in your browser to join: " .. discordInvite,
+            Duration = 5,
+            Image = "rbxassetid://4483345998"
+        })
+    end
+})
+
+-- ESP Functions
 local function addESP(target, playerName)
-    if not target or not target:FindFirstChild("HumanoidRootPart") then
-        print("No HumanoidRootPart for " .. playerName .. ", skipping ESP")
-        return
-    end
-    if target == player.Character then
-        print("Attempted to add ESP to local player, skipping: " .. playerName)
-        return
-    end
+    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
+    if target == player.Character then return end
     local box = Instance.new("BoxHandleAdornment")
-    box.Size = Vector3.new(4, 6, 4) -- Fixed size to avoid scaling issues
+    box.Size = Vector3.new(4, 6, 4)
     box.Adornee = target:FindFirstChild("HumanoidRootPart")
     box.Color3 = Color3.fromRGB(255, 0, 0)
     box.Transparency = 0.5
@@ -220,9 +150,7 @@ end
 
 local function clearESP()
     for _, box in pairs(espBoxes) do
-        if box then
-            box:Destroy()
-        end
+        if box then box:Destroy() end
     end
     espBoxes = {}
 end
@@ -232,26 +160,11 @@ local function updateESP()
         clearESP()
         return
     end
-
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
-        if v == player then
-            print("Skipping local player in ESP loop: " .. v.Name)
-            continue
-        end
-        if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local playerTeam = player.Team
-            local enemyTeam = v.Team
-            local isEnemy = true
-            if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                print("Skipping teammate in ESP: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")")
-                isEnemy = false
-            elseif not playerTeam or not enemyTeam then
-                print("No teams detected, treating as enemy in ESP: " .. v.Name)
-                isEnemy = true
-            end
+        if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local isEnemy = (player.Team ~= v.Team) or not player.Team or not v.Team
             if isEnemy then
-                print("Adding ESP for enemy: " .. v.Name)
                 addESP(v.Character, v.Name)
             end
         end
@@ -260,119 +173,75 @@ end
 
 for _, v in pairs(game.Players:GetPlayers()) do
     if v ~= player then
-        v.CharacterAdded:Connect(function(char)
-            if espEnabled then
-                updateESP()
-            end
+        v.CharacterAdded:Connect(function()
+            if espEnabled then updateESP() end
         end)
     end
 end
 
 game.Players.PlayerAdded:Connect(function(newPlayer)
-    newPlayer.CharacterAdded:Connect(function(char)
-        if espEnabled then
-            updateESP()
-        end
+    newPlayer.CharacterAdded:Connect(function()
+        if espEnabled then updateESP() end
     end)
 end)
 
--- Hitbox Extender Logic (Using FireServer Hook, No Physical Parts)
-local originalFireServer
+-- Hitbox Extender Logic
 local hooked = false
-
+local originalFireServer
 local function hookFireServer()
     if hooked then return end
     local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
     if remotes then
         local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit") or remotes:FindFirstChild("Bullet")
         if shootEvent then
-            print("Found shoot event: " .. shootEvent.Name)
             originalFireServer = shootEvent.FireServer
             shootEvent.FireServer = function(self, targetPos, ...)
                 if hitboxExtenderEnabled then
-                    local closestEnemy = nil
-                    local shortestDist = hitboxSize
+                    local closestEnemy, shortestDist = nil, 10
                     for _, enemy in pairs(game.Players:GetPlayers()) do
-                        if enemy == player then continue end
-                        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
-                            local playerTeam = player.Team
-                            local enemyTeam = enemy.Team
-                            local isEnemy = true
-                            if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                                isEnemy = false
-                            elseif not playerTeam or not enemyTeam then
-                                isEnemy = true
-                            end
+                        if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
+                            local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
                             if isEnemy then
-                                local head = enemy.Character.Head
-                                local dist = (head.Position - targetPos).Magnitude
+                                local dist = (enemy.Character.Head.Position - targetPos).Magnitude
                                 if dist < shortestDist then
                                     shortestDist = dist
-                                    closestEnemy = head
+                                    closestEnemy = enemy.Character.Head
                                 end
                             end
                         end
                     end
-                    if closestEnemy then
-                        print("Hitbox extender redirected shot to: " .. closestEnemy.Parent.Name)
-                        targetPos = closestEnemy.Position
-                    end
+                    if closestEnemy then targetPos = closestEnemy.Position end
                 end
                 return originalFireServer(self, targetPos, ...)
             end
             hooked = true
-        else
-            print("Could not find shoot event in ReplicatedStorage")
         end
-    else
-        print("Could not find Events or Remotes in ReplicatedStorage")
     end
 end
 
 -- Main Loop
 runService.RenderStepped:Connect(function()
-    -- ESP Update
-    if espEnabled then
-        updateESP()
-    else
-        clearESP()
-    end
-
-    -- Hook FireServer for hitbox extender
-    if hitboxExtenderEnabled then
-        hookFireServer()
-    end
+    if espEnabled then updateESP() else clearESP() end
+    if hitboxExtenderEnabled then hookFireServer() end
 end)
 
--- Aimbot Logic (Skip Dead Players, No Confusion in Crowds)
+-- Aimbot Logic
 local target = nil
 local locked = false
 
 local function findNewTarget()
-    local closest = nil
-    local shortestDist = math.huge
+    local closest, shortestDist = nil, math.huge
     local cursorPos = Vector2.new(mouse.X, mouse.Y)
-
     for _, enemy in pairs(game.Players:GetPlayers()) do
-        if enemy == player then continue end
-        if enemy.Character then
+        if enemy ~= player and enemy.Character then
             local head = enemy.Character:FindFirstChild("Head")
             local humanoid = enemy.Character:FindFirstChild("Humanoid")
-            -- Stricter check: ensure both head and humanoid exist, and health is greater than 0
-            if head and humanoid and humanoid.Health > 0 then
-                local playerTeam = player.Team
-                local enemyTeam = enemy.Team
-                local isEnemy = true
-                if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                    isEnemy = false
-                elseif not playerTeam or not enemyTeam then
-                    isEnemy = true
-                end
+            if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+                local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
                 if isEnemy then
                     local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
                     if onScreen then
-                        local screenPos2D = Vector2.new(screenPos.X, screenPos.Y)
-                        local dist = (screenPos2D - cursorPos).Magnitude
+                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
                         if dist < fovSize and dist < shortestDist then
                             shortestDist = dist
                             closest = head
@@ -382,7 +251,6 @@ local function findNewTarget()
             end
         end
     end
-
     return closest
 end
 
@@ -391,38 +259,41 @@ mouse.Button2Down:Connect(function()
     target = findNewTarget()
     if target then
         locked = true
+        print("Locked onto: " .. target.Parent.Name)
+    else
+        print("No target found")
     end
 end)
 
 mouse.Button2Up:Connect(function()
     locked = false
     target = nil
+    print("Aimbot unlocked")
+    -- Snap camera to neutral on release
+    local currentCFrame = camera.CFrame
+    local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
+    camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
 end)
 
 runService.RenderStepped:Connect(function()
     if aimbotEnabled and locked then
-        -- Double-check if the target is still valid and alive
-        if not target or not target.Parent then
+        if not target or not target.Parent or not target.Parent:FindFirstChild("Humanoid") or target.Parent.Humanoid.Health <= 0 or target.Parent.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
+            print("Target invalid: " .. (target and target.Parent.Name or "nil"))
             target = findNewTarget()
             if not target then
                 locked = false
+                print("No target, snapping camera")
+                local currentCFrame = camera.CFrame
+                local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
+                camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
                 return
             end
+            print("New target: " .. target.Parent.Name)
         end
-
-        local humanoid = target.Parent:FindFirstChild("Humanoid")
-        if not humanoid or humanoid.Health <= 0 then
-            target = findNewTarget()
-            if not target then
-                locked = false
-                return
-            end
-        end
-
         local currentCFrame = camera.CFrame
         local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
-        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8) -- Sharper turn
+        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
     end
 end)
 
-print("This script is licensed under the GNU General Public License v3.0 Copyright (C) 2025 d4mage1 You can use, modify, and share this script as long as you keep it open-source and give credit.")
+print("Script updated to v1.1 by d4mage1 - Fixed aimbot looking down and added Discord button.")
