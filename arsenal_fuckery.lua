@@ -29,8 +29,8 @@ local success, err = pcall(function()
 
     -- Load Rayfield UI Library
     local Rayfield
-    local rayfieldUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source"
-    local rayfieldFallbackUrl = "https://sirius.menu/rayfield"
+    local rayfieldUrl = "https://sirius.menu/rayfield" -- Updated URL, might work in April 2025
+    local rayfieldFallbackUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source" 
     local rawScript
 
     success, err = pcall(function()
@@ -43,15 +43,23 @@ local success, err = pcall(function()
         end)
         if not success then
             warn("Failed to load Rayfield from fallback URL: " .. tostring(err))
-            return
+            rawScript = nil
         end
     end
 
-    success, err = pcall(function()
-        Rayfield = loadstring(rawScript)()
-    end)
-    if not success or not Rayfield then
-        warn("Failed to initialize Rayfield: " .. tostring(err))
+    if rawScript then
+        success, err = pcall(function()
+            Rayfield = loadstring(rawScript)
+            if Rayfield then
+                Rayfield = Rayfield()
+            end
+        end)
+        if not success or not Rayfield then
+            warn("Failed to initialize Rayfield: " .. tostring(err))
+            return
+        end
+    else
+        warn("No Rayfield script loaded. Arsenal script cannot create UI.")
         return
     end
 
