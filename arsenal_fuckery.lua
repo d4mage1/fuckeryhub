@@ -4,12 +4,16 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
- __  __       _        ______   ______   __   __       _        ______   _    _       ______   __     __  _____   ______   ______   ______   ______  
-|  \/  |     (_)      |  ____| |  __ \  \ \ / /      (_)      |  ____| | |  | |     |  ____|  \ \   / / |  __ \ |  __ \ |  __ \ |  __ \ |  ____| 
-| \  / | __ _ _  ___  | |__    | |  | |  \ V /  __ _ _  ___  | |__    | |__| |     | |__  _  \ \_/ /  | |  | || |  | || |  | || |  | || |__   
-| |\/| |/ _` | |/ _ \ |  __|   | |  | |   > <  / _` | |/ _ \ |  __|   |  __  |     |  __|| |  \   /   | |  | || |  | || |  | || |  | ||  __|  
-| |  | | (_| | |  __/ | |      | |__| |  / . \ | (_| | |  __/ | |      | |  | |     | |   | |   | |    | |__| || |__| || |__| || |__| || |____ 
-|_|  |_|__,_|_|_|___| |_|      |_____/  /_/ \_\__,_|_|_|___| |_|      |_|  |_|     |_|   |_|   |_|    |_____/ |_____/ |_____/ |_____/ |______|
+
+  __  __            _____   ______     ____ __     __    _____   _  _    __  __            _____  ______  __ 
+ |  \/  |    /\    |  __ \ |  ____|   |  _ \\ \   / /   |  __ \ | || |  |  \/  |    /\    / ____||  ____|/_ |
+ | \  / |   /  \   | |  | || |__      | |_) |\ \_/ /    | |  | || || |_ | \  / |   /  \  | |  __ | |__    | |
+ | |\/| |  / /\ \  | |  | ||  __|     |  _ <  \   /     | |  | ||__   _|| |\/| |  / /\ \ | | |_ ||  __|   | |
+ | |  | | / ____ \ | |__| || |____    | |_) |  | |      | |__| |   | |  | |  | | / ____ \| |__| || |____  | |
+ |_|  |_|/_/    \_\|_____/ |______|   |____/   |_|      |_____/    |_|  |_|  |_|/_/    \_\\_____||______| |_|
+                                                                                                             
+                                                                                                             
+
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -90,7 +94,7 @@ game.StarterGui:SetCore("SendNotification", {
 
 -- Combat Tab
 local CombatTabSuccess, CombatTab = pcall(function()
-    return Window:CreateTab("Combat", "rbxassetid://4483362458")
+    return Window:CreateTab("Combat", "") -- Removed the icon
 end)
 
 if not CombatTabSuccess or not CombatTab then
@@ -155,7 +159,7 @@ end
 
 -- Visuals Tab
 local VisualsTabSuccess, VisualsTab = pcall(function()
-    return Window:CreateTab("Visuals", "rbxassetid://4483362458")
+    return Window:CreateTab("Visuals", "") -- Removed the icon
 end)
 
 if not VisualsTabSuccess or not VisualsTab then
@@ -200,12 +204,12 @@ end
 
 -- Suggest Tab
 local SuggestTabSuccess, SuggestTab = pcall(function()
-    return Window:CreateTab("Suggest", "rbxassetid://4483362458")
+    return Window:CreateTab("Suggest", "") -- Removed the icon
 end)
 
 if not SuggestTabSuccess or not SuggestTab then
     warn("Failed to create Suggest Tab.")
-    game.StarterGui:Set禁止:SendNotification({
+    game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
         Text = "Couldn't create Suggest Tab, cuhh.",
         Duration = 5
