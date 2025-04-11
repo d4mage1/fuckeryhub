@@ -659,7 +659,7 @@ aimbotToggle.MouseButton1Click:Connect(function()
 end)
 
 local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq"
-local cooldown = 30
+local cooldown = 10
 local lastSubmit = 0
 local blockedWords = {"nigger", "slur", "@everyone", "@here", "nigga", "kys"}
 
