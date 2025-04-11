@@ -4,7 +4,6 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
- _____ ______   ________  ________  _______           ________      ___    ___      ________  ___   ___  _____ ______   ________  ________  _______      
 |\   _ \  _   \|\   __  \|\   ___ \|\  ___ \         |\   __  \    |\  \  /  /|    |\   ___ \|\  \ |\  \|\   _ \  _   \|\   __  \|\   ____\|\  ___ \     
 \ \  \\\__\ \  \ \  \|\  \ \  \_|\ \ \   __/|        \ \  \|\ /_   \ \  \/  / /    \ \  \_|\ \ \  \\_\  \ \  \\\__\ \  \ \  \|\  \ \  \___|\ \   __/|    
  \ \  \\|__| \  \ \   __  \ \  \ \\ \ \  \_|/__       \ \   __  \   \ \    / /      \ \  \ \\ \ \______  \ \  \\|__| \  \ \   __  \ \  \  __\ \  \_|/__  
@@ -12,7 +11,6 @@ print([[
    \ \__\    \ \__\ \__\ \__\ \_______\ \_______\       \ \_______\__/  / /           \ \_______\     \ \__\ \__\    \ \__\ \__\ \__\ \_______\ \_______\
     \|__|     \|__|\|__|\|__|\|_______|\|_______|        \|_______|\___/ /             \|_______|      \|__|\|__|     \|__|\|__|\|__|\|_______|\|_______|
                                                                   \|___|/                                                                                
-                                                                                                                                                    
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -523,13 +521,11 @@ local function updateESP()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor or player.Team
-                local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor or v.Team
+                local playerTeam = player.Team
+                local enemyTeam = v.Team
                 local isEnemy = true
-                if playerTeam and enemyTeam then
-                    if playerTeam == enemyTeam then
-                        isEnemy = false
-                    end
+                if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                    isEnemy = false
                 end
                 if isEnemy then
                     addESP(v.Character)
@@ -568,6 +564,7 @@ end)
 local aimEnabled = false
 local target = nil
 local locked = false
+local lastLookVector = camera.CFrame.LookVector
 
 mouse.Button2Down:Connect(function()
     if aimEnabled then
@@ -577,13 +574,11 @@ mouse.Button2Down:Connect(function()
 
         for _, enemy in pairs(game.Players:GetPlayers()) do
             if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
-                local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor or player.Team
-                local enemyTeam = enemy:FindFirstChild("TeamColor") and enemy.TeamColor or enemy.Team
+                local playerTeam = player.Team
+                local enemyTeam = enemy.Team
                 local isEnemy = true
-                if playerTeam and enemyTeam then
-                    if playerTeam == enemyTeam then
-                        isEnemy = false
-                    end
+                if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                    isEnemy = false
                 end
                 if isEnemy then
                     local head = enemy.Character.Head
@@ -609,12 +604,14 @@ mouse.Button2Up:Connect(function()
     locked = false
     target = nil
     local camPos = camera.CFrame.Position
-    local lookVector = camera.CFrame.LookVector
-    local newLookAt = camPos + (lookVector * 100)
+    local newLookAt = camPos + (lastLookVector * 100)
     camera.CFrame = CFrame.new(camPos, newLookAt)
 end)
 
 runService.RenderStepped:Connect(function()
+    if not locked then
+        lastLookVector = camera.CFrame.LookVector
+    end
     if aimEnabled and locked and target and target.Parent then
         camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
         local char = player.Character
@@ -638,8 +635,7 @@ runService.RenderStepped:Connect(function()
             locked = false
             target = nil
             local camPos = camera.CFrame.Position
-            local lookVector = camera.CFrame.LookVector
-            local newLookAt = camPos + (lookVector * 100)
+            local newLookAt = camPos + (lastLookVector * 100)
             camera.CFrame = CFrame.new(camPos, newLookAt)
         end
     end
@@ -659,7 +655,7 @@ aimbotToggle.MouseButton1Click:Connect(function()
 end)
 
 local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq"
-local cooldown = 10
+local cooldown = 30
 local lastSubmit = 0
 local blockedWords = {"nigger", "slur", "@everyone", "@here", "nigga", "kys"}
 
@@ -714,14 +710,14 @@ sendButton.MouseButton1Click:Connect(function()
         lastSubmit = currentTime
         game.StarterGui:SetCore("SendNotification", {
             Title = "Success",
-            Text = "Suggestion sent!",
+            Text = "Suggestion sent successfully!",
             Duration = 3
         })
     else
         game.StarterGui:SetCore("SendNotification", {
             Title = "Error",
-            Text = "Failed to send suggestion.",
-            Duration = 3
+            Text = "Failed to send suggestion: " .. tostring(err),
+            Duration = 5
         })
     end
 end)
