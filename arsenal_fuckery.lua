@@ -4,14 +4,14 @@ print("     FUCKERY HUB LOADED - LET'S GO!  ")
 print("=====================================")
 print(" ")
 print([[
-  __  __            _____   ______     ____ __     __    _____   _  _    __  __            _____  ______  __ 
- |  \/  |    /\    |  __ \ |  ____|   |  _ \\ \   / /   |  __ \ | || |  |  \/  |    /\    / ____||  ____|/_ |
- | \  / |   /  \   | |  | || |__      | |_) |\ \_/ /    | |  | || || |_ | \  / |   /  \  | |  __ | |__    | |
- | |\/| |  / /\ \  | |  | ||  __|     |  _ <  \   /     | |  | ||__   _|| |\/| |  / /\ \ | | |_ ||  __|   | |
- | |  | | / ____ \ | |__| || |____    | |_) |  | |      | |__| |   | |  | |  | | / ____ \| |__| || |____  | |
- |_|  |_|/_/    \_\|_____/ |______|   |____/   |_|      |_____/    |_|  |_|  |_|/_/    \_\\_____||______| |_|
-                                                                                                             
-                                                                                                             
+                      _         _                  _ _  _                             __ 
+                     | |       | |                | | || |                           /_ |
+  _ __ ___   __ _  __| | ___   | |__  _   _     __| | || |_ _ __ ___   __ _  __ _  ___| |
+ | '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |   / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
+ | | | | | | (_| | (_| |  __/  | |_) | |_| |  | (_| |  | | | | | | | | (_| | (_| |  __/ |
+ |_| |_| |_|\__,_|\__,_|\___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
+                                       __/ |                                 __/ |       
+                                      |___/                                 |___/        
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -177,7 +177,6 @@ end
 
 local hitboxExtenderEnabled = false
 local hitboxSize = 5
-local hitboxParts = {} -- Store custom hitbox parts
 local hitboxToggleSuccess, hitboxToggleError = pcall(function()
     CombatTab:CreateToggle({
         Name = "Enable Hitbox Extender",
@@ -190,15 +189,6 @@ local hitboxToggleSuccess, hitboxToggleError = pcall(function()
                 Content = hitboxExtenderEnabled and "Hitbox extender enabled, cuhh!" or "Hitbox extender disabled, cuhh!",
                 Duration = 3
             })
-            if not hitboxExtenderEnabled then
-                -- Clean up custom hitbox parts
-                for _, part in pairs(hitboxParts) do
-                    if part then
-                        part:Destroy()
-                    end
-                end
-                hitboxParts = {}
-            end
         end
     })
 end)
@@ -215,7 +205,7 @@ end
 local hitboxSliderSuccess, hitboxSliderError = pcall(function()
     CombatTab:CreateSlider({
         Name = "Hitbox Size",
-        Range = {2, 10}, -- Reduced max size to prevent freezing
+        Range = {2, 10},
         Increment = 1,
         Suffix = "Studs",
         CurrentValue = 5,
@@ -257,7 +247,7 @@ if not VisualsTabSuccess or not VisualsTab then
 end
 
 local espEnabled = false
-local espBoxes = {}
+local espLabels = {} -- Store BillboardGui labels
 local espToggleSuccess, espToggleError = pcall(function()
     VisualsTab:CreateToggle({
         Name = "Enable ESP",
@@ -303,9 +293,9 @@ else
     local aboutLabelSuccess, aboutLabelError = pcall(function()
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
         AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
-        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
+        AboutTab:CreateLabel("Shoutout to my friends for testing this out—y'all the real MVPs.")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 12th 2025")
     end)
     if not aboutLabelSuccess then
         warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
@@ -357,14 +347,7 @@ else
                         return
                     end
 
-                    local tabList = window:FindFirstChild("TabList")
-                    local content = window:FindFirstChild("Content")
-                    if not tabList or not content then
-                        warn("TabList or Content not found in Window")
-                        return
-                    end
-
-                    -- Function to recursively change colors
+                    -- Recursive function to change colors
                     local function updateColors(obj, bgColor, textColor, buttonColor)
                         if obj:IsA("Frame") or obj:IsA("ScrollingFrame") then
                             obj.BackgroundColor3 = bgColor
@@ -406,7 +389,7 @@ else
                 if not success then
                     Rayfield:Notify({
                         Title = "Error",
-                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh.",
+                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh. Switching to basic GUI next update if this keeps happening.",
                         Duration = 5
                     })
                 end
@@ -423,31 +406,37 @@ else
     end
 end
 
--- ESP Functions
+-- ESP Functions (New Method: BillboardGui)
 local function addESP(target, playerName)
-    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
+    if not target or not target:FindFirstChild("Head") then return end
     if target == player.Character then
         print("Attempted to add ESP to local player, skipping: " .. playerName)
         return
     end
-    local box = Instance.new("BoxHandleAdornment")
-    box.Size = target:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
-    box.Adornee = target
-    box.Color3 = Color3.fromRGB(255, 0, 0)
-    box.Transparency = 0.5
-    box.AlwaysOnTop = true
-    box.ZIndex = 10
-    box.Parent = target
-    table.insert(espBoxes, box)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP"
+    billboard.Adornee = target:FindFirstChild("Head")
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = playerName
+    label.TextColor3 = Color3.fromRGB(255, 0, 0)
+    label.TextScaled = true
+    label.Parent = billboard
+    billboard.Parent = target
+    table.insert(espLabels, billboard)
 end
 
 local function clearESP()
-    for _, box in pairs(espBoxes) do
-        if box then
-            box:Destroy()
+    for _, label in pairs(espLabels) do
+        if label then
+            label:Destroy()
         end
     end
-    espBoxes = {}
+    espLabels = {}
 end
 
 local function updateESP()
@@ -499,24 +488,52 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Hitbox Extender Logic (Using Custom Parts)
-local function createHitboxPart(character)
-    if not character or not character:FindFirstChild("Head") then return end
-    local head = character.Head
-    local hitboxPart = Instance.new("Part")
-    hitboxPart.Name = "ExtendedHitbox"
-    hitboxPart.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-    hitboxPart.Transparency = 0.7
-    hitboxPart.CanCollide = false
-    hitboxPart.Anchored = false
-    hitboxPart.Position = head.Position
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = head
-    weld.Part1 = hitboxPart
-    weld.Parent = hitboxPart
-    hitboxPart.Parent = character
-    table.insert(hitboxParts, hitboxPart)
-    return hitboxPart
+-- Hitbox Extender Logic (New Method: Modify Hit Detection)
+local originalFireServer
+local hooked = false
+
+local function hookFireServer()
+    if hooked then return end
+    local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
+    if remotes then
+        local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire")
+        if shootEvent then
+            originalFireServer = shootEvent.FireServer
+            shootEvent.FireServer = function(self, targetPos, ...)
+                if hitboxExtenderEnabled then
+                    -- Find the closest enemy within hitboxSize range
+                    local closestEnemy = nil
+                    local shortestDist = hitboxSize
+                    for _, enemy in pairs(game.Players:GetPlayers()) do
+                        if enemy == player then continue end
+                        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
+                            local playerTeam = player.Team
+                            local enemyTeam = enemy.Team
+                            local isEnemy = true
+                            if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                                isEnemy = false
+                            elseif not playerTeam or not enemyTeam then
+                                isEnemy = true
+                            end
+                            if isEnemy then
+                                local head = enemy.Character.Head
+                                local dist = (head.Position - targetPos).Magnitude
+                                if dist < shortestDist then
+                                    shortestDist = dist
+                                    closestEnemy = head
+                                end
+                            end
+                        end
+                    end
+                    if closestEnemy then
+                        targetPos = closestEnemy.Position
+                    end
+                end
+                return originalFireServer(self, targetPos, ...)
+            end
+            hooked = true
+        end
+    end
 end
 
 -- Main Loop
@@ -528,18 +545,9 @@ runService.RenderStepped:Connect(function()
         clearESP()
     end
 
-    -- Hitbox Extender Update
+    -- Hook FireServer for hitbox extender
     if hitboxExtenderEnabled then
-        for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
-                local existingHitbox = enemy.Character:FindFirstChild("ExtendedHitbox")
-                if not existingHitbox then
-                    createHitboxPart(enemy.Character)
-                else
-                    existingHitbox.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-                end
-            end
-        end
+        hookFireServer()
     end
 end)
 
@@ -609,7 +617,6 @@ runService.RenderStepped:Connect(function()
         if char then
             local tool = char:FindFirstChildOfClass("Tool")
             if tool then
-                -- Arsenal-specific firing logic
                 local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
                 if remotes then
                     local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire")
@@ -625,7 +632,7 @@ runService.RenderStepped:Connect(function()
             target = nil
             local camPos = camera.CFrame.Position
             local newLookAt = camPos + (lastLookVector * 100)
-            camera.CFrame = CFrame.new(camPos, newLookAt)
+            camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(currentCFrame, 0.5) -- Smooth reset
         end
     end
 end)
