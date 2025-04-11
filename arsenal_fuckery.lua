@@ -66,8 +66,8 @@ local WindowSuccess, Window = pcall(function()
         },
         Discord = {
             Enabled = true,
-            Invite = discordInvite, -- Your Discord invite link
-            RememberJoins = true -- Remember if the user has joined
+            Invite = discordInvite,
+            RememberJoins = true
         },
         KeySystem = false
     })
@@ -135,7 +135,7 @@ end
 local fovSize = 150
 local fovSliderSuccess, fovSliderError = pcall(function()
     CombatTab:CreateSlider({
-        Name = "FOV Size",
+        Name = "Aimbot FOV Size",
         Range = {50, 350},
         Increment = 1,
         Suffix = "Units",
@@ -144,8 +144,8 @@ local fovSliderSuccess, fovSliderError = pcall(function()
         Callback = function(Value)
             fovSize = Value
             Rayfield:Notify({
-                Title = "FOV Size",
-                Content = "Set FOV to " .. Value .. " units, cuhh!",
+                Title = "Aimbot FOV Size",
+                Content = "Set aimbot FOV to " .. Value .. " units, cuhh!",
                 Duration = 3
             })
         end
@@ -157,6 +157,75 @@ if not fovSliderSuccess then
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
         Text = "Couldn't create FOV Slider: " .. tostring(fovSliderError) .. ", cuhh.",
+        Duration = 5
+    })
+end
+
+local hitboxExtenderEnabled = false
+local hitboxSize = 5
+local originalHitboxSizes = {} -- Store original hitbox sizes to restore them
+local hitboxToggleSuccess, hitboxToggleError = pcall(function()
+    CombatTab:CreateToggle({
+        Name = "Enable Hitbox Extender",
+        CurrentValue = false,
+        Flag = "HitboxToggle",
+        Callback = function(Value)
+            hitboxExtenderEnabled = Value
+            Rayfield:Notify({
+                Title = "Hitbox Extender",
+                Content = hitboxExtenderEnabled and "Hitbox extender enabled, cuhh!" or "Hitbox extender disabled, cuhh!",
+                Duration = 3
+            })
+            if not hitboxExtenderEnabled then
+                -- Restore original hitbox sizes
+                for _, enemy in pairs(game.Players:GetPlayers()) do
+                    if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
+                        local head = enemy.Character.Head
+                        if originalHitboxSizes[enemy] then
+                            head.Size = originalHitboxSizes[enemy]
+                            head.Transparency = 0
+                        end
+                    end
+                end
+                originalHitboxSizes = {}
+            end
+        end
+    })
+end)
+
+if not hitboxToggleSuccess then
+    warn("Failed to create Hitbox Extender Toggle: " .. tostring(hitboxToggleError))
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Hitbox Extender Toggle: " .. tostring(hitboxToggleError) .. ", cuhh.",
+        Duration = 5
+    })
+end
+
+local hitboxSliderSuccess, hitboxSliderError = pcall(function()
+    CombatTab:CreateSlider({
+        Name = "Hitbox Size",
+        Range = {2, 20},
+        Increment = 1,
+        Suffix = "Studs",
+        CurrentValue = 5,
+        Flag = "HitboxSlider",
+        Callback = function(Value)
+            hitboxSize = Value
+            Rayfield:Notify({
+                Title = "Hitbox Size",
+                Content = "Set hitbox size to " .. Value .. " studs, cuhh!",
+                Duration = 3
+            })
+        end
+    })
+end)
+
+if not hitboxSliderSuccess then
+    warn("Failed to create Hitbox Size Slider: " .. tostring(hitboxSliderError))
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Error",
+        Text = "Couldn't create Hitbox Size Slider: " .. tostring(hitboxSliderError) .. ", cuhh.",
         Duration = 5
     })
 end
@@ -224,9 +293,9 @@ else
     local aboutLabelSuccess, aboutLabelError = pcall(function()
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
         AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
-        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
+        AboutTab:CreateLabel("Shoutout to my friends for testing this out—y'all the real MVPs.")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 12th 2025")
     end)
     if not aboutLabelSuccess then
         warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
@@ -259,30 +328,67 @@ else
             CurrentOption = "Dark",
             Flag = "ThemeDropdown",
             Callback = function(Option)
-                -- Find the Rayfield GUI elements to change colors
                 local success, err = pcall(function()
                     local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
-                    if not gui then return end
+                    if not gui then
+                        warn("Rayfield GUI not found in CoreGui")
+                        return
+                    end
 
-                    local mainFrame = gui:FindFirstChild("Main", true)
-                    if not mainFrame then return end
+                    -- Debug: Print the GUI hierarchy to find the right elements
+                    local function printHierarchy(obj, indent)
+                        indent = indent or 0
+                        local indentStr = string.rep("  ", indent)
+                        print(indentStr .. obj.Name .. " (" .. obj.ClassName .. ")")
+                        for _, child in pairs(obj:GetChildren()) do
+                            printHierarchy(child, indent + 1)
+                        end
+                    end
+                    print("Rayfield GUI Hierarchy:")
+                    printHierarchy(gui)
 
-                    local tabs = mainFrame:FindFirstChild("Tabs", true)
-                    local elements = mainFrame:FindFirstChild("Elements", true)
+                    -- Find the main frame (usually named "Interface")
+                    local interface = gui:FindFirstChild("Interface")
+                    if not interface then
+                        warn("Interface not found in Rayfield GUI")
+                        return
+                    end
+
+                    -- Find the main container (usually named "Window")
+                    local window = interface:FindFirstChild("Window")
+                    if not window then
+                        warn("Window not found in Interface")
+                        return
+                    end
+
+                    -- Find the tab list and content container
+                    local tabList = window:FindFirstChild("TabList")
+                    local content = window:FindFirstChild("Content")
+                    if not tabList or not content then
+                        warn("TabList or Content not found in Window")
+                        return
+                    end
 
                     if Option == "Dark" then
-                        if mainFrame then
-                            mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+                        if window then
+                            window.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
                         end
-                        if tabs then
-                            for _, tab in pairs(tabs:GetChildren()) do
+                        if tabList then
+                            for _, tab in pairs(tabList:GetChildren()) do
                                 if tab:IsA("Frame") then
                                     tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
+                                    if tabText then
+                                        tabText.TextColor3 = Color3.fromRGB(255, 255, 255)
+                                    end
                                 end
                             end
                         end
-                        if elements then
-                            for _, element in pairs(elements:GetDescendants()) do
+                        if content then
+                            for _, element in pairs(content:GetDescendants()) do
+                                if element:IsA("Frame") then
+                                    element.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                                end
                                 if element:IsA("TextLabel") or element:IsA("TextButton") then
                                     element.TextColor3 = Color3.fromRGB(255, 255, 255)
                                     if element:IsA("TextButton") then
@@ -297,19 +403,28 @@ else
                             Duration = 3
                         })
                     elseif Option == "Light" then
-                        if mainFrame then
-                            mainFrame.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Light background
+                        if window then
+                            window.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Light background
                         end
-                        if tabs then
-                            for _, tab in pairs(tabs:GetChildren()) do
+                        if tabList then
+                            for _, tab in pairs(tabList:GetChildren()) do
                                 if tab:IsA("Frame") then
                                     tab.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
+                                    if tabText then
+                                        tabText.TextColor3 = Color3.fromRGB(0, 0, 0)
+                                    end
                                 end
                             end
                         end
-                        if elements then
-                            for _, element in pairs(elements:GetDescendants()) do
-                                if element:IsA("TextLabel") or element:IsA("TextButton") then
+                        if content then
+                            for _, element in pairs(content:GetDescendants()) do
+                                if element:IsA("Frame") then
+                                    element.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
+                                end
+                                if element:Is
+
+A("TextLabel") or element:IsA("TextButton") then
                                     element.TextColor3 = Color3.fromRGB(0, 0, 0)
                                     if element:IsA("TextButton") then
                                         element.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
@@ -323,18 +438,25 @@ else
                             Duration = 3
                         })
                     elseif Option == "Fuckery" then
-                        if mainFrame then
-                            mainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0) -- Dark red background
+                        if window then
+                            window.BackgroundColor3 = Color3.fromRGB(20, 0, 0) -- Dark red background
                         end
-                        if tabs then
-                            for _, tab in pairs(tabs:GetChildren()) do
+                        if tabList then
+                            for _, tab in pairs(tabList:GetChildren()) do
                                 if tab:IsA("Frame") then
                                     tab.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+                                    local tabText = tab:FindFirstChildWhichIsA("TextLabel")
+                                    if tabText then
+                                        tabText.TextColor3 = Color3.fromRGB(255, 0, 0)
+                                    end
                                 end
                             end
                         end
-                        if elements then
-                            for _, element in pairs(elements:GetDescendants()) do
+                        if content then
+                            for _, element in pairs(content:GetDescendants()) do
+                                if element:IsA("Frame") then
+                                    element.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+                                end
                                 if element:IsA("TextLabel") or element:IsA("TextButton") then
                                     element.TextColor3 = Color3.fromRGB(255, 0, 0)
                                     if element:IsA("TextButton") then
@@ -372,17 +494,16 @@ end
 
 -- ESP Functions
 local function addESP(target)
-    if target and target:FindFirstChild("HumanoidRootPart") then
-        local box = Instance.new("BoxHandleAdornment")
-        box.Size = target:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
-        box.Adornee = target
-        box.Color3 = Color3.fromRGB(255, 0, 0)
-        box.Transparency = 0.5
-        box.AlwaysOnTop = true
-        box.ZIndex = 10
-        box.Parent = target
-        table.insert(espBoxes, box)
-    end
+    if not target or not target:FindFirstChild("HumanoidRootPart") then return end
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = target:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
+    box.Adornee = target
+    box.Color3 = Color3.fromRGB(255, 0, 0)
+    box.Transparency = 0.5
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Parent = target
+    table.insert(espBoxes, box)
 end
 
 local function clearESP()
@@ -403,20 +524,22 @@ local function updateESP()
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
         if v == player then
-            continue -- Explicitly skip the local player
+            print("Skipping local player: " .. v.Name) -- Debug
+            continue
         end
         if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
             local playerTeam = player.Team
             local enemyTeam = v.Team
             local isEnemy = true
-            -- Handle Arsenal's team system (sometimes teams are nil in FFA modes)
             if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                isEnemy = false -- Skip teammates
+                print("Skipping teammate: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")") -- Debug
+                isEnemy = false
             elseif not playerTeam or not enemyTeam then
-                -- If teams are nil (FFA mode), treat everyone as an enemy except the local player
+                print("No teams detected, treating as enemy: " .. v.Name) -- Debug
                 isEnemy = true
             end
             if isEnemy then
+                print("Adding ESP for enemy: " .. v.Name) -- Debug
                 addESP(v.Character)
             end
         end
@@ -447,12 +570,34 @@ runService.RenderStepped:Connect(function()
     else
         clearESP()
     end
+
+    -- Hitbox Extender Logic
+    if hitboxExtenderEnabled then
+        for _, enemy in pairs(game.Players:GetPlayers()) do
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
+                local head = enemy.Character.Head
+                if not originalHitboxSizes[enemy] then
+                    originalHitboxSizes[enemy] = head.Size
+                end
+                head.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+                head.Transparency = 0.5 -- Make it slightly visible for fun
+            end
+        end
+    end
 end)
 
 -- Aimbot Logic
 local target = nil
 local locked = false
 local lastLookVector = camera.CFrame.LookVector
+
+local function isVisible(targetPos)
+    local origin = camera.CFrame.Position
+    local direction = (target Pos - origin).Unit * 500
+    local ray = Ray.new(origin, direction)
+    local hit, pos = game.Workspace:FindPartOnRayWithIgnoreList(ray, {player.Character or {}})
+    return hit == nil or (pos - targetPos).Magnitude < 1
+end
 
 mouse.Button2Down:Connect(function()
     if not aimbotEnabled then return end
@@ -475,7 +620,7 @@ mouse.Button2Down:Connect(function()
             if isEnemy then
                 local head = enemy.Character.Head
                 local dist = (head.Position - mousePos).Magnitude
-                if dist < fovSize and dist < shortestDist then
+                if dist < fovSize and dist < shortestDist and isVisible(head.Position) then
                     shortestDist = dist
                     closest = head
                 end
@@ -502,7 +647,11 @@ runService.RenderStepped:Connect(function()
         lastLookVector = camera.CFrame.LookVector
     end
     if aimbotEnabled and locked and target and target.Parent then
-        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
+        -- Smooth aiming
+        local currentCFrame = camera.CFrame
+        local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
+        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2) -- Smooth transition
+
         local char = player.Character
         if char then
             local tool = char:FindFirstChildOfClass("Tool")
