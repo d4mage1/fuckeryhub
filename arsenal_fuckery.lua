@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.0 - Arsenal Edition")
+print("Version: 2.1 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -29,8 +29,8 @@ local success, err = pcall(function()
 
     -- Load Rayfield UI Library
     local Rayfield
-    local rayfieldUrl = "https://sirius.menu/rayfield"
-    local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source"
+    local rayfieldUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source"
+    local rayfieldFallbackUrl = "https://sirius.menu/rayfield"
     local rawScript
 
     success, err = pcall(function()
