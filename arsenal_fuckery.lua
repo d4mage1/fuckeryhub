@@ -42,12 +42,7 @@ if not success then
         rawScript = game:HttpGet(rayfieldFallbackUrl)
     end)
     if not success then
-        warn("Failed to fetch Rayfield from fallback URL: " .. tostring(errorMsg))
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Couldn't fetch Rayfield UI library. Error: " .. tostring(errorMsg) .. ". Try a different executor or check your internet, cuhh.",
-            Duration = 10
-        })
+        print("Failed to fetch Rayfield from fallback URL: " .. tostring(errorMsg))
         return
     end
 end
@@ -57,17 +52,12 @@ success, errorMsg = pcall(function()
 end)
 
 if not success or not Rayfield then
-    warn("Failed to load Rayfield UI Library: " .. tostring(errorMsg))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't load Rayfield UI. Error: " .. tostring(errorMsg) .. ". The Rayfield library might be down or broken, cuhh. Try a different executor or wait a bit.",
-        Duration = 10
-    })
+    print("Failed to load Rayfield UI Library: " .. tostring(errorMsg))
     return
 end
 
 -- Create Rayfield Window with Discord Join Requirement
-local discordInvite = "YOUR_DISCORD_INVITE_LINK_HERE" -- Replace with your Discord server invite link
+local discordInvite = "https://discord.gg/tqSz4aVBg9" -- Replace with your Discord server invite link
 local WindowSuccess, Window = pcall(function()
     return Rayfield:CreateWindow({
         Name = "Fuckery Hub",
@@ -88,21 +78,9 @@ local WindowSuccess, Window = pcall(function()
 end)
 
 if not WindowSuccess or not Window then
-    warn("Failed to create Rayfield Window: " .. tostring(Window))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Rayfield Window. Error: " .. tostring(Window) .. ". Try a different executor, cuhh.",
-        Duration = 5
-    })
+    print("Failed to create Rayfield Window: " .. tostring(Window))
     return
 end
-
--- Notify that the GUI loaded successfully
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Success",
-    Text = "Fuckery Hub window loaded, cuhh! Press Right Shift to toggle the GUI.",
-    Duration = 5
-})
 
 -- Combat Tab
 local CombatTab
@@ -111,12 +89,7 @@ local CombatTabSuccess, CombatTabError = pcall(function()
 end)
 
 if not CombatTabSuccess or not CombatTab then
-    warn("Failed to create Combat Tab: " .. tostring(CombatTabError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Combat Tab: " .. tostring(CombatTabError) .. ", cuhh. Try a different executor, cuhh.",
-        Duration = 5
-    })
+    print("Failed to create Combat Tab: " .. tostring(CombatTabError))
     return
 end
 
@@ -128,22 +101,12 @@ local aimbotToggleSuccess, aimbotToggleError = pcall(function()
         Flag = "AimbotToggle",
         Callback = function(Value)
             aimbotEnabled = Value
-            Rayfield:Notify({
-                Title = "Aimbot",
-                Content = aimbotEnabled and "Aimbot enabled, cuhh!" or "Aimbot disabled, cuhh!",
-                Duration = 3
-            })
         end
     })
 end)
 
 if not aimbotToggleSuccess then
-    warn("Failed to create Aimbot Toggle: " .. tostring(aimbotToggleError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Aimbot Toggle: " .. tostring(aimbotToggleError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create Aimbot Toggle: " .. tostring(aimbotToggleError))
 end
 
 local fovSize = 150
@@ -157,26 +120,17 @@ local fovSliderSuccess, fovSliderError = pcall(function()
         Flag = "FOVSlider",
         Callback = function(Value)
             fovSize = Value
-            Rayfield:Notify({
-                Title = "Aimbot FOV Size",
-                Content = "Set aimbot FOV to " .. Value .. " units, cuhh!",
-                Duration = 3
-            })
         end
     })
 end)
 
 if not fovSliderSuccess then
-    warn("Failed to create FOV Slider: " .. tostring(fovSliderError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create FOV Slider: " .. tostring(fovSliderError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create FOV Slider: " .. tostring(fovSliderError))
 end
 
 local hitboxExtenderEnabled = false
-local hitboxSize = 5
+local hitboxSize = 10 -- Big hitbox as requested
+local hitboxParts = {} -- Store custom hitbox parts
 local hitboxToggleSuccess, hitboxToggleError = pcall(function()
     CombatTab:CreateToggle({
         Name = "Enable Hitbox Extender",
@@ -184,50 +138,21 @@ local hitboxToggleSuccess, hitboxToggleError = pcall(function()
         Flag = "HitboxToggle",
         Callback = function(Value)
             hitboxExtenderEnabled = Value
-            Rayfield:Notify({
-                Title = "Hitbox Extender",
-                Content = hitboxExtenderEnabled and "Hitbox extender enabled, cuhh!" or "Hitbox extender disabled, cuhh!",
-                Duration = 3
-            })
+            if not hitboxExtenderEnabled then
+                -- Clean up custom hitbox parts
+                for _, part in pairs(hitboxParts) do
+                    if part then
+                        part:Destroy()
+                    end
+                end
+                hitboxParts = {}
+            end
         end
     })
 end)
 
 if not hitboxToggleSuccess then
-    warn("Failed to create Hitbox Extender Toggle: " .. tostring(hitboxToggleError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Hitbox Extender Toggle: " .. tostring(hitboxToggleError) .. ", cuhh.",
-        Duration = 5
-    })
-end
-
-local hitboxSliderSuccess, hitboxSliderError = pcall(function()
-    CombatTab:CreateSlider({
-        Name = "Hitbox Size",
-        Range = {2, 10},
-        Increment = 1,
-        Suffix = "Studs",
-        CurrentValue = 5,
-        Flag = "HitboxSlider",
-        Callback = function(Value)
-            hitboxSize = Value
-            Rayfield:Notify({
-                Title = "Hitbox Size",
-                Content = "Set hitbox size to " .. Value .. " studs, cuhh!",
-                Duration = 3
-            })
-        end
-    })
-end)
-
-if not hitboxSliderSuccess then
-    warn("Failed to create Hitbox Size Slider: " .. tostring(hitboxSliderError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Hitbox Size Slider: " .. tostring(hitboxSliderError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create Hitbox Extender Toggle: " .. tostring(hitboxToggleError))
 end
 
 -- Visuals Tab
@@ -237,12 +162,7 @@ local VisualsTabSuccess, VisualsTabError = pcall(function()
 end)
 
 if not VisualsTabSuccess or not VisualsTab then
-    warn("Failed to create Visuals Tab: " .. tostring(VisualsTabError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Visuals Tab: " .. tostring(VisualsTabError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create Visuals Tab: " .. tostring(VisualsTabError))
     return
 end
 
@@ -255,11 +175,6 @@ local espToggleSuccess, espToggleError = pcall(function()
         Flag = "ESPToggle",
         Callback = function(Value)
             espEnabled = Value
-            Rayfield:Notify({
-                Title = "ESP",
-                Content = espEnabled and "ESP enabled, cuhh!" or "ESP disabled, cuhh!",
-                Duration = 3
-            })
             if not espEnabled then
                 clearESP()
             end
@@ -268,12 +183,7 @@ local espToggleSuccess, espToggleError = pcall(function()
 end)
 
 if not espToggleSuccess then
-    warn("Failed to create ESP Toggle: " .. tostring(espToggleError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create ESP Toggle: " .. tostring(espToggleError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create ESP Toggle: " .. tostring(espToggleError))
 end
 
 -- About Me Tab
@@ -283,12 +193,7 @@ local AboutTabSuccess, AboutTabError = pcall(function()
 end)
 
 if not AboutTabSuccess or not AboutTab then
-    warn("Failed to create About Me Tab: " .. tostring(AboutTabError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create About Me Tab: " .. tostring(AboutTabError) .. ", cuhh.",
-        Duration = 5
-    })
+    print("Failed to create About Me Tab: " .. tostring(AboutTabError))
 else
     local aboutLabelSuccess, aboutLabelError = pcall(function()
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
@@ -298,117 +203,7 @@ else
         AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
     end)
     if not aboutLabelSuccess then
-        warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Couldn't create About Me Labels: " .. tostring(aboutLabelError) .. ", cuhh.",
-            Duration = 5
-        })
-    end
-end
-
--- Settings Tab
-local SettingsTab
-local SettingsTabSuccess, SettingsTabError = pcall(function()
-    SettingsTab = Window:CreateTab("Settings")
-end)
-
-if not SettingsTabSuccess or not SettingsTab then
-    warn("Failed to create Settings Tab: " .. tostring(SettingsTabError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Settings Tab: " .. tostring(SettingsTabError) .. ", cuhh.",
-        Duration = 5
-    })
-else
-    -- Create a separate ScreenGui for the theme overlay
-    local themeGui = Instance.new("ScreenGui")
-    themeGui.Name = "FuckeryThemeOverlay"
-    themeGui.Parent = game.CoreGui
-    themeGui.ResetOnSpawn = false
-
-    local themeOverlay = Instance.new("Frame")
-    themeOverlay.Size = UDim2.new(1, 0, 1, 0)
-    themeOverlay.BackgroundTransparency = 1
-    themeOverlay.Parent = themeGui
-
-    local themeDropdownSuccess, themeDropdownError = pcall(function()
-        SettingsTab:CreateDropdown({
-            Name = "Theme",
-            Options = {"Dark", "Light", "Fuckery"},
-            CurrentOption = "Dark",
-            Flag = "ThemeDropdown",
-            Callback = function(Option)
-                local success, err = pcall(function()
-                    -- Instead of changing Rayfield's colors, apply an overlay effect
-                    for _, child in pairs(themeOverlay:GetChildren()) do
-                        child:Destroy()
-                    end
-
-                    if Option == "Dark" then
-                        -- No overlay needed for Dark (default Rayfield theme)
-                        Rayfield:Notify({
-                            Title = "Theme",
-                            Content = "Switched to Dark theme, cuhh!",
-                            Duration = 3
-                        })
-                    elseif Option == "Light" then
-                        local overlay = Instance.new("Frame")
-                        overlay.Size = UDim2.new(1, 0, 1, 0)
-                        overlay.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-                        overlay.BackgroundTransparency = 0.2
-                        overlay.Parent = themeOverlay
-
-                        local textOverlay = Instance.new("TextLabel")
-                        textOverlay.Size = UDim2.new(1, 0, 1, 0)
-                        textOverlay.BackgroundTransparency = 1
-                        textOverlay.Text = ""
-                        textOverlay.TextColor3 = Color3.fromRGB(0, 0, 0)
-                        textOverlay.Parent = themeOverlay
-
-                        Rayfield:Notify({
-                            Title = "Theme",
-                            Content = "Switched to Light theme, cuhh!",
-                            Duration = 3
-                        })
-                    elseif Option == "Fuckery" then
-                        local overlay = Instance.new("Frame")
-                        overlay.Size = UDim2.new(1, 0, 1, 0)
-                        overlay.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
-                        overlay.BackgroundTransparency = 0.2
-                        overlay.Parent = themeOverlay
-
-                        local textOverlay = Instance.new("TextLabel")
-                        textOverlay.Size = UDim2.new(1, 0, 1, 0)
-                        textOverlay.BackgroundTransparency = 1
-                        textOverlay.Text = ""
-                        textOverlay.TextColor3 = Color3.fromRGB(255, 0, 0)
-                        textOverlay.Parent = themeOverlay
-
-                        Rayfield:Notify({
-                            Title = "Theme",
-                            Content = "Switched to Fuckery theme, cuhh! Red and black vibes!",
-                            Duration = 3
-                        })
-                    end
-                end)
-                if not success then
-                    Rayfield:Notify({
-                        Title = "Error",
-                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh.",
-                        Duration = 5
-                    })
-                end
-            end
-        })
-    end)
-    if not themeDropdownSuccess then
-        warn("Failed to create Theme Dropdown: " .. tostring(themeDropdownError))
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Error",
-            Text = "Couldn't create Theme Dropdown: " .. tostring(themeDropdownError) .. ", cuhh.",
-            Duration = 5
-        })
+        print("Failed to create About Me Labels: " .. tostring(aboutLabelError))
     end
 end
 
@@ -491,57 +286,24 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Hitbox Extender Logic (Fixed FireServer Hook)
-local originalFireServer
-local hooked = false
-
-local function hookFireServer()
-    if hooked then return end
-    local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
-    if remotes then
-        local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit")
-        if shootEvent then
-            print("Found shoot event: " .. shootEvent.Name)
-            originalFireServer = shootEvent.FireServer
-            shootEvent.FireServer = function(self, targetPos, ...)
-                if hitboxExtenderEnabled then
-                    local closestEnemy = nil
-                    local shortestDist = hitboxSize
-                    for _, enemy in pairs(game.Players:GetPlayers()) do
-                        if enemy == player then continue end
-                        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
-                            local playerTeam = player.Team
-                            local enemyTeam = enemy.Team
-                            local isEnemy = true
-                            if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                                isEnemy = false
-                            elseif not playerTeam or not enemyTeam then
-                                isEnemy = true
-                            end
-                            if isEnemy then
-                                local head = enemy.Character.Head
-                                local dist = (head.Position - targetPos).Magnitude
-                                if dist < shortestDist then
-                                    shortestDist = dist
-                                    closestEnemy = head
-                                end
-                            end
-                        end
-                    end
-                    if closestEnemy then
-                        print("Hitbox extender redirected shot to: " .. closestEnemy.Parent.Name)
-                        targetPos = closestEnemy.Position
-                    end
-                end
-                return originalFireServer(self, targetPos, ...)
-            end
-            hooked = true
-        else
-            print("Could not find shoot event in ReplicatedStorage")
-        end
-    else
-        print("Could not find Events or Remotes in ReplicatedStorage")
-    end
+-- Hitbox Extender Logic (Using Custom Parts, Big and Slightly Transparent)
+local function createHitboxPart(character)
+    if not character or not character:FindFirstChild("Head") then return end
+    local head = character.Head
+    local hitboxPart = Instance.new("Part")
+    hitboxPart.Name = "ExtendedHitbox"
+    hitboxPart.Size = Vector3.new(10, 10, 10) -- Big hitbox (10x10x10 studs)
+    hitboxPart.Transparency = 0.8 -- Slightly transparent
+    hitboxPart.CanCollide = false
+    hitboxPart.Anchored = false
+    hitboxPart.Position = head.Position
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = head
+    weld.Part1 = hitboxPart
+    weld.Parent = hitboxPart
+    hitboxPart.Parent = character
+    table.insert(hitboxParts, hitboxPart)
+    return hitboxPart
 end
 
 -- Main Loop
@@ -553,20 +315,24 @@ runService.RenderStepped:Connect(function()
         clearESP()
     end
 
-    -- Hook FireServer for hitbox extender
+    -- Hitbox Extender Update
     if hitboxExtenderEnabled then
-        hookFireServer()
+        for _, enemy in pairs(game.Players:GetPlayers()) do
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
+                local existingHitbox = enemy.Character:FindFirstChild("ExtendedHitbox")
+                if not existingHitbox then
+                    createHitboxPart(enemy.Character)
+                end
+            end
+        end
     end
 end)
 
--- Aimbot Logic (Target Closest to Cursor in Screen Space)
+-- Aimbot Logic (Sharper Turn, Lock On Until Kill, Then Find New Target)
 local target = nil
 local locked = false
-local lastLookVector = camera.CFrame.LookVector
 
-mouse.Button2Down:Connect(function()
-    if not aimbotEnabled then return end
-
+local function findNewTarget()
     local closest = nil
     local shortestDist = math.huge
     local cursorPos = Vector2.new(mouse.X, mouse.Y)
@@ -597,55 +363,44 @@ mouse.Button2Down:Connect(function()
         end
     end
 
-    if closest then
-        target = closest
+    return closest
+end
+
+mouse.Button2Down:Connect(function()
+    if not aimbotEnabled then return end
+    target = findNewTarget()
+    if target then
         locked = true
-        Rayfield:Notify({
-            Title = "Aimbot",
-            Content = "Locked onto " .. closest.Parent.Name .. ", cuhh!",
-            Duration = 3
-        })
     end
 end)
 
 mouse.Button2Up:Connect(function()
     locked = false
     target = nil
-    local camPos = camera.CFrame.Position
-    local newLookAt = camPos + (lastLookVector * 100)
-    camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(camera.CFrame, 0.8) -- Even smoother reset
 end)
 
 runService.RenderStepped:Connect(function()
-    if not locked then
-        lastLookVector = camera.CFrame.LookVector
-    end
-    if aimbotEnabled and locked and target and target.Parent then
-        local currentCFrame = camera.CFrame
-        local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
-        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2)
-
-        local char = player.Character
-        if char then
-            local tool = char:FindFirstChildOfClass("Tool")
-            if tool then
-                local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
-                if remotes then
-                    local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit")
-                    if shootEvent then
-                        shootEvent:FireServer(target.Position)
-                    end
-                end
+    if aimbotEnabled and locked then
+        if not target or not target.Parent then
+            target = findNewTarget()
+            if not target then
+                locked = false
+                return
             end
         end
+
         local humanoid = target.Parent:FindFirstChild("Humanoid")
         if humanoid and humanoid.Health <= 0 then
-            locked = false
-            target = nil
-            local camPos = camera.CFrame.Position
-            local newLookAt = camPos + (lastLookVector * 100)
-            camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(camera.CFrame, 0.8) -- Even smoother reset
+            target = findNewTarget()
+            if not target then
+                locked = false
+                return
+            end
         end
+
+        local currentCFrame = camera.CFrame
+        local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
+        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8) -- Sharper turn (was 0.2)
     end
 end)
 
