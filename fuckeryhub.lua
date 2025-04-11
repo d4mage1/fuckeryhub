@@ -20,8 +20,8 @@ print(" ")
 
 -- Load Rayfield UI Library
 local Rayfield
-local rayfieldUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source" -- Updated URL, might work in April 2025
-local rayfieldFallbackUrl = "https://sirius.menu/rayfield" -- Old primary URL as fallback
+local rayfieldUrl = "https://sirius.menu/rayfield" -- Updated URL, might work in April 2025
+local rayfieldFallbackUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source" 
 local rawScript
 
 local success, err = pcall(function()
@@ -40,7 +40,10 @@ end
 
 if rawScript then
     success, err = pcall(function()
-        Rayfield = loadstring(rawScript)()
+        Rayfield = loadstring(rawScript) -- Don’t call it yet, just get the function
+        if Rayfield then
+            Rayfield = Rayfield() -- Now call it if it’s not nil
+        end
     end)
     if not success or not Rayfield then
         warn("Failed to initialize Rayfield: " .. tostring(err))
@@ -84,7 +87,12 @@ if Window then
             print("Loading Arsenal script...")
             local success, result = pcall(function()
                 local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua")
-                return loadstring(scriptContent)()
+                local loadedFunc = loadstring(scriptContent)
+                if loadedFunc then
+                    return loadedFunc()
+                else
+                    error("Failed to loadstring Arsenal script: scriptContent is invalid")
+                end
             end)
             if success then
                 print("Arsenal script loaded successfully!")
