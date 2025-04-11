@@ -15,7 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 1.5 - Arsenal Edition")
+print("Version: 1.6 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -87,9 +87,15 @@ local success, err = pcall(function()
             if not Value then
                 locked = false
                 target = nil
+                -- Reset camera without downward dip
                 local currentCFrame = camera.CFrame
-                local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
-                camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
+                local lookVector = currentCFrame.LookVector
+                local flatLook = lookVector * Vector3.new(1, 0, 1) -- Zero out Y to avoid dip
+                local newLook = currentCFrame.Position + flatLook.Unit * 10
+                -- Preserve the current pitch (up/down angle)
+                local currentPitch = math.asin(lookVector.Y)
+                local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+                camera.CFrame = newCFrame
             end
         end
     })
@@ -171,7 +177,6 @@ local success, err = pcall(function()
                     fovCircle.Thickness = 2
                     fovCircle.NumSides = 64
                     fovCircle.Radius = fovCircleSize
-                    -- Set initial position to center of screen
                     local screenSize = camera.ViewportSize
                     fovCircle.Position = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
                     fovCircle.Color = fovCircleColor
@@ -325,6 +330,8 @@ local success, err = pcall(function()
     -- Aimbot and Aim Assist Logic
     local target = nil
     local locked = false
+    local lastMousePos = Vector2.new(mouse.X, mouse.Y)
+    local mouseSpeed = 0
 
     local function findTarget(forAimAssist)
         local closest, shortestDist = nil, math.huge
@@ -334,7 +341,7 @@ local success, err = pcall(function()
                 local head = enemy.Character:FindFirstChild("Head")
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
-                    local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
+                    local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not v.Team
                     if isEnemy then
                         local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
                         if onScreen then
@@ -367,11 +374,20 @@ local success, err = pcall(function()
         target = nil
         print("Aimbot unlocked")
         local currentCFrame = camera.CFrame
-        local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
-        camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
+        local lookVector = currentCFrame.LookVector
+        local flatLook = lookVector * Vector3.new(1, 0, 1)
+        local newLook = currentCFrame.Position + flatLook.Unit * 10
+        local currentPitch = math.asin(lookVector.Y)
+        local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+        camera.CFrame = newCFrame
     end)
 
     runService.RenderStepped:Connect(function()
+        -- Calculate mouse movement speed for aim assist
+        local currentMousePos = Vector2.new(mouse.X, mouse.Y)
+        mouseSpeed = (currentMousePos - lastMousePos).Magnitude
+        lastMousePos = currentMousePos
+
         -- Update FOV Circle (Locked to Center of Screen)
         if fovCircleEnabled and fovCircle then
             local screenSize = camera.ViewportSize
@@ -398,8 +414,12 @@ local success, err = pcall(function()
                     locked = false
                     print("No aimbot target, resetting camera")
                     local currentCFrame = camera.CFrame
-                    local flatLook = currentCFrame.Position + (currentCFrame.LookVector * Vector3.new(1, 0, 1)).Unit * 10
-                    camera.CFrame = CFrame.new(currentCFrame.Position, flatLook)
+                    local lookVector = currentCFrame.LookVector
+                    local flatLook = lookVector * Vector3.new(1, 0, 1)
+                    local newLook = currentCFrame.Position + flatLook.Unit * 10
+                    local currentPitch = math.asin(lookVector.Y)
+                    local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+                    camera.CFrame = newCFrame
                     return
                 end
                 print("Aimbot new target: " .. target.Parent.Name)
@@ -409,18 +429,29 @@ local success, err = pcall(function()
             camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
         end
 
-        -- Aim Assist
+        -- Aim Assist (Sticky Behavior)
         if aimAssistEnabled and not locked then
             local assistTarget = findTarget(true)
             if assistTarget then
-                local currentCFrame = camera.CFrame
-                local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
-                camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2)
+                local screenPos, onScreen = camera:WorldToScreenPoint(assistTarget.Position)
+                if onScreen then
+                    local cursorPos = Vector2.new(mouse.X, mouse.Y)
+                    local distToTarget = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
+                    -- Dynamic Lerp strength: stronger pull when close, weaker when moving fast
+                    local baseStrength = 0.3
+                    local stickiness = math.clamp(1 - (distToTarget / fovSize), 0, 1) -- Stronger pull when closer
+                    local speedFactor = math.clamp(mouseSpeed / 50, 0, 1) -- Reduce pull if moving fast
+                    local finalStrength = baseStrength * stickiness * (1 - speedFactor)
+                    local currentCFrame = camera.CFrame
+                    local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
+                    camera.CFrame = currentCFrame:Lerp(targetCFrame, finalStrength)
+                    print("Aim Assist Strength: " .. finalStrength .. " (Distance: " .. distToTarget .. ", Speed: " .. mouseSpeed .. ")")
+                end
             end
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v1.5 by d4mage1 - Fixed aimbot and features, FOV circle centered")
+    print("Fuckery Hub Arsenal script loaded - v1.6 by d4mage1 - Fixed aimbot camera dip, updated aim assist")
 end)
 
 if not success then
