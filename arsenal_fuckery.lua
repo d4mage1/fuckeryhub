@@ -26,28 +26,45 @@ local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local uis = game:GetService("UserInputService")
 
--- Load Rayfield UI Library with Error Handling
+-- Load Rayfield UI Library with Better Error Handling
 local Rayfield
+local rayfieldUrl = "https://sirius.menu/rayfield" -- Primary URL
+local rayfieldFallbackUrl = "https://raw.githubusercontent.com/UI-Interface/Rayfield/main/source" -- Fallback URL
+local rawScript
+
+-- Try the primary URL first
 local success, errorMsg = pcall(function()
-    Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    rawScript = game:HttpGet(rayfieldUrl)
 end)
 
 if not success then
+    print("Failed to fetch Rayfield from primary URL: " .. tostring(errorMsg))
+    -- Try the fallback URL
+    success, errorMsg = pcall(function()
+        rawScript = game:HttpGet(rayfieldFallbackUrl)
+    end)
+    if not success then
+        warn("Failed to fetch Rayfield from fallback URL: " .. tostring(errorMsg))
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Couldn't fetch Rayfield UI library. Error: " .. tostring(errorMsg) .. ". Try a different executor or check your internet, cuhh.",
+            Duration = 10
+        })
+        return
+    end
+end
+
+-- Now try to load the script with loadstring
+success, errorMsg = pcall(function()
+    Rayfield = loadstring(rawScript)()
+end)
+
+if not success or not Rayfield then
     warn("Failed to load Rayfield UI Library: " .. tostring(errorMsg))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't load Rayfield UI. Error: " .. tostring(errorMsg) .. ". Try a different executor, cuhh.",
-        Duration = 5
-    })
-    return
-end
-
-if not Rayfield then
-    warn("Rayfield UI Library is nil after loading.")
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Rayfield UI didn't load properly. Try a different executor, cuhh.",
-        Duration = 5
+        Text = "Couldn't load Rayfield UI. Error: " .. tostring(errorMsg) .. ". The Rayfield library might be down or broken, cuhh. Try a different executor or wait a bit.",
+        Duration = 10
     })
     return
 end
@@ -77,7 +94,7 @@ if not WindowSuccess or not Window then
     warn("Failed to create Rayfield Window: " .. tostring(Window))
     game.StarterGui:SetCore("SendNotification", {
         Title = "Error",
-        Text = "Couldn't create Rayfield Window. Try a different executor, cuhh.",
+        Text = "Couldn't create Rayfield Window. Error: " .. tostring(Window) .. ". Try a different executor, cuhh.",
         Duration = 5
     })
     return
@@ -163,7 +180,7 @@ end
 
 local hitboxExtenderEnabled = false
 local hitboxSize = 5
-local originalHitboxSizes = {} -- Store original hitbox sizes to restore them
+local originalHitboxSizes = {}
 local hitboxToggleSuccess, hitboxToggleError = pcall(function()
     CombatTab:CreateToggle({
         Name = "Enable Hitbox Extender",
@@ -177,7 +194,6 @@ local hitboxToggleSuccess, hitboxToggleError = pcall(function()
                 Duration = 3
             })
             if not hitboxExtenderEnabled then
-                -- Restore original hitbox sizes
                 for _, enemy in pairs(game.Players:GetPlayers()) do
                     if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
                         local head = enemy.Character.Head
@@ -293,9 +309,9 @@ else
     local aboutLabelSuccess, aboutLabelError = pcall(function()
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
         AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
-        AboutTab:CreateLabel("Shoutout to my friends for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 12th 2025")
+        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
     end)
     if not aboutLabelSuccess then
         warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
@@ -335,33 +351,18 @@ else
                         return
                     end
 
-                    -- Debug: Print the GUI hierarchy to find the right elements
-                    local function printHierarchy(obj, indent)
-                        indent = indent or 0
-                        local indentStr = string.rep("  ", indent)
-                        print(indentStr .. obj.Name .. " (" .. obj.ClassName .. ")")
-                        for _, child in pairs(obj:GetChildren()) do
-                            printHierarchy(child, indent + 1)
-                        end
-                    end
-                    print("Rayfield GUI Hierarchy:")
-                    printHierarchy(gui)
-
-                    -- Find the main frame (usually named "Interface")
                     local interface = gui:FindFirstChild("Interface")
                     if not interface then
                         warn("Interface not found in Rayfield GUI")
                         return
                     end
 
-                    -- Find the main container (usually named "Window")
                     local window = interface:FindFirstChild("Window")
                     if not window then
                         warn("Window not found in Interface")
                         return
                     end
 
-                    -- Find the tab list and content container
                     local tabList = window:FindFirstChild("TabList")
                     local content = window:FindFirstChild("Content")
                     if not tabList or not content then
@@ -371,7 +372,7 @@ else
 
                     if Option == "Dark" then
                         if window then
-                            window.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+                            window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
                         end
                         if tabList then
                             for _, tab in pairs(tabList:GetChildren()) do
@@ -404,7 +405,7 @@ else
                         })
                     elseif Option == "Light" then
                         if window then
-                            window.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Light background
+                            window.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
                         end
                         if tabList then
                             for _, tab in pairs(tabList:GetChildren()) do
@@ -422,9 +423,7 @@ else
                                 if element:IsA("Frame") then
                                     element.BackgroundColor3 = Color3.fromRGB(210, 210, 210)
                                 end
-                                if element:Is
-
-A("TextLabel") or element:IsA("TextButton") then
+                                if element:IsA("TextLabel") or element:IsA("TextButton") then
                                     element.TextColor3 = Color3.fromRGB(0, 0, 0)
                                     if element:IsA("TextButton") then
                                         element.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
@@ -439,7 +438,7 @@ A("TextLabel") or element:IsA("TextButton") then
                         })
                     elseif Option == "Fuckery" then
                         if window then
-                            window.BackgroundColor3 = Color3.fromRGB(20, 0, 0) -- Dark red background
+                            window.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
                         end
                         if tabList then
                             for _, tab in pairs(tabList:GetChildren()) do
@@ -524,7 +523,7 @@ local function updateESP()
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
         if v == player then
-            print("Skipping local player: " .. v.Name) -- Debug
+            print("Skipping local player: " .. v.Name)
             continue
         end
         if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
@@ -532,14 +531,14 @@ local function updateESP()
             local enemyTeam = v.Team
             local isEnemy = true
             if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                print("Skipping teammate: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")") -- Debug
+                print("Skipping teammate: " .. v.Name .. " (Team: " .. tostring(enemyTeam) .. ")")
                 isEnemy = false
             elseif not playerTeam or not enemyTeam then
-                print("No teams detected, treating as enemy: " .. v.Name) -- Debug
+                print("No teams detected, treating as enemy: " .. v.Name)
                 isEnemy = true
             end
             if isEnemy then
-                print("Adding ESP for enemy: " .. v.Name) -- Debug
+                print("Adding ESP for enemy: " .. v.Name)
                 addESP(v.Character)
             end
         end
@@ -571,7 +570,6 @@ runService.RenderStepped:Connect(function()
         clearESP()
     end
 
-    -- Hitbox Extender Logic
     if hitboxExtenderEnabled then
         for _, enemy in pairs(game.Players:GetPlayers()) do
             if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
@@ -580,7 +578,7 @@ runService.RenderStepped:Connect(function()
                     originalHitboxSizes[enemy] = head.Size
                 end
                 head.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-                head.Transparency = 0.5 -- Make it slightly visible for fun
+                head.Transparency = 0.5
             end
         end
     end
@@ -593,7 +591,7 @@ local lastLookVector = camera.CFrame.LookVector
 
 local function isVisible(targetPos)
     local origin = camera.CFrame.Position
-    local direction = (target Pos - origin).Unit * 500
+    local direction = (targetPos - origin).Unit * 500
     local ray = Ray.new(origin, direction)
     local hit, pos = game.Workspace:FindPartOnRayWithIgnoreList(ray, {player.Character or {}})
     return hit == nil or (pos - targetPos).Magnitude < 1
@@ -647,10 +645,9 @@ runService.RenderStepped:Connect(function()
         lastLookVector = camera.CFrame.LookVector
     end
     if aimbotEnabled and locked and target and target.Parent then
-        -- Smooth aiming
         local currentCFrame = camera.CFrame
         local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
-        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2) -- Smooth transition
+        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.2)
 
         local char = player.Character
         if char then
