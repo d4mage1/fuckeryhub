@@ -1,206 +1,288 @@
+-- Load Confirmation with ASCII Art
+print(" ")
+print("=====================================")
+print("     FUCKERY HUB LOADED - LET'S GO!  ")
+print("=====================================")
+print(" ")
+print([[
+     _____ ______   ________  ________  _______           ________      ___    ___      ________  ___   ___  _____ ______   ________  ________  _______      
+|\   _ \  _   \|\   __  \|\   ___ \|\  ___ \         |\   __  \    |\  \  /  /|    |\   ___ \|\  \ |\  \|\   _ \  _   \|\   __  \|\   ____\|\  ___ \     
+\ \  \\\__\ \  \ \  \|\  \ \  \_|\ \ \   __/|        \ \  \|\ /_   \ \  \/  / /    \ \  \_|\ \ \  \\_\  \ \  \\\__\ \  \ \  \|\  \ \  \___|\ \   __/|    
+ \ \  \\|__| \  \ \   __  \ \  \ \\ \ \  \_|/__       \ \   __  \   \ \    / /      \ \  \ \\ \ \______  \ \  \\|__| \  \ \   __  \ \  \  __\ \  \_|/__  
+  \ \  \    \ \  \ \  \ \  \ \  \_\\ \ \  \_|\ \       \ \  \|\  \   \/  /  /        \ \  \_\\ \|_____|\  \ \  \    \ \  \ \  \ \  \ \  \|\  \ \  \_|\ \ 
+   \ \__\    \ \__\ \__\ \__\ \_______\ \_______\       \ \_______\__/  / /           \ \_______\     \ \__\ \__\    \ \__\ \__\ \__\ \_______\ \_______\
+    \|__|     \|__|\|__|\|__|\|_______|\|_______|        \|_______|\___/ /             \|_______|      \|__|\|__|     \|__|\|__|\|__|\|_______|\|_______|
+                                                                  \|___|/                                                                                                                                                                                                                                       
+]])
+print(" ")
+print("Loaded by: d4mage")
+print("Version: 1.0 - Arsenal Edition")
+print(" ")
+
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
 local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local tweenService = game:GetService("TweenService")
+local uis = game:GetService("UserInputService")
 
--- GUI Setup (Next-Level Design)
+-- GUI Setup (ZYHPERION Style)
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 320, 0, 380)
-frame.Position = UDim2.new(0.5, -160, 0.5, -190)
-frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.BackgroundTransparency = 1
-frame.Parent = gui
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 600, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundTransparency = 1
+mainFrame.Parent = gui
 
--- Neon Border with Glow
-local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 3
-frameStroke.Color = Color3.fromRGB(255, 0, 0)
-frameStroke.Transparency = 1
-frameStroke.Parent = frame
+-- Side Panel (Tabs)
+local sidePanel = Instance.new("Frame")
+sidePanel.Size = UDim2.new(0, 150, 1, 0)
+sidePanel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+sidePanel.BorderSizePixel = 0
+sidePanel.BackgroundTransparency = 1
+sidePanel.Parent = mainFrame
 
--- Gradient with a Sharper Contrast
-local frameGradient = Instance.new("UIGradient")
-frameGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 25)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
-})
-frameGradient.Rotation = 90
-frameGradient.Parent = frame
+local sidePanelList = Instance.new("UIListLayout")
+sidePanelList.SortOrder = Enum.SortOrder.LayoutOrder
+sidePanelList.Padding = UDim.new(0, 5)
+sidePanelList.Parent = sidePanel
 
--- Title with a Futuristic Font (Switched to SciFi)
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 60)
-title.BackgroundTransparency = 1
-title.Text = "FUCKERY HUB"
-title.TextColor3 = Color3.fromRGB(255, 0, 0)
-title.TextSize = 28
-title.Font = Enum.Font.SciFi -- Valid font, looks futuristic
-title.TextStrokeTransparency = 0.4
-title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-title.TextTransparency = 1
-title.Parent = frame
+-- Tab Buttons
+local combatTabButton = Instance.new("TextButton")
+combatTabButton.Size = UDim2.new(1, 0, 0, 40)
+combatTabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+combatTabButton.Text = "Combat"
+combatTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+combatTabButton.TextSize = 16
+combatTabButton.Font = Enum.Font.SourceSansBold
+combatTabButton.BackgroundTransparency = 1
+combatTabButton.Parent = sidePanel
 
--- Close Button (Top-Right)
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 40, 0, 40)
-closeButton.Position = UDim2.new(1, -50, 0, 10)
-closeButton.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
-closeButton.Text = "X"
-closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-closeButton.TextSize = 20
-closeButton.Font = Enum.Font.SciFi -- Valid font
-closeButton.BackgroundTransparency = 1
-closeButton.Parent = frame
+local visualsTabButton = Instance.new("TextButton")
+visualsTabButton.Size = UDim2.new(1, 0, 0, 40)
+visualsTabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+visualsTabButton.Text = "Visuals"
+visualsTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+visualsTabButton.TextSize = 16
+visualsTabButton.Font = Enum.Font.SourceSansBold
+visualsTabButton.BackgroundTransparency = 1
+visualsTabButton.Parent = sidePanel
 
-local closeStroke = Instance.new("UIStroke")
-closeStroke.Thickness = 1
-closeStroke.Color = Color3.fromRGB(255, 0, 0)
-closeStroke.Transparency = 1
-closeStroke.Parent = closeButton
+-- Content Area
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(0, 450, 1, 0)
+contentFrame.Position = UDim2.new(0, 150, 0, 0)
+contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+contentFrame.BorderSizePixel = 0
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
 
--- ESP Toggle Button
+-- Combat Tab Content
+local combatTab = Instance.new("Frame")
+combatTab.Size = UDim2.new(1, 0, 1, 0)
+combatTab.BackgroundTransparency = 1
+combatTab.Visible = true
+combatTab.Parent = contentFrame
+
+local combatList = Instance.new("UIListLayout")
+combatList.SortOrder = Enum.SortOrder.LayoutOrder
+combatList.Padding = UDim.new(0, 10)
+combatList.Parent = combatTab
+
+-- Aimbot Toggle
+local aimbotFrame = Instance.new("Frame")
+aimbotFrame.Size = UDim2.new(1, 0, 0, 30)
+aimbotFrame.BackgroundTransparency = 1
+aimbotFrame.Parent = combatTab
+
+local aimbotLabel = Instance.new("TextLabel")
+aimbotLabel.Size = UDim2.new(0, 200, 1, 0)
+aimbotLabel.BackgroundTransparency = 1
+aimbotLabel.Text = "Enable Aimbot"
+aimbotLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+aimbotLabel.TextSize = 16
+aimbotLabel.Font = Enum.Font.SourceSans
+aimbotLabel.TextXAlignment = Enum.TextXAlignment.Left
+aimbotLabel.Parent = aimbotFrame
+
+local aimbotToggle = Instance.new("TextButton")
+aimbotToggle.Size = UDim2.new(0, 40, 0, 20)
+aimbotToggle.Position = UDim2.new(1, -50, 0.5, -10)
+aimbotToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+aimbotToggle.Text = "OFF"
+aimbotToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
+aimbotToggle.TextSize = 14
+aimbotToggle.Font = Enum.Font.SourceSans
+aimbotToggle.Parent = aimbotFrame
+
+-- FOV Slider
+local fovFrame = Instance.new("Frame")
+fovFrame.Size = UDim2.new(1, 0, 0, 30)
+fovFrame.BackgroundTransparency = 1
+fovFrame.Parent = combatTab
+
+local fovLabel = Instance.new("TextLabel")
+fovLabel.Size = UDim2.new(0, 200, 1, 0)
+fovLabel.BackgroundTransparency = 1
+fovLabel.Text = "FOV Size"
+fovLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+fovLabel.TextSize = 16
+fovLabel.Font = Enum.Font.SourceSans
+fovLabel.TextXAlignment = Enum.TextXAlignment.Left
+fovLabel.Parent = fovFrame
+
+local fovSlider = Instance.new("TextButton")
+fovSlider.Size = UDim2.new(0, 150, 0, 10)
+fovSlider.Position = UDim2.new(1, -160, 0.5, -5)
+fovSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+fovSlider.Text = ""
+fovSlider.Parent = fovFrame
+
+local fovFill = Instance.new("Frame")
+fovFill.Size = UDim2.new(0.5, 0, 1, 0)
+fovFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+fovFill.BorderSizePixel = 0
+fovFill.Parent = fovSlider
+
+local fovValue = Instance.new("TextLabel")
+fovValue.Size = UDim2.new(0, 50, 1, 0)
+fovValue.Position = UDim2.new(1, -50, 0, 0)
+fovValue.BackgroundTransparency = 1
+fovValue.Text = "150"
+fovValue.TextColor3 = Color3.fromRGB(200, 200, 200)
+fovValue.TextSize = 16
+fovValue.Font = Enum.Font.SourceSans
+fovValue.Parent = fovFrame
+
+-- Visuals Tab Content
+local visualsTab = Instance.new("Frame")
+visualsTab.Size = UDim2.new(1, 0, 1, 0)
+visualsTab.BackgroundTransparency = 1
+visualsTab.Visible = false
+visualsTab.Parent = contentFrame
+
+local visualsList = Instance.new("UIListLayout")
+visualsList.SortOrder = Enum.SortOrder.LayoutOrder
+visualsList.Padding = UDim.new(0, 10)
+visualsList.Parent = visualsTab
+
+-- ESP Toggle
+local espFrame = Instance.new("Frame")
+espFrame.Size = UDim2.new(1, 0, 0, 30)
+espFrame.BackgroundTransparency = 1
+espFrame.Parent = visualsTab
+
+local espLabel = Instance.new("TextLabel")
+espLabel.Size = UDim2.new(0, 200, 1, 0)
+espLabel.BackgroundTransparency = 1
+espLabel.Text = "Enable ESP"
+espLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+espLabel.TextSize = 16
+espLabel.Font = Enum.Font.SourceSans
+espLabel.TextXAlignment = Enum.TextXAlignment.Left
+espLabel.Parent = espFrame
+
 local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(0, 280, 0, 70)
-espToggle.Position = UDim2.new(0.5, -140, 0, 80)
-espToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-espToggle.Text = "ESP: OFF"
+espToggle.Size = UDim2.new(0, 40, 0, 20)
+espToggle.Position = UDim2.new(1, -50, 0.5, -10)
+espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+espToggle.Text = "OFF"
 espToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
-espToggle.TextSize = 22
-espToggle.Font = Enum.Font.SciFi -- Valid font
-espToggle.BackgroundTransparency = 1
-espToggle.Parent = frame
-
-local espStroke = Instance.new("UIStroke")
-espStroke.Thickness = 2
-espStroke.Color = Color3.fromRGB(255, 0, 0)
-espStroke.Transparency = 1
-espStroke.Parent = espToggle
-
-local espGradient = Instance.new("UIGradient")
-espGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 0, 0))
-})
-espGradient.Parent = espToggle
-
--- Aimbot Toggle Button
-local aimToggle = Instance.new("TextButton")
-aimToggle.Size = UDim2.new(0, 280, 0, 70)
-aimToggle.Position = UDim2.new(0.5, -140, 0, 160)
-aimToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-aimToggle.Text = "AIMBOT: OFF"
-aimToggle.TextColor3 = Color3.fromRGB(255, 0, 0)
-aimToggle.TextSize = 22
-aimToggle.Font = Enum.Font.SciFi -- Valid font
-aimToggle.BackgroundTransparency = 1
-aimToggle.Parent = frame
-
-local aimStroke = Instance.new("UIStroke")
-aimStroke.Thickness = 2
-aimStroke.Color = Color3.fromRGB(255, 0, 0)
-aimStroke.Transparency = 1
-aimStroke.Parent = aimToggle
-
-local aimGradient = Instance.new("UIGradient")
-aimGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 0, 0))
-})
-aimGradient.Parent = aimToggle
+espToggle.TextSize = 14
+espToggle.Font = Enum.Font.SourceSans
+espToggle.Parent = espFrame
 
 -- Animations
--- Fade-In for GUI
-local fadeInInfo = TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-local frameFadeIn = tweenService:Create(frame, fadeInInfo, {BackgroundTransparency = 0})
-local frameStrokeFadeIn = tweenService:Create(frameStroke, fadeInInfo, {Transparency = 0})
-local titleFadeIn = tweenService:Create(title, fadeInInfo, {TextTransparency = 0})
-local espFadeIn = tweenService:Create(espToggle, fadeInInfo, {BackgroundTransparency = 0})
-local espStrokeFadeIn = tweenService:Create(espStroke, fadeInInfo, {Transparency = 0})
-local aimFadeIn = tweenService:Create(aimToggle, fadeInInfo, {BackgroundTransparency = 0})
-local aimStrokeFadeIn = tweenService:Create(aimStroke, fadeInInfo, {Transparency = 0})
-local closeFadeIn = tweenService:Create(closeButton, fadeInInfo, {BackgroundTransparency = 0})
-local closeStrokeFadeIn = tweenService:Create(closeStroke, fadeInInfo, {Transparency = 0})
+local fadeInInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+local mainFadeIn = tweenService:Create(mainFrame, fadeInInfo, {BackgroundTransparency = 0})
+local sideFadeIn = tweenService:Create(sidePanel, fadeInInfo, {BackgroundTransparency = 0})
+local contentFadeIn = tweenService:Create(contentFrame, fadeInInfo, {BackgroundTransparency = 0})
+local combatFadeIn = tweenService:Create(combatTab, fadeInInfo, {BackgroundTransparency = 0})
+local visualsFadeIn = tweenService:Create(visualsTab, fadeInInfo, {BackgroundTransparency = 0})
 
-frameFadeIn:Play()
-frameStrokeFadeIn:Play()
-titleFadeIn:Play()
-espFadeIn:Play()
-espStrokeFadeIn:Play()
-aimFadeIn:Play()
-aimStrokeFadeIn:Play()
-closeFadeIn:Play()
-closeStrokeFadeIn:Play()
+mainFadeIn:Play()
+sideFadeIn:Play()
+contentFadeIn:Play()
+combatFadeIn:Play()
+visualsFadeIn:Play()
 
--- Hover Effect for Buttons
-local hoverInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-local espHoverOn = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 290, 0, 75), BackgroundColor3 = Color3.fromRGB(55, 55, 55)})
-local espHoverOff = tweenService:Create(espToggle, hoverInfo, {Size = UDim2.new(0, 280, 0, 70), BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
-local aimHoverOn = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 290, 0, 75), BackgroundColor3 = Color3.fromRGB(55, 55, 55)})
-local aimHoverOff = tweenService:Create(aimToggle, hoverInfo, {Size = UDim2.new(0, 280, 0, 70), BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
-local closeHoverOn = tweenService:Create(closeButton, hoverInfo, {BackgroundColor3 = Color3.fromRGB(80, 0, 0)})
-local closeHoverOff = tweenService:Create(closeButton, hoverInfo, {BackgroundColor3 = Color3.fromRGB(50, 0, 0)})
-
-espToggle.MouseEnter:Connect(function()
-    espHoverOn:Play()
-end)
-espToggle.MouseLeave:Connect(function()
-    espHoverOff:Play()
+-- Tab Switching
+combatTabButton.MouseButton1Click:Connect(function()
+    combatTab.Visible = true
+    visualsTab.Visible = false
+    combatTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+    visualsTabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 end)
 
-aimToggle.MouseEnter:Connect(function()
-    aimHoverOn:Play()
-end)
-aimToggle.MouseLeave:Connect(function()
-    aimHoverOff:Play()
-end)
-
-closeButton.MouseEnter:Connect(function()
-    closeHoverOn:Play()
-end)
-closeButton.MouseLeave:Connect(function()
-    closeHoverOff:Play()
+visualsTabButton.MouseButton1Click:Connect(function()
+    combatTab.Visible = false
+    visualsTab.Visible = true
+    combatTabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    visualsTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
 end)
 
--- Close Button Spin Animation
-local spinInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-local closeSpin = tweenService:Create(closeButton, spinInfo, {Rotation = 180})
+-- FOV Slider Logic
+local fovSize = 150
+local dragging = false
 
-closeButton.MouseButton1Click:Connect(function()
-    closeSpin:Play()
-    wait(0.5)
-    gui:Destroy()
+fovSlider.MouseButton1Down:Connect(function()
+    dragging = true
 end)
 
--- ESP with Boxes (Enemies Only, Arsenal Fix)
+uis.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+uis.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = uis:GetMouseLocation()
+        local sliderPos = fovSlider.AbsolutePosition
+        local sliderSize = fovSlider.AbsoluteSize
+        local relativeX = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
+        fovSize = 50 + (relativeX * 300) -- Range: 50 to 350
+        fovFill.Size = UDim2.new(relativeX, 0, 1, 0)
+        fovValue.Text = math.floor(fovSize)
+    end
+end)
+
+-- ESP with Billboard GUI (No Flashing)
 local espEnabled = false
-local espBoxes = {}
+local espLabels = {}
 
-local function addESPBox(target)
-    local box = Instance.new("BoxHandleAdornment")
-    box.Size = target:GetExtentsSize() * 1.1
-    box.Adornee = target
-    box.AlwaysOnTop = true
-    box.ZIndex = 0
-    box.Transparency = 0.5
-    box.Color3 = Color3.fromRGB(255, 0, 0)
-    box.Parent = target
-    table.insert(espBoxes, box)
+local function addESP(target)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP"
+    billboard.Adornee = target:FindFirstChild("HumanoidRootPart")
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = target
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = target.Parent.Name
+    nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    nameLabel.TextSize = 14
+    nameLabel.Font = Enum.Font.SourceSansBold
+    nameLabel.Parent = billboard
+
+    table.insert(espLabels, billboard)
 end
 
 local function clearESP()
-    for _, box in pairs(espBoxes) do
-        box:Destroy()
+    for _, label in pairs(espLabels) do
+        label:Destroy()
     end
-    espBoxes = {}
+    espLabels = {}
 end
 
 local function updateESP()
@@ -208,7 +290,6 @@ local function updateESP()
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character then
-                -- Arsenal-specific team check using TeamColor and Status
                 local playerTeam = player:FindFirstChild("TeamColor") and player.TeamColor
                 local enemyTeam = v:FindFirstChild("TeamColor") and v.TeamColor
                 local isEnemy = true
@@ -217,13 +298,11 @@ local function updateESP()
                         isEnemy = false
                     end
                 else
-                    -- Fallback: Check Team and Status (Arsenal-specific)
                     local playerTeamObj = player.Team
                     local enemyTeamObj = v.Team
                     if playerTeamObj and enemyTeamObj and playerTeamObj == enemyTeamObj then
                         isEnemy = false
                     end
-                    -- Arsenal-specific: Check "Status" for team assignment
                     local playerStatus = player:FindFirstChild("Status")
                     local enemyStatus = v:FindFirstChild("Status")
                     if playerStatus and enemyStatus then
@@ -235,7 +314,7 @@ local function updateESP()
                     end
                 end
                 if isEnemy then
-                    addESPBox(v.Character)
+                    addESP(v.Character)
                 end
             end
         end
@@ -272,7 +351,7 @@ for _, v in pairs(game.Players:GetPlayers()) do
                     end
                 end
                 if isEnemy then
-                    addESPBox(char)
+                    addESP(char)
                 end
             end
         end)
@@ -306,7 +385,7 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
                 end
             end
             if isEnemy then
-                addESPBox(char)
+                addESP(char)
             end
         end
     end)
@@ -351,9 +430,11 @@ mouse.Button2Down:Connect(function()
                 if isEnemy then
                     local head = enemy.Character.Head
                     local dist = (head.Position - mousePos).Magnitude
-                    if dist < shortestDist then
-                        shortestDist = dist
-                        closest = head
+                    if dist < fovSize then -- Use FOV size
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closest = head
+                        end
                     end
                 end
             end
@@ -369,6 +450,8 @@ end)
 mouse.Button2Up:Connect(function()
     locked = false
     target = nil
+    -- Reset camera to prevent aiming down
+    camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
 end)
 
 runService.RenderStepped:Connect(function()
@@ -390,35 +473,27 @@ runService.RenderStepped:Connect(function()
                 end
             end
         end
+        -- Check if target is dead
+        local humanoid = target.Parent:FindFirstChild("Humanoid")
+        if humanoid and humanoid.Health <= 0 then
+            locked = false
+            target = nil
+            -- Reset camera to prevent aiming down
+            camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
+        end
     end
 end)
 
--- Toggle Logic with Slide Animation
-local toggleInfo = TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out)
-local espSlideOn = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -130, 0, 80)})
-local espSlideOff = tweenService:Create(espToggle, toggleInfo, {Position = UDim2.new(0.5, -140, 0, 80)})
-local aimSlideOn = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -130, 0, 160)})
-local aimSlideOff = tweenService:Create(aimToggle, toggleInfo, {Position = UDim2.new(0.5, -140, 0, 160)})
-
+-- Toggle Logic
 espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    espToggle.Text = "ESP: " .. (espEnabled and "ON" or "OFF")
+    espToggle.Text = espEnabled and "ON" or "OFF"
     espToggle.TextColor3 = espEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    if espEnabled then
-        espSlideOn:Play()
-    else
-        espSlideOff:Play()
-    end
     updateESP()
 end)
 
-aimToggle.MouseButton1Click:Connect(function()
+aimbotToggle.MouseButton1Click:Connect(function()
     aimEnabled = not aimEnabled
-    aimToggle.Text = "AIMBOT: " .. (aimEnabled and "ON" or "OFF")
-    aimToggle.TextColor3 = aimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    if aimEnabled then
-        aimSlideOn:Play()
-    else
-        aimSlideOff:Play()
-    end
+    aimbotToggle.Text = aimEnabled and "ON" or "OFF"
+    aimbotToggle.TextColor3 = aimEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 end)
