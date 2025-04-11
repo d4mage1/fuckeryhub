@@ -1,4 +1,3 @@
--- Load Confirmation with ASCII Art
 print(" ")
 print("=====================================")
 print("     FUCKERY HUB LOADED - LET'S GO!  ")
@@ -27,7 +26,6 @@ local teams = game:GetService("Teams")
 local tweenService = game:GetService("TweenService")
 local uis = game:GetService("UserInputService")
 
--- GUI Setup (ZYHPERION Style)
 local gui = Instance.new("ScreenGui")
 gui.Name = "FuckeryHub"
 gui.Parent = game.CoreGui
@@ -40,7 +38,7 @@ mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundTransparency = 1
 mainFrame.Parent = gui
 
--- Side Panel (Tabs)
+
 local sidePanel = Instance.new("Frame")
 sidePanel.Size = UDim2.new(0, 150, 1, 0)
 sidePanel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
@@ -53,7 +51,7 @@ sidePanelList.SortOrder = Enum.SortOrder.LayoutOrder
 sidePanelList.Padding = UDim.new(0, 5)
 sidePanelList.Parent = sidePanel
 
--- Tab Buttons
+
 local combatTabButton = Instance.new("TextButton")
 combatTabButton.Size = UDim2.new(1, 0, 0, 40)
 combatTabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
@@ -74,7 +72,7 @@ visualsTabButton.Font = Enum.Font.SourceSansBold
 visualsTabButton.BackgroundTransparency = 1
 visualsTabButton.Parent = sidePanel
 
--- Content Area
+
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(0, 450, 1, 0)
 contentFrame.Position = UDim2.new(0, 150, 0, 0)
@@ -83,7 +81,7 @@ contentFrame.BorderSizePixel = 0
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
 
--- Combat Tab Content
+
 local combatTab = Instance.new("Frame")
 combatTab.Size = UDim2.new(1, 0, 1, 0)
 combatTab.BackgroundTransparency = 1
@@ -95,7 +93,7 @@ combatList.SortOrder = Enum.SortOrder.LayoutOrder
 combatList.Padding = UDim.new(0, 10)
 combatList.Parent = combatTab
 
--- Aimbot Toggle
+
 local aimbotFrame = Instance.new("Frame")
 aimbotFrame.Size = UDim2.new(1, 0, 0, 30)
 aimbotFrame.BackgroundTransparency = 1
@@ -121,7 +119,7 @@ aimbotToggle.TextSize = 14
 aimbotToggle.Font = Enum.Font.SourceSans
 aimbotToggle.Parent = aimbotFrame
 
--- FOV Slider
+
 local fovFrame = Instance.new("Frame")
 fovFrame.Size = UDim2.new(1, 0, 0, 30)
 fovFrame.BackgroundTransparency = 1
@@ -160,7 +158,7 @@ fovValue.TextSize = 16
 fovValue.Font = Enum.Font.SourceSans
 fovValue.Parent = fovFrame
 
--- Visuals Tab Content
+
 local visualsTab = Instance.new("Frame")
 visualsTab.Size = UDim2.new(1, 0, 1, 0)
 visualsTab.BackgroundTransparency = 1
@@ -172,7 +170,7 @@ visualsList.SortOrder = Enum.SortOrder.LayoutOrder
 visualsList.Padding = UDim.new(0, 10)
 visualsList.Parent = visualsTab
 
--- ESP Toggle
+
 local espFrame = Instance.new("Frame")
 espFrame.Size = UDim2.new(1, 0, 0, 30)
 espFrame.BackgroundTransparency = 1
@@ -198,7 +196,7 @@ espToggle.TextSize = 14
 espToggle.Font = Enum.Font.SourceSans
 espToggle.Parent = espFrame
 
--- Animations
+
 local fadeInInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 local mainFadeIn = tweenService:Create(mainFrame, fadeInInfo, {BackgroundTransparency = 0})
 local sideFadeIn = tweenService:Create(sidePanel, fadeInInfo, {BackgroundTransparency = 0})
@@ -212,7 +210,7 @@ contentFadeIn:Play()
 combatFadeIn:Play()
 visualsFadeIn:Play()
 
--- Tab Switching
+
 combatTabButton.MouseButton1Click:Connect(function()
     combatTab.Visible = true
     visualsTab.Visible = false
@@ -227,7 +225,7 @@ visualsTabButton.MouseButton1Click:Connect(function()
     visualsTabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
 end)
 
--- FOV Slider Logic
+
 local fovSize = 150
 local dragging = false
 
@@ -247,13 +245,13 @@ uis.InputChanged:Connect(function(input)
         local sliderPos = fovSlider.AbsolutePosition
         local sliderSize = fovSlider.AbsoluteSize
         local relativeX = math.clamp((mousePos.X - sliderPos.X) / sliderSize.X, 0, 1)
-        fovSize = 50 + (relativeX * 300) -- Range: 50 to 350
+        fovSize = 50 + (relativeX * 300)
         fovFill.Size = UDim2.new(relativeX, 0, 1, 0)
         fovValue.Text = math.floor(fovSize)
     end
 end)
 
--- ESP with Billboard GUI (No Flashing)
+
 local espEnabled = false
 local espLabels = {}
 
@@ -391,7 +389,7 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Aimbot: Hold Right-Click to Lock and Fire (Enemies Only)
+
 local aimEnabled = false
 local target = nil
 local locked = false
@@ -430,7 +428,7 @@ mouse.Button2Down:Connect(function()
                 if isEnemy then
                     local head = enemy.Character.Head
                     local dist = (head.Position - mousePos).Magnitude
-                    if dist < fovSize then -- Use FOV size
+                    if dist < fovSize then 
                         if dist < shortestDist then
                             shortestDist = dist
                             closest = head
@@ -450,7 +448,6 @@ end)
 mouse.Button2Up:Connect(function()
     locked = false
     target = nil
-    -- Reset camera to prevent aiming down
     camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
 end)
 
@@ -473,18 +470,15 @@ runService.RenderStepped:Connect(function()
                 end
             end
         end
-        -- Check if target is dead
         local humanoid = target.Parent:FindFirstChild("Humanoid")
         if humanoid and humanoid.Health <= 0 then
             locked = false
             target = nil
-            -- Reset camera to prevent aiming down
             camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + camera.CFrame.LookVector * 10)
         end
     end
 end)
 
--- Toggle Logic
 espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     espToggle.Text = espEnabled and "ON" or "OFF"
