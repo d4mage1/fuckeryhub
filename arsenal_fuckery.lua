@@ -67,7 +67,7 @@ if not success or not Rayfield then
 end
 
 -- Create Rayfield Window with Discord Join Requirement
-local discordInvite = "https://discord.gg/tqSz4aVBg9" -- Replace with your Discord server invite link
+local discordInvite = "YOUR_DISCORD_INVITE_LINK_HERE" -- Replace with your Discord server invite link
 local WindowSuccess, Window = pcall(function()
     return Rayfield:CreateWindow({
         Name = "Fuckery Hub",
@@ -247,7 +247,7 @@ if not VisualsTabSuccess or not VisualsTab then
 end
 
 local espEnabled = false
-local espLabels = {} -- Store BillboardGui labels
+local espBoxes = {}
 local espToggleSuccess, espToggleError = pcall(function()
     VisualsTab:CreateToggle({
         Name = "Enable ESP",
@@ -293,9 +293,9 @@ else
     local aboutLabelSuccess, aboutLabelError = pcall(function()
         AboutTab:CreateLabel("Yo, I'm d4mage1, the mastermind behind Fuckery Hub, yk!")
         AboutTab:CreateLabel("I made this script to fuck shit up in Arsenal and have a good time.")
-        AboutTab:CreateLabel("Shoutout to my friends for testing this out—y'all the real MVPs.")
-        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1")
-        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 12th 2025")
+        AboutTab:CreateLabel("Shoutout to my homies for testing this out—y'all the real MVPs.")
+        AboutTab:CreateLabel("Wanna hit me up? Catch me on Discord: d4mage1#1337")
+        AboutTab:CreateLabel("Version: 1.0 | Last Updated: April 2025")
     end)
     if not aboutLabelSuccess then
         warn("Failed to create About Me Labels: " .. tostring(aboutLabelError))
@@ -321,6 +321,17 @@ if not SettingsTabSuccess or not SettingsTab then
         Duration = 5
     })
 else
+    -- Create a separate ScreenGui for the theme overlay
+    local themeGui = Instance.new("ScreenGui")
+    themeGui.Name = "FuckeryThemeOverlay"
+    themeGui.Parent = game.CoreGui
+    themeGui.ResetOnSpawn = false
+
+    local themeOverlay = Instance.new("Frame")
+    themeOverlay.Size = UDim2.new(1, 0, 1, 0)
+    themeOverlay.BackgroundTransparency = 1
+    themeOverlay.Parent = themeGui
+
     local themeDropdownSuccess, themeDropdownError = pcall(function()
         SettingsTab:CreateDropdown({
             Name = "Theme",
@@ -329,56 +340,51 @@ else
             Flag = "ThemeDropdown",
             Callback = function(Option)
                 local success, err = pcall(function()
-                    local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
-                    if not gui then
-                        warn("Rayfield GUI not found in CoreGui")
-                        return
-                    end
-
-                    local interface = gui:FindFirstChild("Interface")
-                    if not interface then
-                        warn("Interface not found in Rayfield GUI")
-                        return
-                    end
-
-                    local window = interface:FindFirstChild("Window")
-                    if not window then
-                        warn("Window not found in Interface")
-                        return
-                    end
-
-                    -- Recursive function to change colors
-                    local function updateColors(obj, bgColor, textColor, buttonColor)
-                        if obj:IsA("Frame") or obj:IsA("ScrollingFrame") then
-                            obj.BackgroundColor3 = bgColor
-                        end
-                        if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-                            obj.TextColor3 = textColor
-                            if obj:IsA("TextButton") then
-                                obj.BackgroundColor3 = buttonColor
-                            end
-                        end
-                        for _, child in pairs(obj:GetChildren()) do
-                            updateColors(child, bgColor, textColor, buttonColor)
-                        end
+                    -- Instead of changing Rayfield's colors, apply an overlay effect
+                    for _, child in pairs(themeOverlay:GetChildren()) do
+                        child:Destroy()
                     end
 
                     if Option == "Dark" then
-                        updateColors(window, Color3.fromRGB(30, 30, 30), Color3.fromRGB(255, 255, 255), Color3.fromRGB(50, 50, 50))
+                        -- No overlay needed for Dark (default Rayfield theme)
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Dark theme, cuhh!",
                             Duration = 3
                         })
                     elseif Option == "Light" then
-                        updateColors(window, Color3.fromRGB(220, 220, 220), Color3.fromRGB(0, 0, 0), Color3.fromRGB(180, 180, 180))
+                        local overlay = Instance.new("Frame")
+                        overlay.Size = UDim2.new(1, 0, 1, 0)
+                        overlay.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+                        overlay.BackgroundTransparency = 0.2
+                        overlay.Parent = themeOverlay
+
+                        local textOverlay = Instance.new("TextLabel")
+                        textOverlay.Size = UDim2.new(1, 0, 1, 0)
+                        textOverlay.BackgroundTransparency = 1
+                        textOverlay.Text = ""
+                        textOverlay.TextColor3 = Color3.fromRGB(0, 0, 0)
+                        textOverlay.Parent = themeOverlay
+
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Light theme, cuhh!",
                             Duration = 3
                         })
                     elseif Option == "Fuckery" then
-                        updateColors(window, Color3.fromRGB(20, 0, 0), Color3.fromRGB(255, 0, 0), Color3.fromRGB(50, 0, 0))
+                        local overlay = Instance.new("Frame")
+                        overlay.Size = UDim2.new(1, 0, 1, 0)
+                        overlay.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+                        overlay.BackgroundTransparency = 0.2
+                        overlay.Parent = themeOverlay
+
+                        local textOverlay = Instance.new("TextLabel")
+                        textOverlay.Size = UDim2.new(1, 0, 1, 0)
+                        textOverlay.BackgroundTransparency = 1
+                        textOverlay.Text = ""
+                        textOverlay.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        textOverlay.Parent = themeOverlay
+
                         Rayfield:Notify({
                             Title = "Theme",
                             Content = "Switched to Fuckery theme, cuhh! Red and black vibes!",
@@ -389,7 +395,7 @@ else
                 if not success then
                     Rayfield:Notify({
                         Title = "Error",
-                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh. Switching to basic GUI next update if this keeps happening.",
+                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh.",
                         Duration = 5
                     })
                 end
@@ -406,37 +412,34 @@ else
     end
 end
 
--- ESP Functions (New Method: BillboardGui)
+-- ESP Functions (Fixed BoxHandleAdornment Method)
 local function addESP(target, playerName)
-    if not target or not target:FindFirstChild("Head") then return end
+    if not target or not target:FindFirstChild("HumanoidRootPart") then
+        print("No HumanoidRootPart for " .. playerName .. ", skipping ESP")
+        return
+    end
     if target == player.Character then
         print("Attempted to add ESP to local player, skipping: " .. playerName)
         return
     end
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP"
-    billboard.Adornee = target:FindFirstChild("Head")
-    billboard.Size = UDim2.new(0, 100, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = playerName
-    label.TextColor3 = Color3.fromRGB(255, 0, 0)
-    label.TextScaled = true
-    label.Parent = billboard
-    billboard.Parent = target
-    table.insert(espLabels, billboard)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = Vector3.new(4, 6, 4) -- Fixed size to avoid scaling issues
+    box.Adornee = target:FindFirstChild("HumanoidRootPart")
+    box.Color3 = Color3.fromRGB(255, 0, 0)
+    box.Transparency = 0.5
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Parent = target
+    table.insert(espBoxes, box)
 end
 
 local function clearESP()
-    for _, label in pairs(espLabels) do
-        if label then
-            label:Destroy()
+    for _, box in pairs(espBoxes) do
+        if box then
+            box:Destroy()
         end
     end
-    espLabels = {}
+    espBoxes = {}
 end
 
 local function updateESP()
@@ -488,7 +491,7 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Hitbox Extender Logic (New Method: Modify Hit Detection)
+-- Hitbox Extender Logic (Fixed FireServer Hook)
 local originalFireServer
 local hooked = false
 
@@ -496,12 +499,12 @@ local function hookFireServer()
     if hooked then return end
     local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
     if remotes then
-        local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire")
+        local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit")
         if shootEvent then
+            print("Found shoot event: " .. shootEvent.Name)
             originalFireServer = shootEvent.FireServer
             shootEvent.FireServer = function(self, targetPos, ...)
                 if hitboxExtenderEnabled then
-                    -- Find the closest enemy within hitboxSize range
                     local closestEnemy = nil
                     local shortestDist = hitboxSize
                     for _, enemy in pairs(game.Players:GetPlayers()) do
@@ -526,13 +529,18 @@ local function hookFireServer()
                         end
                     end
                     if closestEnemy then
+                        print("Hitbox extender redirected shot to: " .. closestEnemy.Parent.Name)
                         targetPos = closestEnemy.Position
                     end
                 end
                 return originalFireServer(self, targetPos, ...)
             end
             hooked = true
+        else
+            print("Could not find shoot event in ReplicatedStorage")
         end
+    else
+        print("Could not find Events or Remotes in ReplicatedStorage")
     end
 end
 
@@ -551,7 +559,7 @@ runService.RenderStepped:Connect(function()
     end
 end)
 
--- Aimbot Logic
+-- Aimbot Logic (Target Closest to Cursor in Screen Space)
 local target = nil
 local locked = false
 local lastLookVector = camera.CFrame.LookVector
@@ -561,7 +569,7 @@ mouse.Button2Down:Connect(function()
 
     local closest = nil
     local shortestDist = math.huge
-    local mousePos = mouse.Hit.Position
+    local cursorPos = Vector2.new(mouse.X, mouse.Y)
 
     for _, enemy in pairs(game.Players:GetPlayers()) do
         if enemy == player then continue end
@@ -576,10 +584,14 @@ mouse.Button2Down:Connect(function()
             end
             if isEnemy then
                 local head = enemy.Character.Head
-                local dist = (head.Position - mousePos).Magnitude
-                if dist < fovSize and dist < shortestDist then
-                    shortestDist = dist
-                    closest = head
+                local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
+                if onScreen then
+                    local screenPos2D = Vector2.new(screenPos.X, screenPos.Y)
+                    local dist = (screenPos2D - cursorPos).Magnitude
+                    if dist < fovSize and dist < shortestDist then
+                        shortestDist = dist
+                        closest = head
+                    end
                 end
             end
         end
@@ -601,7 +613,7 @@ mouse.Button2Up:Connect(function()
     target = nil
     local camPos = camera.CFrame.Position
     local newLookAt = camPos + (lastLookVector * 100)
-    camera.CFrame = CFrame.new(camPos, newLookAt)
+    camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(camera.CFrame, 0.8) -- Even smoother reset
 end)
 
 runService.RenderStepped:Connect(function()
@@ -619,7 +631,7 @@ runService.RenderStepped:Connect(function()
             if tool then
                 local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
                 if remotes then
-                    local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire")
+                    local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit")
                     if shootEvent then
                         shootEvent:FireServer(target.Position)
                     end
@@ -632,7 +644,7 @@ runService.RenderStepped:Connect(function()
             target = nil
             local camPos = camera.CFrame.Position
             local newLookAt = camPos + (lastLookVector * 100)
-            camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(currentCFrame, 0.5) -- Smooth reset
+            camera.CFrame = CFrame.new(camPos, newLookAt):Lerp(camera.CFrame, 0.8) -- Even smoother reset
         end
     end
 end)
