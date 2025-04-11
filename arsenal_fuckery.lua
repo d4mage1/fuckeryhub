@@ -25,7 +25,6 @@ local camera = game.Workspace.CurrentCamera
 local runService = game:GetService("RunService")
 local teams = game:GetService("Teams")
 local uis = game:GetService("UserInputService")
-local httpService = game:GetService("HttpService")
 
 -- Load Rayfield UI Library with Error Handling
 local Rayfield
@@ -53,7 +52,8 @@ if not Rayfield then
     return
 end
 
--- Create Rayfield Window
+-- Create Rayfield Window with Discord Join Requirement
+local discordInvite = "https://discord.gg/tqSz4aVBg9" -- Replace with your Discord server invite link
 local WindowSuccess, Window = pcall(function()
     return Rayfield:CreateWindow({
         Name = "Fuckery Hub",
@@ -65,9 +65,9 @@ local WindowSuccess, Window = pcall(function()
             FileName = "ArsenalConfig"
         },
         Discord = {
-            Enabled = false,
-            Invite = "",
-            RememberJoins = true
+            Enabled = true,
+            Invite = discordInvite, -- Your Discord invite link
+            RememberJoins = true -- Remember if the user has joined
         },
         KeySystem = false
     })
@@ -93,7 +93,7 @@ game.StarterGui:SetCore("SendNotification", {
 -- Combat Tab
 local CombatTab
 local CombatTabSuccess, CombatTabError = pcall(function()
-    CombatTab = Window:CreateTab("Combat") -- Removed the icon argument
+    CombatTab = Window:CreateTab("Combat")
 end)
 
 if not CombatTabSuccess or not CombatTab then
@@ -143,6 +143,11 @@ local fovSliderSuccess, fovSliderError = pcall(function()
         Flag = "FOVSlider",
         Callback = function(Value)
             fovSize = Value
+            Rayfield:Notify({
+                Title = "FOV Size",
+                Content = "Set FOV to " .. Value .. " units, cuhh!",
+                Duration = 3
+            })
         end
     })
 end)
@@ -159,7 +164,7 @@ end
 -- Visuals Tab
 local VisualsTab
 local VisualsTabSuccess, VisualsTabError = pcall(function()
-    VisualsTab = Window:CreateTab("Visuals") -- Removed the icon argument
+    VisualsTab = Window:CreateTab("Visuals")
 end)
 
 if not VisualsTabSuccess or not VisualsTab then
@@ -202,75 +207,10 @@ if not espToggleSuccess then
     })
 end
 
--- Suggest Tab
-local SuggestTab
-local SuggestTabSuccess, SuggestTabError = pcall(function()
-    SuggestTab = Window:CreateTab("Suggest") -- Removed the icon argument
-end)
-
-if not SuggestTabSuccess or not SuggestTab then
-    warn("Failed to create Suggest Tab: " .. tostring(SuggestTabError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Suggest Tab: " .. tostring(SuggestTabError) .. ", cuhh.",
-        Duration = 5
-    })
-    return
-end
-
-local suggestionInput
-local suggestionInputSuccess, suggestionInputError = pcall(function()
-    suggestionInput = SuggestTab:CreateInput({
-        Name = "Suggestion",
-        PlaceholderText = "Type your suggestion here, cuhh...",
-        RemoveTextAfterFocusLost = false,
-        Flag = "SuggestionInput",
-        Callback = function(Text)
-            -- Store the input for the send button
-        end
-    })
-end)
-
-if not suggestionInputSuccess then
-    warn("Failed to create Suggestion Input: " .. tostring(suggestionInputError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Suggestion Input: " .. tostring(suggestionInputError) .. ", cuhh.",
-        Duration = 5
-    })
-end
-
-local sendButtonSuccess, sendButtonError = pcall(function()
-    SuggestTab:CreateButton({
-        Name = "Send Suggestion",
-        Callback = function()
-            local suggestion = suggestionInput and suggestionInput.CurrentText or ""
-            if suggestion == "" then
-                Rayfield:Notify({
-                    Title = "Error",
-                    Content = "Suggestion can't be empty, cuhh.",
-                    Duration = 3
-                })
-                return
-            end
-            sendSuggestion(suggestion)
-        end
-    })
-end)
-
-if not sendButtonSuccess then
-    warn("Failed to create Send Suggestion Button: " .. tostring(sendButtonError))
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Error",
-        Text = "Couldn't create Send Suggestion Button: " .. tostring(sendButtonError) .. ", cuhh.",
-        Duration = 5
-    })
-end
-
 -- About Me Tab
 local AboutTab
 local AboutTabSuccess, AboutTabError = pcall(function()
-    AboutTab = Window:CreateTab("About Me") -- Removed the icon argument
+    AboutTab = Window:CreateTab("About Me")
 end)
 
 if not AboutTabSuccess or not AboutTab then
@@ -301,7 +241,7 @@ end
 -- Settings Tab
 local SettingsTab
 local SettingsTabSuccess, SettingsTabError = pcall(function()
-    SettingsTab = Window:CreateTab("Settings") -- Removed the icon argument
+    SettingsTab = Window:CreateTab("Settings")
 end)
 
 if not SettingsTabSuccess or not SettingsTab then
@@ -319,23 +259,102 @@ else
             CurrentOption = "Dark",
             Flag = "ThemeDropdown",
             Callback = function(Option)
-                if Option == "Dark" then
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "Theme",
-                        Text = "Switched to Dark theme, cuhh! (Default Rayfield look)",
-                        Duration = 3
-                    })
-                elseif Option == "Light" then
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "Theme",
-                        Text = "Switched to Light theme, cuhh! (Not fully supported, but we vibin')",
-                        Duration = 3
-                    })
-                elseif Option == "Fuckery" then
-                    game.StarterGui:SetCore("SendNotification", {
-                        Title = "Theme",
-                        Text = "Switched to Fuckery theme, cuhh! (Red and black vibes)",
-                        Duration = 3
+                -- Find the Rayfield GUI elements to change colors
+                local success, err = pcall(function()
+                    local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
+                    if not gui then return end
+
+                    local mainFrame = gui:FindFirstChild("Main", true)
+                    if not mainFrame then return end
+
+                    local tabs = mainFrame:FindFirstChild("Tabs", true)
+                    local elements = mainFrame:FindFirstChild("Elements", true)
+
+                    if Option == "Dark" then
+                        if mainFrame then
+                            mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+                        end
+                        if tabs then
+                            for _, tab in pairs(tabs:GetChildren()) do
+                                if tab:IsA("Frame") then
+                                    tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                                end
+                            end
+                        end
+                        if elements then
+                            for _, element in pairs(elements:GetDescendants()) do
+                                if element:IsA("TextLabel") or element:IsA("TextButton") then
+                                    element.TextColor3 = Color3.fromRGB(255, 255, 255)
+                                    if element:IsA("TextButton") then
+                                        element.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                                    end
+                                end
+                            end
+                        end
+                        Rayfield:Notify({
+                            Title = "Theme",
+                            Content = "Switched to Dark theme, cuhh!",
+                            Duration = 3
+                        })
+                    elseif Option == "Light" then
+                        if mainFrame then
+                            mainFrame.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Light background
+                        end
+                        if tabs then
+                            for _, tab in pairs(tabs:GetChildren()) do
+                                if tab:IsA("Frame") then
+                                    tab.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                                end
+                            end
+                        end
+                        if elements then
+                            for _, element in pairs(elements:GetDescendants()) do
+                                if element:IsA("TextLabel") or element:IsA("TextButton") then
+                                    element.TextColor3 = Color3.fromRGB(0, 0, 0)
+                                    if element:IsA("TextButton") then
+                                        element.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+                                    end
+                                end
+                            end
+                        end
+                        Rayfield:Notify({
+                            Title = "Theme",
+                            Content = "Switched to Light theme, cuhh!",
+                            Duration = 3
+                        })
+                    elseif Option == "Fuckery" then
+                        if mainFrame then
+                            mainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0) -- Dark red background
+                        end
+                        if tabs then
+                            for _, tab in pairs(tabs:GetChildren()) do
+                                if tab:IsA("Frame") then
+                                    tab.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+                                end
+                            end
+                        end
+                        if elements then
+                            for _, element in pairs(elements:GetDescendants()) do
+                                if element:IsA("TextLabel") or element:IsA("TextButton") then
+                                    element.TextColor3 = Color3.fromRGB(255, 0, 0)
+                                    if element:IsA("TextButton") then
+                                        element.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+                                    end
+                                end
+                            end
+                        end
+                        Rayfield:Notify({
+                            Title = "Theme",
+                            Content = "Switched to Fuckery theme, cuhh! Red and black vibes!",
+                            Duration = 3
+                        })
+                    end
+                end)
+                if not success then
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "Failed to change theme: " .. tostring(err) .. ", cuhh.",
+                        Duration = 5
                     })
                 end
             end
@@ -384,14 +403,18 @@ local function updateESP()
     clearESP()
     for _, v in pairs(game.Players:GetPlayers()) do
         if v == player then
-            continue -- Skip the local player
+            continue -- Explicitly skip the local player
         end
         if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
             local playerTeam = player.Team
             local enemyTeam = v.Team
             local isEnemy = true
+            -- Handle Arsenal's team system (sometimes teams are nil in FFA modes)
             if playerTeam and enemyTeam and playerTeam == enemyTeam then
                 isEnemy = false -- Skip teammates
+            elseif not playerTeam or not enemyTeam then
+                -- If teams are nil (FFA mode), treat everyone as an enemy except the local player
+                isEnemy = true
             end
             if isEnemy then
                 addESP(v.Character)
@@ -446,6 +469,8 @@ mouse.Button2Down:Connect(function()
             local isEnemy = true
             if playerTeam and enemyTeam and playerTeam == enemyTeam then
                 isEnemy = false
+            elseif not playerTeam or not enemyTeam then
+                isEnemy = true
             end
             if isEnemy then
                 local head = enemy.Character.Head
@@ -504,65 +529,5 @@ runService.RenderStepped:Connect(function()
         end
     end
 end)
-
--- Webhook Logic
-local webhookUrl = "https://discord.com/api/webhooks/1360247235757084772/zP2eOCkVrnoGE2bB3fuEbJ2NtqmhknVkuPJ6jl5CQShZd3M3zl5QWtQG_yesTcxFZzfq"
-local cooldown = 30
-local lastSubmit = 0
-local blockedWords = {"nigger", "slur", "@everyone", "@here", "nigga", "kys"}
-
-local function containsBlockedWords(text)
-    for _, word in pairs(blockedWords) do
-        if string.find(string.lower(text), word) then
-            return true
-        end
-    end
-    return false
-end
-
-function sendSuggestion(suggestion)
-    local currentTime = tick()
-    if currentTime - lastSubmit < cooldown then
-        Rayfield:Notify({
-            Title = "Cooldown",
-            Content = "Wait " .. math.ceil(cooldown - (currentTime - lastSubmit)) .. " seconds, cuhh.",
-            Duration = 3
-        })
-        return
-    end
-
-    if containsBlockedWords(suggestion) then
-        Rayfield:Notify({
-            Title = "Error",
-            Content = "Suggestion got blocked words, cuhh.",
-            Duration = 3
-        })
-        return
-    end
-
-    local success, err = pcall(function()
-        local data = {
-            ["content"] = "New Suggestion from " .. player.Name .. ": " .. suggestion
-        }
-        local jsonData = httpService:JSONEncode(data)
-        local response = httpService:PostAsync(webhookUrl, jsonData, Enum.HttpContentType.ApplicationJson)
-        return response
-    end)
-
-    if success then
-        lastSubmit = currentTime
-        Rayfield:Notify({
-            Title = "Success",
-            Content = "Suggestion sent to Discord, cuhh!",
-            Duration = 3
-        })
-    else
-        Rayfield:Notify({
-            Title = "Error",
-            Content = "Failed to send suggestion: " .. tostring(err) .. ", cuhh. Check if the webhook URL is valid.",
-            Duration = 5
-        })
-    end
-end
 
 print("This script is licensed under the GNU General Public License v3.0 Copyright (C) 2025 d4mage1 You can use, modify, and share this script as long as you keep it open-source and give credit.")
