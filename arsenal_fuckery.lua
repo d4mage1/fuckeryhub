@@ -129,8 +129,7 @@ if not fovSliderSuccess then
 end
 
 local hitboxExtenderEnabled = false
-local hitboxSize = 10 -- Big hitbox as requested
-local hitboxParts = {} -- Store custom hitbox parts
+local hitboxSize = 10 -- Virtual hitbox range (10 studs)
 local hitboxToggleSuccess, hitboxToggleError = pcall(function()
     CombatTab:CreateToggle({
         Name = "Enable Hitbox Extender",
@@ -138,15 +137,6 @@ local hitboxToggleSuccess, hitboxToggleError = pcall(function()
         Flag = "HitboxToggle",
         Callback = function(Value)
             hitboxExtenderEnabled = Value
-            if not hitboxExtenderEnabled then
-                -- Clean up custom hitbox parts
-                for _, part in pairs(hitboxParts) do
-                    if part then
-                        part:Destroy()
-                    end
-                end
-                hitboxParts = {}
-            end
         end
     })
 end)
@@ -286,24 +276,57 @@ game.Players.PlayerAdded:Connect(function(newPlayer)
     end)
 end)
 
--- Hitbox Extender Logic (Using Custom Parts, Big and Slightly Transparent)
-local function createHitboxPart(character)
-    if not character or not character:FindFirstChild("Head") then return end
-    local head = character.Head
-    local hitboxPart = Instance.new("Part")
-    hitboxPart.Name = "ExtendedHitbox"
-    hitboxPart.Size = Vector3.new(10, 10, 10) -- Big hitbox (10x10x10 studs)
-    hitboxPart.Transparency = 0.8 -- Slightly transparent
-    hitboxPart.CanCollide = false
-    hitboxPart.Anchored = false
-    hitboxPart.Position = head.Position
-    local weld = Instance.new("WeldConstraint")
-    weld.Part0 = head
-    weld.Part1 = hitboxPart
-    weld.Parent = hitboxPart
-    hitboxPart.Parent = character
-    table.insert(hitboxParts, hitboxPart)
-    return hitboxPart
+-- Hitbox Extender Logic (Using FireServer Hook, No Physical Parts)
+local originalFireServer
+local hooked = false
+
+local function hookFireServer()
+    if hooked then return end
+    local remotes = game.ReplicatedStorage:FindFirstChild("Events") or game.ReplicatedStorage:FindFirstChild("Remotes")
+    if remotes then
+        local shootEvent = remotes:FindFirstChild("Shoot") or remotes:FindFirstChild("Fire") or remotes:FindFirstChild("Hit") or remotes:FindFirstChild("Bullet")
+        if shootEvent then
+            print("Found shoot event: " .. shootEvent.Name)
+            originalFireServer = shootEvent.FireServer
+            shootEvent.FireServer = function(self, targetPos, ...)
+                if hitboxExtenderEnabled then
+                    local closestEnemy = nil
+                    local shortestDist = hitboxSize
+                    for _, enemy in pairs(game.Players:GetPlayers()) do
+                        if enemy == player then continue end
+                        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
+                            local playerTeam = player.Team
+                            local enemyTeam = enemy.Team
+                            local isEnemy = true
+                            if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                                isEnemy = false
+                            elseif not playerTeam or not enemyTeam then
+                                isEnemy = true
+                            end
+                            if isEnemy then
+                                local head = enemy.Character.Head
+                                local dist = (head.Position - targetPos).Magnitude
+                                if dist < shortestDist then
+                                    shortestDist = dist
+                                    closestEnemy = head
+                                end
+                            end
+                        end
+                    end
+                    if closestEnemy then
+                        print("Hitbox extender redirected shot to: " .. closestEnemy.Parent.Name)
+                        targetPos = closestEnemy.Position
+                    end
+                end
+                return originalFireServer(self, targetPos, ...)
+            end
+            hooked = true
+        else
+            print("Could not find shoot event in ReplicatedStorage")
+        end
+    else
+        print("Could not find Events or Remotes in ReplicatedStorage")
+    end
 end
 
 -- Main Loop
@@ -315,20 +338,13 @@ runService.RenderStepped:Connect(function()
         clearESP()
     end
 
-    -- Hitbox Extender Update
+    -- Hook FireServer for hitbox extender
     if hitboxExtenderEnabled then
-        for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") then
-                local existingHitbox = enemy.Character:FindFirstChild("ExtendedHitbox")
-                if not existingHitbox then
-                    createHitboxPart(enemy.Character)
-                end
-            end
-        end
+        hookFireServer()
     end
 end)
 
--- Aimbot Logic (Sharper Turn, Lock On Until Kill, Then Find New Target)
+-- Aimbot Logic (Skip Dead Players, No Confusion in Crowds)
 local target = nil
 local locked = false
 
@@ -339,24 +355,28 @@ local function findNewTarget()
 
     for _, enemy in pairs(game.Players:GetPlayers()) do
         if enemy == player then continue end
-        if enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") and enemy.Character.Humanoid.Health > 0 then
-            local playerTeam = player.Team
-            local enemyTeam = enemy.Team
-            local isEnemy = true
-            if playerTeam and enemyTeam and playerTeam == enemyTeam then
-                isEnemy = false
-            elseif not playerTeam or not enemyTeam then
-                isEnemy = true
-            end
-            if isEnemy then
-                local head = enemy.Character.Head
-                local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
-                if onScreen then
-                    local screenPos2D = Vector2.new(screenPos.X, screenPos.Y)
-                    local dist = (screenPos2D - cursorPos).Magnitude
-                    if dist < fovSize and dist < shortestDist then
-                        shortestDist = dist
-                        closest = head
+        if enemy.Character then
+            local head = enemy.Character:FindFirstChild("Head")
+            local humanoid = enemy.Character:FindFirstChild("Humanoid")
+            -- Stricter check: ensure both head and humanoid exist, and health is greater than 0
+            if head and humanoid and humanoid.Health > 0 then
+                local playerTeam = player.Team
+                local enemyTeam = enemy.Team
+                local isEnemy = true
+                if playerTeam and enemyTeam and playerTeam == enemyTeam then
+                    isEnemy = false
+                elseif not playerTeam or not enemyTeam then
+                    isEnemy = true
+                end
+                if isEnemy then
+                    local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
+                    if onScreen then
+                        local screenPos2D = Vector2.new(screenPos.X, screenPos.Y)
+                        local dist = (screenPos2D - cursorPos).Magnitude
+                        if dist < fovSize and dist < shortestDist then
+                            shortestDist = dist
+                            closest = head
+                        end
                     end
                 end
             end
@@ -381,6 +401,7 @@ end)
 
 runService.RenderStepped:Connect(function()
     if aimbotEnabled and locked then
+        -- Double-check if the target is still valid and alive
         if not target or not target.Parent then
             target = findNewTarget()
             if not target then
@@ -390,7 +411,7 @@ runService.RenderStepped:Connect(function()
         end
 
         local humanoid = target.Parent:FindFirstChild("Humanoid")
-        if humanoid and humanoid.Health <= 0 then
+        if not humanoid or humanoid.Health <= 0 then
             target = findNewTarget()
             if not target then
                 locked = false
@@ -400,7 +421,7 @@ runService.RenderStepped:Connect(function()
 
         local currentCFrame = camera.CFrame
         local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
-        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8) -- Sharper turn (was 0.2)
+        camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8) -- Sharper turn
     end
 end)
 
