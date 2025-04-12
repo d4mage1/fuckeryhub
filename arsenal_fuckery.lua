@@ -4,18 +4,18 @@ print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
 print([[
-                     szerokie  szerokie  szerokie  szerokie  szerokie  szerokie  
-                    | |       | |               | | || |                         / _|
- _ __ ___   __ _  __| | ___   | |__  _   _    __| | || |_| '_ ` _ \  __ _  __ _  |__|
-| '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |  / _` |__   _| | | | | |/ _` |/ _` |/ _ \
-| | | | | | (_| | (_| |  __/  | |_) | |_| | | (_| |  | | | | | | | | (_| | (_| |  __/ |
-|_| |_| |_|__,_|__,_|_|___|  |_.__/ \__, |  \__,_|  |_| |_| |_| |_|__,_|__,_|_|___|_|
-                                     __/ |                               __/ |       
-                                    |___/                               |___/        
+                     _        _                 _   ___                            __  
+                    | |      | |               | | /   |                          /  | 
+ _ __ ___   __ _  __| | ___  | |__  _   _    __| |/ /| |_ __ ___   __ _  __ _  ___`| | 
+| '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` / /_| | '_ ` _ \ / _` |/ _` |/ _ \| | 
+| | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| \___  | | | | | | (_| | (_| |  __/| |_
+|_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|   |_/_| |_| |_|\__,_|\__, |\___\___/
+                                     __/ |                               __/ |         
+                                    |___/                               |___/          
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.4 - Arsenal Edition")
+print("Version: 2.5 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -35,7 +35,6 @@ local success, err = pcall(function()
     -- Feature Toggles
     local aimbotEnabled = false
     local aimAssistEnabled = false
-    local silentAimEnabled = false
     local hitboxExtenderEnabled = false
     local autoFireEnabled = false
     local espEnabled = false
@@ -45,7 +44,7 @@ local success, err = pcall(function()
 
     -- Feature Variables
     local espBoxes = {}
-    local tracers = {}
+    local tracerBeams = {} -- Using Beams instead of Drawing API
     local fovCircle = nil
     local fovCircleSize = 150
     local fovCircleColor = Color3.fromRGB(255, 255, 255)
@@ -75,13 +74,12 @@ local success, err = pcall(function()
         print("Keybinds:")
         print("F1 - Toggle Aimbot")
         print("F2 - Toggle Aim Assist")
-        print("F3 - Toggle Silent Aim")
-        print("F4 - Toggle Hitbox Extender")
-        print("F5 - Toggle Auto Fire")
-        print("F6 - Toggle ESP")
-        print("F7 - Toggle Tracers")
-        print("F8 - Toggle FOV Circle")
-        print("F9 - Toggle Panic Mode")
+        print("F3 - Toggle Hitbox Extender")
+        print("F4 - Toggle Auto Fire")
+        print("F5 - Toggle ESP")
+        print("F6 - Toggle Tracers")
+        print("F7 - Toggle FOV Circle")
+        print("F8 - Toggle Panic Mode")
         print(" ")
 
         -- Fallback to keybinds if Rayfield fails
@@ -95,23 +93,20 @@ local success, err = pcall(function()
                     aimAssistEnabled = not aimAssistEnabled
                     print("Aim Assist " .. (aimAssistEnabled and "enabled" or "disabled"))
                 elseif input.KeyCode == Enum.KeyCode.F3 then
-                    silentAimEnabled = not silentAimEnabled
-                    print("Silent Aim " .. (silentAimEnabled and "enabled" or "disabled"))
-                elseif input.KeyCode == Enum.KeyCode.F4 then
                     hitboxExtenderEnabled = not hitboxExtenderEnabled
                     print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
-                elseif input.KeyCode == Enum.KeyCode.F5 then
+                elseif input.KeyCode == Enum.KeyCode.F4 then
                     autoFireEnabled = not autoFireEnabled
                     print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
-                elseif input.KeyCode == Enum.KeyCode.F6 then
+                elseif input.KeyCode == Enum.KeyCode.F5 then
                     espEnabled = not espEnabled
                     print("ESP " .. (espEnabled and "enabled" or "disabled"))
                     if not espEnabled then clearESP() end
-                elseif input.KeyCode == Enum.KeyCode.F7 then
+                elseif input.KeyCode == Enum.KeyCode.F6 then
                     tracersEnabled = not tracersEnabled
                     print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
                     if not tracersEnabled then clearTracers() end
-                elseif input.KeyCode == Enum.KeyCode.F8 then
+                elseif input.KeyCode == Enum.KeyCode.F7 then
                     fovCircleEnabled = not fovCircleEnabled
                     print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
                     if fovCircleEnabled and not fovCircle then
@@ -126,13 +121,12 @@ local success, err = pcall(function()
                     elseif fovCircle then
                         fovCircle.Visible = fovCircleEnabled
                     end
-                elseif input.KeyCode == Enum.KeyCode.F9 then
+                elseif input.KeyCode == Enum.KeyCode.F8 then
                     panicModeEnabled = not panicModeEnabled
                     print("Panic Mode " .. (panicModeEnabled and "enabled" or "disabled"))
                     if panicModeEnabled then
                         aimbotEnabled = false
                         aimAssistEnabled = false
-                        silentAimEnabled = false
                         hitboxExtenderEnabled = false
                         autoFireEnabled = false
                         espEnabled = false
@@ -149,7 +143,7 @@ local success, err = pcall(function()
             end
         end)
     else
-        -- Rayfield loaded successfully, create the GUI
+        -- Rayfield loaded successfully, create the GUI with tabs
         print("Rayfield loaded successfully!")
         local Window = Rayfield:CreateWindow({
             Name = "Fuckery Hub - Arsenal",
@@ -162,10 +156,11 @@ local success, err = pcall(function()
             }
         })
 
-        local MainTab = Window:CreateTab("Main Features")
-        local MainSection = MainTab:CreateSection("Toggles")
+        -- Combat Tab
+        local CombatTab = Window:CreateTab("Combat")
+        local CombatSection = CombatTab:CreateSection("Combat Features")
 
-        MainTab:CreateToggle({
+        CombatTab:CreateToggle({
             Name = "Aimbot",
             CurrentValue = false,
             Callback = function(Value)
@@ -174,7 +169,7 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
+        CombatTab:CreateToggle({
             Name = "Aim Assist",
             CurrentValue = false,
             Callback = function(Value)
@@ -183,16 +178,7 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
-            Name = "Silent Aim",
-            CurrentValue = false,
-            Callback = function(Value)
-                silentAimEnabled = Value
-                print("Silent Aim " .. (silentAimEnabled and "enabled" or "disabled"))
-            end
-        })
-
-        MainTab:CreateToggle({
+        CombatTab:CreateToggle({
             Name = "Hitbox Extender",
             CurrentValue = false,
             Callback = function(Value)
@@ -201,7 +187,7 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
+        CombatTab:CreateToggle({
             Name = "Auto Fire",
             CurrentValue = false,
             Callback = function(Value)
@@ -210,7 +196,11 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
+        -- Visuals Tab
+        local VisualsTab = Window:CreateTab("Visuals")
+        local VisualsSection = VisualsTab:CreateSection("Visual Features")
+
+        VisualsTab:CreateToggle({
             Name = "ESP",
             CurrentValue = false,
             Callback = function(Value)
@@ -220,17 +210,7 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
-            Name = "Tracers",
-            CurrentValue = false,
-            Callback = function(Value)
-                tracersEnabled = Value
-                print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
-                if not tracersEnabled then clearTracers() end
-            end
-        })
-
-        MainTab:CreateToggle({
+        VisualsTab:CreateToggle({
             Name = "FOV Circle",
             CurrentValue = false,
             Callback = function(Value)
@@ -251,7 +231,21 @@ local success, err = pcall(function()
             end
         })
 
-        MainTab:CreateToggle({
+        VisualsTab:CreateToggle({
+            Name = "Tracers",
+            CurrentValue = false,
+            Callback = function(Value)
+                tracersEnabled = Value
+                print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
+                if not tracersEnabled then clearTracers() end
+            end
+        })
+
+        -- Panic Tab
+        local PanicTab = Window:CreateTab("Panic")
+        local PanicSection = PanicTab:CreateSection("Panic Features")
+
+        PanicTab:CreateToggle({
             Name = "Panic Mode",
             CurrentValue = false,
             Callback = function(Value)
@@ -260,7 +254,6 @@ local success, err = pcall(function()
                 if panicModeEnabled then
                     aimbotEnabled = false
                     aimAssistEnabled = false
-                    silentAimEnabled = false
                     hitboxExtenderEnabled = false
                     autoFireEnabled = false
                     espEnabled = false
@@ -357,7 +350,7 @@ local success, err = pcall(function()
         end)
     end)
 
-    -- Tracers Functions
+    -- Tracers Functions (Using Beams)
     local function addTracer(target)
         if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") then
             return
@@ -365,21 +358,36 @@ local success, err = pcall(function()
         if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
             return
         end
-        local line = Drawing.new("Line")
-        line.Transparency = 0.7
-        line.Thickness = 1
-        line.Color = (player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy
-        line.Visible = true
-        table.insert(tracers, {line = line, target = target})
+
+        -- Create Beam
+        local beam = Instance.new("Beam")
+        beam.Color = ColorSequence.new((player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy)
+        beam.Width0 = 0.1
+        beam.Width1 = 0.1
+        beam.Transparency = NumberSequence.new(0.3)
+        beam.LightEmission = 0.5
+
+        -- Create Attachments
+        local attachment0 = Instance.new("Attachment")
+        local attachment1 = Instance.new("Attachment")
+        attachment0.Parent = player.Character.HumanoidRootPart
+        attachment1.Parent = target.HumanoidRootPart
+
+        -- Assign Attachments to Beam
+        beam.Attachment0 = attachment0
+        beam.Attachment1 = attachment1
+        beam.Parent = game.Workspace
+
+        table.insert(tracerBeams, {beam = beam, target = target, attachment0 = attachment0, attachment1 = attachment1})
     end
 
     local function clearTracers()
-        for _, tracer in pairs(tracers) do
-            if tracer.line then
-                tracer.line:Remove()
-            end
+        for _, tracer in pairs(tracerBeams) do
+            if tracer.beam then tracer.beam:Destroy() end
+            if tracer.attachment0 then tracer.attachment0:Destroy() end
+            if tracer.attachment1 then tracer.attachment1:Destroy() end
         end
-        tracers = {}
+        tracerBeams = {}
     end
 
     local function updateTracers()
@@ -412,7 +420,7 @@ local success, err = pcall(function()
         end)
     end)
 
-    -- Silent Aim, Hitbox Extender, and Auto Fire Logic
+    -- Hitbox Extender and Auto Fire Logic
     local function findClosestEnemy()
         local closest, shortestDist = nil, math.huge
         if not player.Character or not player.Character:FindFirstChild("Head") then
@@ -451,13 +459,7 @@ local success, err = pcall(function()
         print("Successfully hooked Arsenal HitPart event")
         originalFireServer = hitPart.FireServer
         hitPart.FireServer = function(self, hit, position, ...)
-            if silentAimEnabled then
-                local closestEnemy = findClosestEnemy()
-                if closestEnemy then
-                    hit = closestEnemy
-                    position = closestEnemy.Position
-                end
-            elseif hitboxExtenderEnabled then
+            if hitboxExtenderEnabled then
                 local closestEnemy, shortestDist = nil, 10
                 for _, enemy in pairs(game.Players:GetPlayers()) do
                     if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
@@ -572,26 +574,18 @@ local success, err = pcall(function()
 
         -- Update Tracers
         if tracersEnabled then
-            for _, tracer in pairs(tracers) do
-                if tracer.target and tracer.target:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local startPos = camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
-                    local endPos, onScreen = camera:WorldToScreenPoint(tracer.target.HumanoidRootPart.Position)
-                    if onScreen then
-                        tracer.line.From = Vector2.new(startPos.X, startPos.Y)
-                        tracer.line.To = Vector2.new(endPos.X, endPos.Y)
-                        tracer.line.Visible = true
-                    else
-                        tracer.line.Visible = false
-                    end
+            for _, tracer in pairs(tracerBeams) do
+                if tracer.target and tracer.target.Parent and tracer.target:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    tracer.beam.Enabled = true
                 else
-                    tracer.line.Visible = false
+                    tracer.beam.Enabled = false
                 end
             end
             updateTracers()
         end
 
-        -- Hook FireServer for Silent Aim, Hitbox Extender, and Auto Fire
-        if silentAimEnabled or hitboxExtenderEnabled or autoFireEnabled then
+        -- Hook FireServer for Hitbox Extender and Auto Fire
+        if hitboxExtenderEnabled or autoFireEnabled then
             local successHook, hookErr = pcall(hookFireServer)
             if not successHook then
                 print("Failed to hook FireServer: " .. tostring(hookErr))
@@ -641,7 +635,7 @@ local success, err = pcall(function()
             camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
         end
 
-        -- Aim Assist
+        -- Aim Assist (Less Sticky)
         if aimAssistEnabled and not locked then
             local assistTarget = findTarget(true)
             if assistTarget then
@@ -649,9 +643,9 @@ local success, err = pcall(function()
                 if onScreen then
                     local cursorPos = Vector2.new(mouse.X, mouse.Y)
                     local distToTarget = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                    local baseStrength = 0.15
-                    local stickiness = math.clamp(1 - (distToTarget / fovSize), 0, 1)
-                    local speedFactor = math.clamp(mouseSpeed / 30, 0, 1)
+                    local baseStrength = 0.05 -- Reduced from 0.15 to make it less sticky
+                    local stickiness = math.clamp(1 - (distToTarget / (fovSize * 1.5)), 0, 1) -- Adjusted stickiness range
+                    local speedFactor = math.clamp(mouseSpeed / 50, 0, 1) -- Adjusted speed factor for smoother movement
                     local finalStrength = baseStrength * stickiness * (1 - speedFactor)
                     local currentCFrame = camera.CFrame
                     local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
@@ -661,7 +655,7 @@ local success, err = pcall(function()
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v2.4 by d4mage1 - Added Rayfield with keybind fallback")
+    print("Fuckery Hub Arsenal script loaded - v2.5 by d4mage1 - Fixed aim assist, added Beam tracers, removed silent aim, added tabs")
 end)
 
 if not success then
