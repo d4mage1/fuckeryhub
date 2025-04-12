@@ -4,7 +4,7 @@ print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
 print([[
-                     _         _                 _ _  _                           __ 
+                     szerokie  szerokie  szerokie  szerokie  szerokie  szerokie  
                     | |       | |               | | || |                         / _|
  _ __ ___   __ _  __| | ___   | |__  _   _    __| | || |_| '_ ` _ \  __ _  __ _  |__|
 | '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |  / _` |__   _| | | | | |/ _` |/ _` |/ _ \
@@ -15,18 +15,7 @@ print([[
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.2 - Arsenal Edition")
-print(" ")
-print("Keybinds:")
-print("F1 - Toggle Aimbot")
-print("F2 - Toggle Aim Assist")
-print("F3 - Toggle Silent Aim")
-print("F4 - Toggle Hitbox Extender")
-print("F5 - Toggle Auto Fire")
-print("F6 - Toggle ESP")
-print("F7 - Toggle Tracers")
-print("F8 - Toggle FOV Circle")
-print("F9 - Toggle Panic Mode")
+print("Version: 2.4 - Arsenal Edition")
 print(" ")
 
 -- Services
@@ -38,7 +27,12 @@ local success, err = pcall(function()
     local teams = game:GetService("Teams")
     local uis = game:GetService("UserInputService")
 
-    -- Feature Toggles (without Rayfield)
+    -- Wait for player character to load
+    if not player.Character then
+        player.CharacterAdded:Wait()
+    end
+
+    -- Feature Toggles
     local aimbotEnabled = false
     local aimAssistEnabled = false
     local silentAimEnabled = false
@@ -69,34 +63,178 @@ local success, err = pcall(function()
     local fireRate = 0.1
     local isFiring = false
 
-    -- Keybinds for Toggling Features
-    uis.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Keyboard then
-            if input.KeyCode == Enum.KeyCode.F1 then
-                aimbotEnabled = not aimbotEnabled
+    -- Try to load Rayfield
+    local Rayfield = nil
+    local rayfieldSuccess, rayfieldErr = pcall(function()
+        Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    end)
+
+    if not rayfieldSuccess then
+        print("Failed to load Rayfield: " .. tostring(rayfieldErr))
+        print("Falling back to keybinds...")
+        print("Keybinds:")
+        print("F1 - Toggle Aimbot")
+        print("F2 - Toggle Aim Assist")
+        print("F3 - Toggle Silent Aim")
+        print("F4 - Toggle Hitbox Extender")
+        print("F5 - Toggle Auto Fire")
+        print("F6 - Toggle ESP")
+        print("F7 - Toggle Tracers")
+        print("F8 - Toggle FOV Circle")
+        print("F9 - Toggle Panic Mode")
+        print(" ")
+
+        -- Fallback to keybinds if Rayfield fails
+        uis.InputBegan:Connect(function(input, gameProcessedEvent)
+            if gameProcessedEvent then return end
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                if input.KeyCode == Enum.KeyCode.F1 then
+                    aimbotEnabled = not aimbotEnabled
+                    print("Aimbot " .. (aimbotEnabled and "enabled" or "disabled"))
+                elseif input.KeyCode == Enum.KeyCode.F2 then
+                    aimAssistEnabled = not aimAssistEnabled
+                    print("Aim Assist " .. (aimAssistEnabled and "enabled" or "disabled"))
+                elseif input.KeyCode == Enum.KeyCode.F3 then
+                    silentAimEnabled = not silentAimEnabled
+                    print("Silent Aim " .. (silentAimEnabled and "enabled" or "disabled"))
+                elseif input.KeyCode == Enum.KeyCode.F4 then
+                    hitboxExtenderEnabled = not hitboxExtenderEnabled
+                    print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
+                elseif input.KeyCode == Enum.KeyCode.F5 then
+                    autoFireEnabled = not autoFireEnabled
+                    print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
+                elseif input.KeyCode == Enum.KeyCode.F6 then
+                    espEnabled = not espEnabled
+                    print("ESP " .. (espEnabled and "enabled" or "disabled"))
+                    if not espEnabled then clearESP() end
+                elseif input.KeyCode == Enum.KeyCode.F7 then
+                    tracersEnabled = not tracersEnabled
+                    print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
+                    if not tracersEnabled then clearTracers() end
+                elseif input.KeyCode == Enum.KeyCode.F8 then
+                    fovCircleEnabled = not fovCircleEnabled
+                    print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
+                    if fovCircleEnabled and not fovCircle then
+                        fovCircle = Drawing.new("Circle")
+                        fovCircle.Thickness = 2
+                        fovCircle.NumSides = 64
+                        fovCircle.Radius = fovCircleSize
+                        local screenSize = camera.ViewportSize
+                        fovCircle.Position = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+                        fovCircle.Color = fovCircleColor
+                        fovCircle.Visible = true
+                    elseif fovCircle then
+                        fovCircle.Visible = fovCircleEnabled
+                    end
+                elseif input.KeyCode == Enum.KeyCode.F9 then
+                    panicModeEnabled = not panicModeEnabled
+                    print("Panic Mode " .. (panicModeEnabled and "enabled" or "disabled"))
+                    if panicModeEnabled then
+                        aimbotEnabled = false
+                        aimAssistEnabled = false
+                        silentAimEnabled = false
+                        hitboxExtenderEnabled = false
+                        autoFireEnabled = false
+                        espEnabled = false
+                        tracersEnabled = false
+                        fovCircleEnabled = false
+                        locked = false
+                        target = nil
+                        clearESP()
+                        clearTracers()
+                        if fovCircle then fovCircle.Visible = false end
+                        print("Panic Mode enabled - all features disabled")
+                    end
+                end
+            end
+        end)
+    else
+        -- Rayfield loaded successfully, create the GUI
+        print("Rayfield loaded successfully!")
+        local Window = Rayfield:CreateWindow({
+            Name = "Fuckery Hub - Arsenal",
+            LoadingTitle = "Fuckery Hub Loading",
+            LoadingSubtitle = "by d4mage1",
+            ConfigurationSaving = {
+                Enabled = true,
+                FolderName = "FuckeryHub",
+                FileName = "ArsenalConfig"
+            }
+        })
+
+        local MainTab = Window:CreateTab("Main Features")
+        local MainSection = MainTab:CreateSection("Toggles")
+
+        MainTab:CreateToggle({
+            Name = "Aimbot",
+            CurrentValue = false,
+            Callback = function(Value)
+                aimbotEnabled = Value
                 print("Aimbot " .. (aimbotEnabled and "enabled" or "disabled"))
-            elseif input.KeyCode == Enum.KeyCode.F2 then
-                aimAssistEnabled = not aimAssistEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Aim Assist",
+            CurrentValue = false,
+            Callback = function(Value)
+                aimAssistEnabled = Value
                 print("Aim Assist " .. (aimAssistEnabled and "enabled" or "disabled"))
-            elseif input.KeyCode == Enum.KeyCode.F3 then
-                silentAimEnabled = not silentAimEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Silent Aim",
+            CurrentValue = false,
+            Callback = function(Value)
+                silentAimEnabled = Value
                 print("Silent Aim " .. (silentAimEnabled and "enabled" or "disabled"))
-            elseif input.KeyCode == Enum.KeyCode.F4 then
-                hitboxExtenderEnabled = not hitboxExtenderEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Hitbox Extender",
+            CurrentValue = false,
+            Callback = function(Value)
+                hitboxExtenderEnabled = Value
                 print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
-            elseif input.KeyCode == Enum.KeyCode.F5 then
-                autoFireEnabled = not autoFireEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Auto Fire",
+            CurrentValue = false,
+            Callback = function(Value)
+                autoFireEnabled = Value
                 print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
-            elseif input.KeyCode == Enum.KeyCode.F6 then
-                espEnabled = not espEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "ESP",
+            CurrentValue = false,
+            Callback = function(Value)
+                espEnabled = Value
                 print("ESP " .. (espEnabled and "enabled" or "disabled"))
                 if not espEnabled then clearESP() end
-            elseif input.KeyCode == Enum.KeyCode.F7 then
-                tracersEnabled = not tracersEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Tracers",
+            CurrentValue = false,
+            Callback = function(Value)
+                tracersEnabled = Value
                 print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
                 if not tracersEnabled then clearTracers() end
-            elseif input.KeyCode == Enum.KeyCode.F8 then
-                fovCircleEnabled = not fovCircleEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "FOV Circle",
+            CurrentValue = false,
+            Callback = function(Value)
+                fovCircleEnabled = Value
                 print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
                 if fovCircleEnabled and not fovCircle then
                     fovCircle = Drawing.new("Circle")
@@ -110,8 +248,14 @@ local success, err = pcall(function()
                 elseif fovCircle then
                     fovCircle.Visible = fovCircleEnabled
                 end
-            elseif input.KeyCode == Enum.KeyCode.F9 then
-                panicModeEnabled = not panicModeEnabled
+            end
+        })
+
+        MainTab:CreateToggle({
+            Name = "Panic Mode",
+            CurrentValue = false,
+            Callback = function(Value)
+                panicModeEnabled = Value
                 print("Panic Mode " .. (panicModeEnabled and "enabled" or "disabled"))
                 if panicModeEnabled then
                     aimbotEnabled = false
@@ -130,15 +274,13 @@ local success, err = pcall(function()
                     print("Panic Mode enabled - all features disabled")
                 end
             end
-        end
-    end)
+        })
+    end
 
     -- Game Mode Detection and Enemy Check
     local function isFFA()
         local teamCount = #teams:GetChildren()
-        print("Team count: " .. teamCount)
         if teamCount == 0 then
-            print("Detected FFA mode (no teams)")
             return true
         end
         local playersWithTeam = 0
@@ -147,12 +289,9 @@ local success, err = pcall(function()
                 playersWithTeam = playersWithTeam + 1
             end
         end
-        print("Players with teams: " .. playersWithTeam .. "/" .. #game.Players:GetPlayers())
         if playersWithTeam == 0 then
-            print("Detected FFA mode (no players have teams)")
             return true
         end
-        print("Detected Team mode")
         return false
     end
 
@@ -160,19 +299,15 @@ local success, err = pcall(function()
         if enemy == player then return false end
         local ffa = isFFA()
         if ffa then
-            print("Enemy check (FFA): " .. enemy.Name .. " is an enemy")
             return true
         else
-            local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
-            print("Enemy check (Team mode): " .. enemy.Name .. " is " .. (isEnemy and "an enemy" or "not an enemy"))
-            return isEnemy
+            return (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
         end
     end
 
     -- ESP Functions
     local function addESP(target)
-        if not target or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then
-            print("Cannot add ESP for " .. (target and target.Name or "nil") .. ": Invalid target")
+        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then
             return
         end
         local box = Instance.new("BoxHandleAdornment")
@@ -225,11 +360,9 @@ local success, err = pcall(function()
     -- Tracers Functions
     local function addTracer(target)
         if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") then
-            print("Failed to add tracer for " .. (target and target.Name or "nil") .. ": Missing target or HumanoidRootPart")
             return
         end
         if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            print("Failed to add tracer: Player character or HumanoidRootPart missing")
             return
         end
         local line = Drawing.new("Line")
@@ -238,7 +371,6 @@ local success, err = pcall(function()
         line.Color = (player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy
         line.Visible = true
         table.insert(tracers, {line = line, target = target})
-        print("Added tracer for " .. target.Parent.Name)
     end
 
     local function clearTracers()
@@ -248,7 +380,6 @@ local success, err = pcall(function()
             end
         end
         tracers = {}
-        print("Cleared all tracers")
     end
 
     local function updateTracers()
@@ -258,7 +389,6 @@ local success, err = pcall(function()
         end
         clearTracers()
         if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            print("Cannot update tracers: Player character or HumanoidRootPart missing")
             return
         end
         for _, v in pairs(game.Players:GetPlayers()) do
@@ -285,13 +415,16 @@ local success, err = pcall(function()
     -- Silent Aim, Hitbox Extender, and Auto Fire Logic
     local function findClosestEnemy()
         local closest, shortestDist = nil, math.huge
+        if not player.Character or not player.Character:FindFirstChild("Head") then
+            return nil
+        end
         for _, enemy in pairs(game.Players:GetPlayers()) do
             if enemy ~= player and enemy.Character then
                 local head = enemy.Character:FindFirstChild("Head")
                 local humanoid = enemy.Character:FindFirstChild("Humanoid")
                 if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
                     if isEnemyPlayer(enemy) then
-                        local dist = (head.Position - (player.Character and player.Character:FindFirstChild("Head") and player.Character.Head.Position or camera.CFrame.Position)).Magnitude
+                        local dist = (head.Position - player.Character.Head.Position).Magnitude
                         if dist < shortestDist then
                             shortestDist = dist
                             closest = head
@@ -299,11 +432,6 @@ local success, err = pcall(function()
                     end
                 end
             end
-        end
-        if closest then
-            print("Closest enemy found: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
-        else
-            print("No closest enemy found")
         end
         return closest
     end
@@ -326,7 +454,6 @@ local success, err = pcall(function()
             if silentAimEnabled then
                 local closestEnemy = findClosestEnemy()
                 if closestEnemy then
-                    print("Silent Aim: Redirecting shot to " .. closestEnemy.Parent.Name)
                     hit = closestEnemy
                     position = closestEnemy.Position
                 end
@@ -344,7 +471,6 @@ local success, err = pcall(function()
                     end
                 end
                 if closestEnemy then
-                    print("Hitbox Extender: Redirecting shot to " .. closestEnemy.Parent.Name)
                     hit = closestEnemy
                     position = closestEnemy.Position
                 end
@@ -378,26 +504,17 @@ local success, err = pcall(function()
                 end
             end
         end
-        if closest then
-            print("Found target: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
-        else
-            print("No target found within " .. (forAimAssist and "screen" or "FOV"))
-        end
         return closest
     end
 
     mouse.Button2Down:Connect(function()
         if not aimbotEnabled or panicModeEnabled then
-            print("Cannot lock aimbot: " .. (not aimbotEnabled and "Aimbot disabled" or "Panic Mode active"))
             return
         end
-        print("Right-click detected, attempting to lock aimbot")
         target = findTarget(false)
         if target then
             locked = true
             print("Aimbot locked onto: " .. target.Parent.Name)
-        else
-            print("No aimbot target found")
         end
     end)
 
@@ -420,17 +537,20 @@ local success, err = pcall(function()
     mouse.Button1Down:Connect(function()
         if autoFireEnabled and not panicModeEnabled then
             isFiring = true
-            print("Left-click down: Auto fire started")
         end
     end)
 
     mouse.Button1Up:Connect(function()
         isFiring = false
-        print("Left-click up: Auto fire stopped")
     end)
 
     runService.RenderStepped:Connect(function()
         if panicModeEnabled then return end
+
+        -- Ensure player character is loaded
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            return
+        end
 
         -- Calculate mouse movement speed for aim assist
         local currentMousePos = Vector2.new(mouse.X, mouse.Y)
@@ -448,7 +568,7 @@ local success, err = pcall(function()
         end
 
         -- Update ESP
-        if espEnabled then updateESP() else clearESP() end
+        if espEnabled then updateESP() end
 
         -- Update Tracers
         if tracersEnabled then
@@ -468,8 +588,6 @@ local success, err = pcall(function()
                 end
             end
             updateTracers()
-        else
-            clearTracers()
         end
 
         -- Hook FireServer for Silent Aim, Hitbox Extender, and Auto Fire
@@ -495,12 +613,9 @@ local success, err = pcall(function()
                     end)
                     if successFire then
                         lastFireTime = currentTime
-                        print("Auto Fire: Shot fired at " .. targetPart.Parent.Name)
                     else
                         print("Auto Fire failed: " .. tostring(fireErr))
                     end
-                else
-                    print("Auto Fire failed: HitPart or player character not found")
                 end
             end
         end
@@ -508,11 +623,9 @@ local success, err = pcall(function()
         -- Aimbot
         if aimbotEnabled and locked then
             if not target or not target.Parent or not target.Parent:FindFirstChild("Humanoid") or target.Parent.Humanoid.Health <= 0 or target.Parent.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
-                print("Aimbot target invalid: " .. (target and target.Parent.Name or "nil"))
                 target = findTarget(false)
                 if not target then
                     locked = false
-                    print("No aimbot target, resetting camera")
                     local currentCFrame = camera.CFrame
                     local lookVector = currentCFrame.LookVector
                     local flatLook = lookVector * Vector3.new(1, 0, 1)
@@ -522,7 +635,6 @@ local success, err = pcall(function()
                     camera.CFrame = newCFrame
                     return
                 end
-                print("Aimbot new target: " .. target.Parent.Name)
             end
             local currentCFrame = camera.CFrame
             local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
@@ -544,13 +656,12 @@ local success, err = pcall(function()
                     local currentCFrame = camera.CFrame
                     local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
                     camera.CFrame = currentCFrame:Lerp(targetCFrame, finalStrength)
-                    print("Aim Assist Strength: " .. finalStrength .. " (Distance: " .. distToTarget .. ", Speed: " .. mouseSpeed .. ")")
                 end
             end
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v2.2 by d4mage1 - Removed Rayfield, added keybinds, fixed tracers")
+    print("Fuckery Hub Arsenal script loaded - v2.4 by d4mage1 - Added Rayfield with keybind fallback")
 end)
 
 if not success then
