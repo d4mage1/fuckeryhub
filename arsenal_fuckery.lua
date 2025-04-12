@@ -3,19 +3,30 @@ print("=====================================")
 print("     FUCKERY HUB - ARSENAL LOADED    ")
 print("=====================================")
 print(" ")
-print([[ 
-                       _        _                 _ _  _                             __ 
-                     | |      | |               | | || |                           /_ |
-  _ __ ___   __ _  __| | ___  | |__  _   _    __| | || |_ _ __ ___   __ _  __ _  ___| |
- | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
- | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| |  | | | | | | | | (_| | (_| |  __/ |
- |_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
-                                      __/ |                                __/ |       
-                                     |___/                                |___/        
+print([[
+                     _         _                 _ _  _                           __ 
+                    | |       | |               | | || |                         / _|
+ _ __ ___   __ _  __| | ___   | |__  _   _    __| | || |_| '_ ` _ \  __ _  __ _  |__|
+| '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |  / _` |__   _| | | | | |/ _` |/ _` |/ _ \
+| | | | | | (_| | (_| |  __/  | |_) | |_| | | (_| |  | | | | | | | | (_| | (_| |  __/ |
+|_| |_| |_|__,_|__,_|_|___|  |_.__/ \__, |  \__,_|  |_| |_| |_| |_|__,_|__,_|_|___|_|
+                                     __/ |                               __/ |       
+                                    |___/                               |___/        
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.1 - Arsenal Edition")
+print("Version: 2.2 - Arsenal Edition")
+print(" ")
+print("Keybinds:")
+print("F1 - Toggle Aimbot")
+print("F2 - Toggle Aim Assist")
+print("F3 - Toggle Silent Aim")
+print("F4 - Toggle Hitbox Extender")
+print("F5 - Toggle Auto Fire")
+print("F6 - Toggle ESP")
+print("F7 - Toggle Tracers")
+print("F8 - Toggle FOV Circle")
+print("F9 - Toggle Panic Mode")
 print(" ")
 
 -- Services
@@ -27,331 +38,143 @@ local success, err = pcall(function()
     local teams = game:GetService("Teams")
     local uis = game:GetService("UserInputService")
 
-    -- Load Rayfield UI Library
-    local Rayfield
-    local rayfieldUrl = "https://sirius.menu/rayfield" -- Updated URL, might work in April 2025
-    local rayfieldFallbackUrl = "https://raw.githubusercontent.com/Rayfield-UI/Rayfield/main/source" 
-    local rawScript
-
-    success, err = pcall(function()
-        rawScript = game:HttpGet(rayfieldUrl)
-    end)
-    if not success then
-        warn("Failed to load Rayfield from primary URL: " .. tostring(err))
-        success, err = pcall(function()
-            rawScript = game:HttpGet(rayfieldFallbackUrl)
-        end)
-        if not success then
-            warn("Failed to load Rayfield from fallback URL: " .. tostring(err))
-            rawScript = nil
-        end
-    end
-
-    if rawScript then
-        success, err = pcall(function()
-            Rayfield = loadstring(rawScript)
-            if Rayfield then
-                Rayfield = Rayfield()
-            end
-        end)
-        if not success or not Rayfield then
-            warn("Failed to initialize Rayfield: " .. tostring(err))
-            return
-        end
-    else
-        warn("No Rayfield script loaded. Arsenal script cannot create UI.")
-        return
-    end
-
-    -- Create Window
-    local discordInvite = "https://discord.gg/mAFyAPnVA4"
-    local Window = Rayfield:CreateWindow({
-        Name = "Fuckery Hub - Arsenal",
-        LoadingTitle = "Fuckery Hub - Arsenal",
-        LoadingSubtitle = "by d4mage1",
-        ConfigurationSaving = {
-            Enabled = true,
-            FolderName = "FuckeryHub",
-            FileName = "ArsenalConfig"
-        },
-        Discord = {
-            Enabled = true,
-            Invite = discordInvite,
-            RememberJoins = true
-        },
-        KeySystem = false
-    })
-
-    -- Main Tab (Panic Mode)
-    local MainTab = Window:CreateTab("Main")
-    local panicModeEnabled = false
-    MainTab:CreateToggle({
-        Name = "Panic Mode (Disables All Features)",
-        CurrentValue = false,
-        Flag = "PanicModeToggle",
-        Callback = function(Value)
-            panicModeEnabled = Value
-            if panicModeEnabled then
-                warn("Panic Mode enabled - disabling all features")
-                aimbotEnabled = false
-                aimAssistEnabled = false
-                silentAimEnabled = false
-                hitboxExtenderEnabled = false
-                espEnabled = false
-                fovCircleEnabled = false
-                autoFireEnabled = false
-                tracersEnabled = false
-                locked = false
-                target = nil
-                clearESP()
-                if fovCircle then fovCircle.Visible = false end
-                clearTracers()
-            else
-                warn("Panic Mode disabled - features can be re-enabled")
-            end
-        end
-    })
-
-    -- Combat Tab
-    local CombatTab = Window:CreateTab("Combat")
+    -- Feature Toggles (without Rayfield)
     local aimbotEnabled = false
     local aimAssistEnabled = false
     local silentAimEnabled = false
-    local autoFireEnabled = false
     local hitboxExtenderEnabled = false
-    local fovSize = 150
-    local locked = false
-    local target = nil
-
-    CombatTab:CreateToggle({
-        Name = "Enable Aimbot",
-        CurrentValue = false,
-        Flag = "AimbotToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable aimbot - Panic Mode is active")
-                return
-            end
-            aimbotEnabled = Value
-            if not Value then
-                locked = false
-                target = nil
-            end
-        end
-    })
-
-    CombatTab:CreateToggle({
-        Name = "Enable Aim Assist",
-        CurrentValue = false,
-        Flag = "AimAssistToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable aim assist - Panic Mode is active")
-                return
-            end
-            aimAssistEnabled = Value
-        end
-    })
-
-    CombatTab:CreateToggle({
-        Name = "Enable Silent Aim",
-        CurrentValue = false,
-        Flag = "SilentAimToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable silent aim - Panic Mode is active")
-                return
-            end
-            silentAimEnabled = Value
-        end
-    })
-
-    CombatTab:CreateToggle({
-        Name = "Enable Auto Fire",
-        CurrentValue = false,
-        Flag = "AutoFireToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable auto fire - Panic Mode is active")
-                return
-            end
-            autoFireEnabled = Value
-        end
-    })
-
-    CombatTab:CreateToggle({
-        Name = "Enable Hitbox Extender",
-        CurrentValue = false,
-        Flag = "HitboxToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable hitbox extender - Panic Mode is active")
-                return
-            end
-            hitboxExtenderEnabled = Value
-        end
-    })
-
-    CombatTab:CreateSlider({
-        Name = "Aimbot/Assist FOV Size",
-        Range = {50, 350},
-        Increment = 1,
-        Suffix = "Units",
-        CurrentValue = 150,
-        Flag = "FOVSlider",
-        Callback = function(Value)
-            fovSize = Value
-        end
-    })
-
-    -- Visuals Tab
-    local VisualsTab = Window:CreateTab("Visuals")
+    local autoFireEnabled = false
     local espEnabled = false
-    local espBoxes = {}
-    local espColor = Color3.fromRGB(255, 0, 0)
     local tracersEnabled = false
-    local tracers = {}
-    local tracerColorEnemy = Color3.fromRGB(255, 0, 0)
-    local tracerColorTeam = Color3.fromRGB(0, 255, 0)
     local fovCircleEnabled = false
+    local panicModeEnabled = false
+
+    -- Feature Variables
+    local espBoxes = {}
+    local tracers = {}
     local fovCircle = nil
     local fovCircleSize = 150
     local fovCircleColor = Color3.fromRGB(255, 255, 255)
+    local espColor = Color3.fromRGB(255, 0, 0)
+    local tracerColorEnemy = Color3.fromRGB(255, 0, 0)
+    local tracerColorTeam = Color3.fromRGB(0, 255, 0)
+    local fovSize = 150
+    local target = nil
+    local locked = false
+    local lastMousePos = Vector2.new(mouse.X, mouse.Y)
+    local mouseSpeed = 0
+    local hooked = false
+    local originalFireServer
+    local lastFireTime = 0
+    local fireRate = 0.1
+    local isFiring = false
 
-    VisualsTab:CreateToggle({
-        Name = "Enable ESP",
-        CurrentValue = false,
-        Flag = "ESPToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable ESP - Panic Mode is active")
-                return
-            end
-            espEnabled = Value
-            if not espEnabled then
-                clearESP()
+    -- Keybinds for Toggling Features
+    uis.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            if input.KeyCode == Enum.KeyCode.F1 then
+                aimbotEnabled = not aimbotEnabled
+                print("Aimbot " .. (aimbotEnabled and "enabled" or "disabled"))
+            elseif input.KeyCode == Enum.KeyCode.F2 then
+                aimAssistEnabled = not aimAssistEnabled
+                print("Aim Assist " .. (aimAssistEnabled and "enabled" or "disabled"))
+            elseif input.KeyCode == Enum.KeyCode.F3 then
+                silentAimEnabled = not silentAimEnabled
+                print("Silent Aim " .. (silentAimEnabled and "enabled" or "disabled"))
+            elseif input.KeyCode == Enum.KeyCode.F4 then
+                hitboxExtenderEnabled = not hitboxExtenderEnabled
+                print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
+            elseif input.KeyCode == Enum.KeyCode.F5 then
+                autoFireEnabled = not autoFireEnabled
+                print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
+            elseif input.KeyCode == Enum.KeyCode.F6 then
+                espEnabled = not espEnabled
+                print("ESP " .. (espEnabled and "enabled" or "disabled"))
+                if not espEnabled then clearESP() end
+            elseif input.KeyCode == Enum.KeyCode.F7 then
+                tracersEnabled = not tracersEnabled
+                print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
+                if not tracersEnabled then clearTracers() end
+            elseif input.KeyCode == Enum.KeyCode.F8 then
+                fovCircleEnabled = not fovCircleEnabled
+                print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
+                if fovCircleEnabled and not fovCircle then
+                    fovCircle = Drawing.new("Circle")
+                    fovCircle.Thickness = 2
+                    fovCircle.NumSides = 64
+                    fovCircle.Radius = fovCircleSize
+                    local screenSize = camera.ViewportSize
+                    fovCircle.Position = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+                    fovCircle.Color = fovCircleColor
+                    fovCircle.Visible = true
+                elseif fovCircle then
+                    fovCircle.Visible = fovCircleEnabled
+                end
+            elseif input.KeyCode == Enum.KeyCode.F9 then
+                panicModeEnabled = not panicModeEnabled
+                print("Panic Mode " .. (panicModeEnabled and "enabled" or "disabled"))
+                if panicModeEnabled then
+                    aimbotEnabled = false
+                    aimAssistEnabled = false
+                    silentAimEnabled = false
+                    hitboxExtenderEnabled = false
+                    autoFireEnabled = false
+                    espEnabled = false
+                    tracersEnabled = false
+                    fovCircleEnabled = false
+                    locked = false
+                    target = nil
+                    clearESP()
+                    clearTracers()
+                    if fovCircle then fovCircle.Visible = false end
+                    print("Panic Mode enabled - all features disabled")
+                end
             end
         end
-    })
-
-    VisualsTab:CreateColorPicker({
-        Name = "ESP Color",
-        Color = espColor,
-        Flag = "ESPColorPicker",
-        Callback = function(Value)
-            espColor = Value
-        end
-    })
-
-    VisualsTab:CreateToggle({
-        Name = "Enable Tracers",
-        CurrentValue = false,
-        Flag = "TracersToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable tracers - Panic Mode is active")
-                return
-            end
-            tracersEnabled = Value
-            if not tracersEnabled then
-                clearTracers()
-            end
-        end
-    })
-
-    VisualsTab:CreateToggle({
-        Name = "Enable FOV Circle",
-        CurrentValue = false,
-        Flag = "FOVCircleToggle",
-        Callback = function(Value)
-            if panicModeEnabled then
-                warn("Cannot enable FOV circle - Panic Mode is active")
-                return
-            end
-            fovCircleEnabled = Value
-            if fovCircleEnabled and not fovCircle then
-                fovCircle = Drawing.new("Circle")
-                fovCircle.Thickness = 2
-                fovCircle.NumSides = 64
-                fovCircle.Radius = fovCircleSize
-                fovCircle.Color = fovCircleColor
-                fovCircle.Visible = true
-            elseif fovCircle then
-                fovCircle.Visible = Value
-            end
-        end
-    })
-
-    VisualsTab:CreateSlider({
-        Name = "FOV Circle Size",
-        Range = {50, 350},
-        Increment = 1,
-        Suffix = "Units",
-        CurrentValue = 150,
-        Flag = "FOVCircleSizeSlider",
-        Callback = function(Value)
-            fovCircleSize = Value
-            if fovCircle then
-                fovCircle.Radius = fovCircleSize
-            end
-        end
-    })
-
-    VisualsTab:CreateColorPicker({
-        Name = "FOV Circle Color",
-        Color = fovCircleColor,
-        Flag = "FOVCircleColorPicker",
-        Callback = function(Value)
-            fovCircleColor = Value
-            if fovCircle then
-                fovCircle.Color = fovCircleColor
-            end
-        end
-    })
-
-    -- Discord Fix Tab
-    local DiscordTab = Window:CreateTab("Discord Fix")
-    DiscordTab:CreateButton({
-        Name = "Copy Discord Invite",
-        Callback = function()
-            local success, err = pcall(function()
-                setclipboard(discordInvite)
-            end)
-            if success then
-                print("Copied Discord invite to clipboard: " .. discordInvite)
-            else
-                warn("Failed to copy Discord invite: " .. tostring(err))
-                print("Join the Discord here: " .. discordInvite)
-            end
-        end
-    })
+    end)
 
     -- Game Mode Detection and Enemy Check
     local function isFFA()
         local teamCount = #teams:GetChildren()
-        if teamCount <= 1 then
+        print("Team count: " .. teamCount)
+        if teamCount == 0 then
+            print("Detected FFA mode (no teams)")
             return true
         end
         local playersWithTeam = 0
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v.Team then
+            if v.Team ~= nil then
                 playersWithTeam = playersWithTeam + 1
             end
         end
-        return playersWithTeam == 0
+        print("Players with teams: " .. playersWithTeam .. "/" .. #game.Players:GetPlayers())
+        if playersWithTeam == 0 then
+            print("Detected FFA mode (no players have teams)")
+            return true
+        end
+        print("Detected Team mode")
+        return false
     end
 
     local function isEnemyPlayer(enemy)
-        if not enemy or enemy == player then return false end
-        if isFFA() then
+        if enemy == player then return false end
+        local ffa = isFFA()
+        if ffa then
+            print("Enemy check (FFA): " .. enemy.Name .. " is an enemy")
             return true
+        else
+            local isEnemy = (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
+            print("Enemy check (Team mode): " .. enemy.Name .. " is " .. (isEnemy and "an enemy" or "not an enemy"))
+            return isEnemy
         end
-        return player.Team ~= enemy.Team or not player.Team or not enemy.Team
     end
 
     -- ESP Functions
     local function addESP(target)
-        if not target or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then return end
+        if not target or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then
+            print("Cannot add ESP for " .. (target and target.Name or "nil") .. ": Invalid target")
+            return
+        end
         local box = Instance.new("BoxHandleAdornment")
         box.Size = Vector3.new(4, 6, 4)
         box.Adornee = target.HumanoidRootPart
@@ -377,34 +200,55 @@ local success, err = pcall(function()
         end
         clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 and isEnemyPlayer(v) then
-                addESP(v.Character)
+            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
+                if isEnemyPlayer(v) then
+                    addESP(v.Character)
+                end
             end
+        end
+    end
+
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player then
+            v.CharacterAdded:Connect(function()
+                if espEnabled then updateESP() end
+            end)
         end
     end
 
     game.Players.PlayerAdded:Connect(function(newPlayer)
         newPlayer.CharacterAdded:Connect(function()
             if espEnabled then updateESP() end
-        end
+        end)
     end)
 
     -- Tracers Functions
     local function addTracer(target)
-        if not target or not target:FindFirstChild("HumanoidRootPart") or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") then
+            print("Failed to add tracer for " .. (target and target.Name or "nil") .. ": Missing target or HumanoidRootPart")
+            return
+        end
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            print("Failed to add tracer: Player character or HumanoidRootPart missing")
+            return
+        end
         local line = Drawing.new("Line")
         line.Transparency = 0.7
         line.Thickness = 1
-        line.Color = isEnemyPlayer(target.Parent) and tracerColorEnemy or tracerColorTeam
+        line.Color = (player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy
         line.Visible = true
         table.insert(tracers, {line = line, target = target})
+        print("Added tracer for " .. target.Parent.Name)
     end
 
     local function clearTracers()
         for _, tracer in pairs(tracers) do
-            if tracer.line then tracer.line:Remove() end
+            if tracer.line then
+                tracer.line:Remove()
+            end
         end
         tracers = {}
+        print("Cleared all tracers")
     end
 
     local function updateTracers()
@@ -413,7 +257,10 @@ local success, err = pcall(function()
             return
         end
         clearTracers()
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            print("Cannot update tracers: Player character or HumanoidRootPart missing")
+            return
+        end
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
                 addTracer(v.Character)
@@ -421,66 +268,83 @@ local success, err = pcall(function()
         end
     end
 
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player then
+            v.CharacterAdded:Connect(function()
+                if tracersEnabled then updateTracers() end
+            end)
+        end
+    end
+
     game.Players.PlayerAdded:Connect(function(newPlayer)
         newPlayer.CharacterAdded:Connect(function()
             if tracersEnabled then updateTracers() end
-        end
+        end)
     end)
 
     -- Silent Aim, Hitbox Extender, and Auto Fire Logic
-    local hooked = false
-    local originalFireServer
-    local lastFireTime = 0
-    local fireRate = 0.1
-
     local function findClosestEnemy()
         local closest, shortestDist = nil, math.huge
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid and enemy.Character.Humanoid.Health > 0 then
-                if isEnemyPlayer(enemy) then
-                    local dist = (enemy.Character.Head.Position - camera.CFrame.Position).Magnitude
-                    if dist < shortestDist then
-                        shortestDist = dist
-                        closest = enemy.Character.Head
+            if enemy ~= player and enemy.Character then
+                local head = enemy.Character:FindFirstChild("Head")
+                local humanoid = enemy.Character:FindFirstChild("Humanoid")
+                if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+                    if isEnemyPlayer(enemy) then
+                        local dist = (head.Position - (player.Character and player.Character:FindFirstChild("Head") and player.Character.Head.Position or camera.CFrame.Position)).Magnitude
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closest = head
+                        end
                     end
                 end
             end
+        end
+        if closest then
+            print("Closest enemy found: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
+        else
+            print("No closest enemy found")
         end
         return closest
     end
 
     local function hookFireServer()
         if hooked then return end
-        local comm = game.ReplicatedStorage:FindFirstChild("Comm")
+        local comm = game.ReplicatedStorage:WaitForChild("Comm", 5)
         if not comm then
-            warn("Comm not found in ReplicatedStorage")
+            print("Error: Could not find Comm in ReplicatedStorage")
             return
         end
-        local hitPart = comm:FindFirstChild("HitPart")
+        local hitPart = comm:WaitForChild("HitPart", 5)
         if not hitPart then
-            warn("HitPart not found in Comm")
+            print("Error: Could not find HitPart in Comm")
             return
         end
+        print("Successfully hooked Arsenal HitPart event")
         originalFireServer = hitPart.FireServer
         hitPart.FireServer = function(self, hit, position, ...)
             if silentAimEnabled then
                 local closestEnemy = findClosestEnemy()
                 if closestEnemy then
+                    print("Silent Aim: Redirecting shot to " .. closestEnemy.Parent.Name)
                     hit = closestEnemy
                     position = closestEnemy.Position
                 end
             elseif hitboxExtenderEnabled then
                 local closestEnemy, shortestDist = nil, 10
                 for _, enemy in pairs(game.Players:GetPlayers()) do
-                    if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 and isEnemyPlayer(enemy) then
-                        local dist = (enemy.Character.Head.Position - position).Magnitude
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            closestEnemy = enemy.Character.Head
+                    if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid.Health > 0 then
+                        if isEnemyPlayer(enemy) then
+                            local dist = (enemy.Character.Head.Position - position).Magnitude
+                            if dist < shortestDist then
+                                shortestDist = dist
+                                closestEnemy = enemy.Character.Head
+                            end
                         end
                     end
                 end
                 if closestEnemy then
+                    print("Hitbox Extender: Redirecting shot to " .. closestEnemy.Parent.Name)
                     hit = closestEnemy
                     position = closestEnemy.Position
                 end
@@ -491,58 +355,84 @@ local success, err = pcall(function()
     end
 
     -- Aimbot and Aim Assist Logic
-    local lastMousePos = Vector2.new(mouse.X, mouse.Y)
-    local mouseSpeed = 0
-
     local function findTarget(forAimAssist)
         local closest, shortestDist = nil, math.huge
         local cursorPos = Vector2.new(mouse.X, mouse.Y)
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character.Humanoid and enemy.Character.Humanoid.Health > 0 then
-                if isEnemyPlayer(enemy) then
-                    local screenPos, onScreen = camera:WorldToScreenPoint(enemy.Character.Head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                        if dist < fovSize and dist < shortestDist then
-                            shortestDist = dist
-                            closest = enemy.Character.Head
+            if enemy ~= player and enemy.Character then
+                local head = enemy.Character:FindFirstChild("Head")
+                local humanoid = enemy.Character:FindFirstChild("Humanoid")
+                if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+                    if isEnemyPlayer(enemy) then
+                        local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
+                        if onScreen then
+                            local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
+                            if forAimAssist or dist < fovSize then
+                                if dist < shortestDist then
+                                    shortestDist = dist
+                                    closest = head
+                                end
+                            end
                         end
                     end
                 end
             end
         end
+        if closest then
+            print("Found target: " .. closest.Parent.Name .. " (Distance: " .. shortestDist .. ")")
+        else
+            print("No target found within " .. (forAimAssist and "screen" or "FOV"))
+        end
         return closest
     end
 
     mouse.Button2Down:Connect(function()
-        if not aimbotEnabled or panicModeEnabled then return end
+        if not aimbotEnabled or panicModeEnabled then
+            print("Cannot lock aimbot: " .. (not aimbotEnabled and "Aimbot disabled" or "Panic Mode active"))
+            return
+        end
+        print("Right-click detected, attempting to lock aimbot")
         target = findTarget(false)
         if target then
             locked = true
+            print("Aimbot locked onto: " .. target.Parent.Name)
+        else
+            print("No aimbot target found")
         end
     end)
 
     mouse.Button2Up:Connect(function()
-        locked = false
-        target = nil
+        if locked then
+            locked = false
+            target = nil
+            print("Aimbot unlocked")
+            local currentCFrame = camera.CFrame
+            local lookVector = currentCFrame.LookVector
+            local flatLook = lookVector * Vector3.new(1, 0, 1)
+            local newLook = currentCFrame.Position + flatLook.Unit * 10
+            local currentPitch = math.asin(lookVector.Y)
+            local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+            camera.CFrame = newCFrame
+        end
     end)
 
     -- Auto Fire Logic
-    local isFiring = false
     mouse.Button1Down:Connect(function()
         if autoFireEnabled and not panicModeEnabled then
             isFiring = true
+            print("Left-click down: Auto fire started")
         end
     end)
 
     mouse.Button1Up:Connect(function()
         isFiring = false
+        print("Left-click up: Auto fire stopped")
     end)
 
     runService.RenderStepped:Connect(function()
         if panicModeEnabled then return end
 
-        -- Mouse movement speed for aim assist
+        -- Calculate mouse movement speed for aim assist
         local currentMousePos = Vector2.new(mouse.X, mouse.Y)
         mouseSpeed = (currentMousePos - lastMousePos).Magnitude
         lastMousePos = currentMousePos
@@ -550,19 +440,20 @@ local success, err = pcall(function()
         -- Update FOV Circle
         if fovCircleEnabled and fovCircle then
             local screenSize = camera.ViewportSize
-            fovCircle.Position = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+            local centerPos = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+            fovCircle.Position = centerPos
             fovCircle.Radius = fovCircleSize
             fovCircle.Color = fovCircleColor
             fovCircle.Visible = true
         end
 
         -- Update ESP
-        if espEnabled then updateESP() end
+        if espEnabled then updateESP() else clearESP() end
 
         -- Update Tracers
-        if tracersEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        if tracersEnabled then
             for _, tracer in pairs(tracers) do
-                if tracer.target and tracer.target:FindFirstChild("HumanoidRootPart") then
+                if tracer.target and tracer.target:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local startPos = camera:WorldToScreenPoint(player.Character.HumanoidRootPart.Position)
                     local endPos, onScreen = camera:WorldToScreenPoint(tracer.target.HumanoidRootPart.Position)
                     if onScreen then
@@ -581,9 +472,12 @@ local success, err = pcall(function()
             clearTracers()
         end
 
-        -- Hook FireServer
+        -- Hook FireServer for Silent Aim, Hitbox Extender, and Auto Fire
         if silentAimEnabled or hitboxExtenderEnabled or autoFireEnabled then
-            pcall(hookFireServer)
+            local successHook, hookErr = pcall(hookFireServer)
+            if not successHook then
+                print("Failed to hook FireServer: " .. tostring(hookErr))
+            end
         end
 
         -- Auto Fire
@@ -592,27 +486,47 @@ local success, err = pcall(function()
             if currentTime - lastFireTime >= fireRate then
                 local hitPart = game.ReplicatedStorage:FindFirstChild("Comm") and game.ReplicatedStorage.Comm:FindFirstChild("HitPart")
                 if hitPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetPart = target or findClosestEnemy()
-                    if targetPart then
-                        pcall(function()
-                            hitPart:FireServer(targetPart, targetPart.Position)
-                        end)
-                        lastFireTime = currentTime
+                    local targetPart = target or mouse.Target
+                    if not targetPart or not targetPart.Parent:FindFirstChild("Humanoid") then
+                        targetPart = player.Character.HumanoidRootPart
                     end
+                    local successFire, fireErr = pcall(function()
+                        hitPart:FireServer(targetPart, targetPart.Position)
+                    end)
+                    if successFire then
+                        lastFireTime = currentTime
+                        print("Auto Fire: Shot fired at " .. targetPart.Parent.Name)
+                    else
+                        print("Auto Fire failed: " .. tostring(fireErr))
+                    end
+                else
+                    print("Auto Fire failed: HitPart or player character not found")
                 end
             end
         end
 
         -- Aimbot
-        if aimbotEnabled and locked and target and target.Parent and target.Parent:FindFirstChild("Humanoid") and target.Parent.Humanoid.Health > 0 then
+        if aimbotEnabled and locked then
+            if not target or not target.Parent or not target.Parent:FindFirstChild("Humanoid") or target.Parent.Humanoid.Health <= 0 or target.Parent.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
+                print("Aimbot target invalid: " .. (target and target.Parent.Name or "nil"))
+                target = findTarget(false)
+                if not target then
+                    locked = false
+                    print("No aimbot target, resetting camera")
+                    local currentCFrame = camera.CFrame
+                    local lookVector = currentCFrame.LookVector
+                    local flatLook = lookVector * Vector3.new(1, 0, 1)
+                    local newLook = currentCFrame.Position + flatLook.Unit * 10
+                    local currentPitch = math.asin(lookVector.Y)
+                    local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
+                    camera.CFrame = newCFrame
+                    return
+                end
+                print("Aimbot new target: " .. target.Parent.Name)
+            end
             local currentCFrame = camera.CFrame
             local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
             camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
-        elseif aimbotEnabled and locked then
-            target = findTarget(false)
-            if not target then
-                locked = false
-            end
         end
 
         -- Aim Assist
@@ -630,14 +544,15 @@ local success, err = pcall(function()
                     local currentCFrame = camera.CFrame
                     local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
                     camera.CFrame = currentCFrame:Lerp(targetCFrame, finalStrength)
+                    print("Aim Assist Strength: " .. finalStrength .. " (Distance: " .. distToTarget .. ", Speed: " .. mouseSpeed .. ")")
                 end
             end
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v2.1 by d4mage1 - Full features restored")
+    print("Fuckery Hub Arsenal script loaded - v2.2 by d4mage1 - Removed Rayfield, added keybinds, fixed tracers")
 end)
 
 if not success then
-    warn("Script failed to initialize: " .. tostring(err))
+    print("Script failed to initialize: " .. tostring(err))
 end
