@@ -11,11 +11,11 @@ print([[
 | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| \___  | | | | | | (_| | (_| |  __/| |_
 |_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|   |_/_| |_| |_|\__,_|\__, |\___\___/
                                      __/ |                               __/ |         
-                                    |___/                               |___/          
+                                    |___/                               |___/                
 ]])
 print(" ")
 print("Loaded by: d4mage1")
-print("Version: 2.7 - Arsenal Edition")
+print("Version: 4.10 - Arsenal Edition (Xeno)")
 print(" ")
 
 -- Services
@@ -27,7 +27,7 @@ local success, err = pcall(function()
     local teams = game:GetService("Teams")
     local uis = game:GetService("UserInputService")
 
-    -- Wait for player character to load
+    -- Wait for player character
     if not player.Character then
         player.CharacterAdded:Wait()
     end
@@ -36,7 +36,6 @@ local success, err = pcall(function()
     local aimbotEnabled = false
     local aimAssistEnabled = false
     local hitboxExtenderEnabled = false
-    local autoFireEnabled = false
     local espEnabled = false
     local tracersEnabled = false
     local fovCircleEnabled = false
@@ -44,29 +43,60 @@ local success, err = pcall(function()
 
     -- Feature Variables
     local espBoxes = {}
-    local hitboxParts = {} -- Store expanded hitboxes
+    local hitboxAdornments = {}
     local tracerBeams = {}
     local fovCircle = nil
-    local hitboxSize = 6 -- Default hitbox size (6 studs)
-    local fovCircleSize = 150
+    local hitboxSize = 6
+    local fovCircleSize = 200
     local fovCircleColor = Color3.fromRGB(255, 255, 255)
-    local espColor = Color3.fromRGB(255, 0, 0)
-    local hitboxColor = Color3.fromRGB(255, 0, 0) -- Red for hitbox overlay
+    local espColorEnemy = Color3.fromRGB(255, 0, 0)
+    local hitboxColor = Color3.fromRGB(255, 0, 0)
     local tracerColorEnemy = Color3.fromRGB(255, 0, 0)
-    local tracerColorTeam = Color3.fromRGB(0, 255, 0)
-    local fovSize = 150
     local target = nil
     local locked = false
-    local lastMousePos = Vector2.new(mouse.X, mouse.Y)
-    local mouseSpeed = 0
-    local hooked = false
-    local originalFireServer
-    local lastFireTime = 0
-    local fireRate = 0.1
+    local tracerUpdateCounter = 0
+    local maxTracers = 10
+    local maxAimbotRange = 500 -- Max distance for aimbot/aim assist (studs)
+
+    -- Hitbox Extender Functions
+    local function addHitboxAdornment(target)
+        if not target or not target.Parent or not target:FindFirstChild("Head") or target == player.Character then return end
+        local hitbox = Instance.new("BoxHandleAdornment")
+        hitbox.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+        hitbox.Adornee = target.Head
+        hitbox.Color3 = hitboxColor
+        hitbox.Transparency = 0.7
+        hitbox.AlwaysOnTop = true
+        hitbox.ZIndex = 5
+        hitbox.Parent = target
+        hitboxAdornments[target] = hitbox
+    end
+
+    local function clearHitboxAdornments()
+        for _, hitbox in pairs(hitboxAdornments) do
+            if hitbox then pcall(function() hitbox:Destroy() end) end
+        end
+        hitboxAdornments = {}
+    end
+
+    local function updateHitboxAdornments()
+        if not hitboxExtenderEnabled then
+            clearHitboxAdornments()
+            return
+        end
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
+                if isEnemyPlayer(v) and not hitboxAdornments[v.Character] then
+                    pcall(function() addHitboxAdornment(v.Character) end)
+                end
+            end
+        end
+    end
 
     -- Try to load Rayfield
     local Rayfield = nil
     local rayfieldSuccess, rayfieldErr = pcall(function()
+        wait(1.5)
         Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
     end)
 
@@ -75,16 +105,14 @@ local success, err = pcall(function()
         print("Falling back to keybinds...")
         print("Keybinds:")
         print("F1 - Toggle Aimbot")
-        print("F2 - Toggle Aim Assist")
+        print("F2 - Toggle Aim Assist (Always On)")
         print("F3 - Toggle Hitbox Extender")
-        print("F4 - Toggle Auto Fire")
         print("F5 - Toggle ESP")
         print("F6 - Toggle Tracers")
         print("F7 - Toggle FOV Circle")
         print("F8 - Toggle Panic Mode")
         print(" ")
 
-        -- Fallback to keybinds if Rayfield fails
         uis.InputBegan:Connect(function(input, gameProcessedEvent)
             if gameProcessedEvent then return end
             if input.UserInputType == Enum.UserInputType.Keyboard then
@@ -97,18 +125,18 @@ local success, err = pcall(function()
                 elseif input.KeyCode == Enum.KeyCode.F3 then
                     hitboxExtenderEnabled = not hitboxExtenderEnabled
                     print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
-                    if not hitboxExtenderEnabled then clearHitboxes() end
-                elseif input.KeyCode == Enum.KeyCode.F4 then
-                    autoFireEnabled = not autoFireEnabled
-                    print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
+                    pcall(clearHitboxAdornments)
+                    if hitboxExtenderEnabled then pcall(updateHitboxAdornments) end
                 elseif input.KeyCode == Enum.KeyCode.F5 then
                     espEnabled = not espEnabled
                     print("ESP " .. (espEnabled and "enabled" or "disabled"))
-                    if not espEnabled then clearESP() end
+                    pcall(clearESP)
+                    if espEnabled then pcall(updateESP) end
                 elseif input.KeyCode == Enum.KeyCode.F6 then
                     tracersEnabled = not tracersEnabled
                     print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
-                    if not tracersEnabled then clearTracers() end
+                    pcall(clearTracers)
+                    if tracersEnabled then pcall(updateTracers) end
                 elseif input.KeyCode == Enum.KeyCode.F7 then
                     fovCircleEnabled = not fovCircleEnabled
                     print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
@@ -131,15 +159,14 @@ local success, err = pcall(function()
                         aimbotEnabled = false
                         aimAssistEnabled = false
                         hitboxExtenderEnabled = false
-                        autoFireEnabled = false
                         espEnabled = false
                         tracersEnabled = false
                         fovCircleEnabled = false
                         locked = false
                         target = nil
-                        clearESP()
-                        clearTracers()
-                        clearHitboxes()
+                        pcall(clearESP)
+                        pcall(clearTracers)
+                        pcall(clearHitboxAdornments)
                         if fovCircle then fovCircle.Visible = false end
                         print("Panic Mode enabled - all features disabled")
                     end
@@ -147,7 +174,6 @@ local success, err = pcall(function()
             end
         end)
     else
-        -- Rayfield loaded successfully, create the GUI with tabs
         print("Rayfield loaded successfully!")
         local Window = Rayfield:CreateWindow({
             Name = "Fuckery Hub - Arsenal",
@@ -160,7 +186,6 @@ local success, err = pcall(function()
             }
         })
 
-        -- Combat Tab
         local CombatTab = Window:CreateTab("Combat")
         local CombatSection = CombatTab:CreateSection("Combat Features")
 
@@ -174,7 +199,7 @@ local success, err = pcall(function()
         })
 
         CombatTab:CreateToggle({
-            Name = "Aim Assist",
+            Name = "Aim Assist (Always On)",
             CurrentValue = false,
             Callback = function(Value)
                 aimAssistEnabled = Value
@@ -188,36 +213,29 @@ local success, err = pcall(function()
             Callback = function(Value)
                 hitboxExtenderEnabled = Value
                 print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
-                if not hitboxExtenderEnabled then clearHitboxes() end
+                pcall(clearHitboxAdornments)
+                if hitboxExtenderEnabled then pcall(updateHitboxAdornments) end
             end
         })
 
         CombatTab:CreateSlider({
             Name = "Hitbox Size",
-            Range = {4, 12}, -- Range from 4 to 12 studs
+            Range = {4, 12},
             Increment = 1,
             Suffix = "Studs",
             CurrentValue = 6,
             Callback = function(Value)
-                hitboxSize = Value
-                print("Hitbox Size set to " .. hitboxSize .. " studs")
-                if hitboxExtenderEnabled then
-                    clearHitboxes()
-                    updateHitboxes()
-                end
+                pcall(function()
+                    hitboxSize = Value
+                    print("Hitbox Size set to " .. hitboxSize .. " studs")
+                    if hitboxExtenderEnabled then
+                        clearHitboxAdornments()
+                        updateHitboxAdornments()
+                    end
+                end)
             end
         })
 
-        CombatTab:CreateToggle({
-            Name = "Auto Fire",
-            CurrentValue = false,
-            Callback = function(Value)
-                autoFireEnabled = Value
-                print("Auto Fire " .. (autoFireEnabled and "enabled" or "disabled"))
-            end
-        })
-
-        -- Visuals Tab
         local VisualsTab = Window:CreateTab("Visuals")
         local VisualsSection = VisualsTab:CreateSection("Visual Features")
 
@@ -227,7 +245,8 @@ local success, err = pcall(function()
             Callback = function(Value)
                 espEnabled = Value
                 print("ESP " .. (espEnabled and "enabled" or "disabled"))
-                if not espEnabled then clearESP() end
+                pcall(clearESP)
+                if espEnabled then pcall(updateESP) end
             end
         })
 
@@ -239,7 +258,6 @@ local success, err = pcall(function()
                 print("FOV Circle " .. (fovCircleEnabled and "enabled" or "disabled"))
                 if fovCircleEnabled and not fovCircle then
                     fovCircle = Drawing.new("Circle")
-                    fovCircle.Transparency = 0.5
                     fovCircle.Thickness = 2
                     fovCircle.NumSides = 64
                     fovCircle.Radius = fovCircleSize
@@ -253,17 +271,76 @@ local success, err = pcall(function()
             end
         })
 
+        VisualsTab:CreateSlider({
+            Name = "FOV Circle Size",
+            Range = {50, 500},
+            Increment = 10,
+            Suffix = "Pixels",
+            CurrentValue = 200,
+            Callback = function(Value)
+                pcall(function()
+                    fovCircleSize = Value
+                    print("FOV Circle Size set to " .. fovCircleSize .. " pixels")
+                    if fovCircle then
+                        fovCircle.Radius = fovCircleSize
+                    end
+                end)
+            end
+        })
+
+        VisualsTab:CreateDropdown({
+            Name = "FOV Circle Color",
+            Options = {"White", "Red", "Green", "Blue", "Yellow"},
+            CurrentOption = "White",
+            Callback = function(Value)
+                pcall(function()
+                    local colors = {
+                        White = Color3.fromRGB(255, 255, 255),
+                        Red = Color3.fromRGB(255, 0, 0),
+                        Green = Color3.fromRGB(0, 255, 0),
+                        Blue = Color3.fromRGB(0, 0, 255),
+                        Yellow = Color3.fromRGB(255, 255, 0)
+                    }
+                    fovCircleColor = colors[Value] or fovCircleColor
+                    print("FOV Circle Color set to " .. Value)
+                    if fovCircle then
+                        fovCircle.Color = fovCircleColor
+                    end
+                end)
+            end
+        })
+
+        VisualsTab:CreateInput({
+            Name = "Custom FOV RGB (R,G,B)",
+            PlaceholderText = "e.g., 255,128,0",
+            Callback = function(Value)
+                pcall(function()
+                    local r, g, b = Value:match("(%d+),(%d+),(%d+)")
+                    r, g, b = tonumber(r), tonumber(g), tonumber(b)
+                    if r and g and b and r >= 0 and r <= 255 and g >= 0 and g <= 255 and b >= 0 and b <= 255 then
+                        fovCircleColor = Color3.fromRGB(r, g, b)
+                        print("FOV Circle Color set to RGB(" .. r .. "," .. g .. "," .. b .. ")")
+                        if fovCircle then
+                            fovCircle.Color = fovCircleColor
+                        end
+                    else
+                        print("Invalid RGB format. Use: R,G,B (0-255 each)")
+                    end
+                end)
+            end
+        })
+
         VisualsTab:CreateToggle({
             Name = "Tracers",
             CurrentValue = false,
             Callback = function(Value)
                 tracersEnabled = Value
                 print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
-                if not tracersEnabled then clearTracers() end
+                pcall(clearTracers)
+                if tracersEnabled then pcall(updateTracers) end
             end
         })
 
-        -- Panic Tab
         local PanicTab = Window:CreateTab("Panic")
         local PanicSection = PanicTab:CreateSection("Panic Features")
 
@@ -277,15 +354,14 @@ local success, err = pcall(function()
                     aimbotEnabled = false
                     aimAssistEnabled = false
                     hitboxExtenderEnabled = false
-                    autoFireEnabled = false
                     espEnabled = false
                     tracersEnabled = false
                     fovCircleEnabled = false
                     locked = false
                     target = nil
-                    clearESP()
-                    clearTracers()
-                    clearHitboxes()
+                    pcall(clearESP)
+                    pcall(clearTracers)
+                    pcall(clearHitboxAdornments)
                     if fovCircle then fovCircle.Visible = false end
                     print("Panic Mode enabled - all features disabled")
                 end
@@ -293,53 +369,46 @@ local success, err = pcall(function()
         })
     end
 
-    -- Game Mode Detection and Enemy Check
+    -- Game Mode Detection
     local function isFFA()
         local teamCount = #teams:GetChildren()
-        if teamCount == 0 then
-            return true
-        end
+        if teamCount == 0 then return true end
         local playersWithTeam = 0
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v.Team ~= nil then
-                playersWithTeam = playersWithTeam + 1
-            end
+            if v.Team ~= nil then playersWithTeam = playersWithTeam + 1 end
         end
-        if playersWithTeam == 0 then
-            return true
-        end
-        return false
+        return playersWithTeam == 0
     end
 
     local function isEnemyPlayer(enemy)
-        if enemy == player then return false end
+        if not enemy or enemy == player then return false end
         local ffa = isFFA()
-        if ffa then
-            return true
-        else
-            return (player.Team ~= enemy.Team) or not player.Team or not enemy.Team
-        end
+        if ffa then return true end
+        local enemyPlayer = game.Players:GetPlayerFromCharacter(enemy.Character)
+        if not enemyPlayer or not player.Team or not enemyPlayer.Team then return false end
+        return player.Team ~= enemyPlayer.Team
     end
 
-    -- ESP Functions
+    -- ESP Functions (Enemies only)
     local function addESP(target)
-        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then
-            return
-        end
+        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then return end
         local box = Instance.new("BoxHandleAdornment")
         box.Size = Vector3.new(4, 6, 4)
         box.Adornee = target.HumanoidRootPart
-        box.Color3 = espColor
+        box.Color3 = espColorEnemy
         box.Transparency = 0.5
         box.AlwaysOnTop = true
         box.ZIndex = 10
         box.Parent = target
-        table.insert(espBoxes, box)
+        espBoxes[target] = box
     end
 
     local function clearESP()
-        for _, box in pairs(espBoxes) do
-            if box then box:Destroy() end
+        for target, box in pairs(espBoxes) do
+            pcall(function()
+                if box then box:Destroy() end
+                espBoxes[target] = nil
+            end)
         end
         espBoxes = {}
     end
@@ -349,125 +418,75 @@ local success, err = pcall(function()
             clearESP()
             return
         end
-        clearESP()
         for _, v in pairs(game.Players:GetPlayers()) do
             if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
                 if isEnemyPlayer(v) then
-                    addESP(v.Character)
+                    if not espBoxes[v.Character] then
+                        pcall(function() addESP(v.Character) end)
+                    end
+                else
+                    -- Remove ESP if player is a teammate
+                    if espBoxes[v.Character] then
+                        pcall(function()
+                            espBoxes[v.Character]:Destroy()
+                            espBoxes[v.Character] = nil
+                        end)
+                    end
                 end
             end
         end
     end
 
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= player then
-            v.CharacterAdded:Connect(function()
-                if espEnabled then updateESP() end
-            end)
-        end
-    end
-
-    game.Players.PlayerAdded:Connect(function(newPlayer)
-        newPlayer.CharacterAdded:Connect(function()
-            if espEnabled then updateESP() end
-        end)
-    end)
-
-    -- Hitbox Extender Functions
-    local function addHitbox(target)
-        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") or target == player.Character then
+    -- Tracer Functions (Enemies only, Optimized 3D Beams)
+    local function updateTracer(targetPlayer)
+        if not targetPlayer or targetPlayer == player or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Head") or not targetPlayer.Character:FindFirstChild("Humanoid") or targetPlayer.Character.Humanoid.Health <= 0 then
             return
         end
-        local hitbox = Instance.new("Part")
-        hitbox.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-        hitbox.Anchored = true
-        hitbox.CanCollide = false
-        hitbox.Transparency = 0.7
-        hitbox.Color = hitboxColor
-        hitbox.Position = target.HumanoidRootPart.Position
-        hitbox.Parent = target
+        if not isEnemyPlayer(targetPlayer) then return end
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-        -- Weld the hitbox to the target's HumanoidRootPart
-        local weld = Instance.new("WeldConstraint")
-        weld.Part0 = hitbox
-        weld.Part1 = target.HumanoidRootPart
-        weld.Parent = hitbox
+        local tracerData = tracerBeams[targetPlayer]
+        local startPart = player.Character.HumanoidRootPart
+        local endPart = targetPlayer.Character.Head
 
-        table.insert(hitboxParts, {part = hitbox, target = target})
-    end
+        if not tracerData then
+            if #tracerBeams >= maxTracers then return end
 
-    local function clearHitboxes()
-        for _, hitbox in pairs(hitboxParts) do
-            if hitbox.part then hitbox.part:Destroy() end
+            local startAttachment = Instance.new("Attachment")
+            startAttachment.Parent = startPart
+
+            local endAttachment = Instance.new("Attachment")
+            endAttachment.Parent = endPart
+
+            local beam = Instance.new("Beam")
+            beam.Attachment0 = startAttachment
+            beam.Attachment1 = endAttachment
+            beam.Color = ColorSequence.new(tracerColorEnemy)
+            beam.Width0 = 0.1
+            beam.Width1 = 0.1
+            beam.Transparency = NumberSequence.new(0.3)
+            beam.Enabled = tracersEnabled
+            beam.Parent = game.Workspace
+
+            tracerData = {
+                beam = beam,
+                startAttachment = startAttachment,
+                endAttachment = endAttachment,
+                targetPlayer = targetPlayer
+            }
+            tracerBeams[targetPlayer] = tracerData
+        else
+            tracerData.beam.Enabled = tracersEnabled
         end
-        hitboxParts = {}
-    end
-
-    local function updateHitboxes()
-        if not hitboxExtenderEnabled then
-            clearHitboxes()
-            return
-        end
-        clearHitboxes()
-        for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
-                if isEnemyPlayer(v) then
-                    addHitbox(v.Character)
-                end
-            end
-        end
-    end
-
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= player then
-            v.CharacterAdded:Connect(function()
-                if hitboxExtenderEnabled then updateHitboxes() end
-            end)
-        end
-    end
-
-    game.Players.PlayerAdded:Connect(function(newPlayer)
-        newPlayer.CharacterAdded:Connect(function()
-            if hitboxExtenderEnabled then updateHitboxes() end
-        end)
-    end)
-
-    -- Tracers Functions (Using Beams)
-    local function addTracer(target)
-        if not target or not target.Parent or not target:FindFirstChild("HumanoidRootPart") then
-            return
-        end
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            return
-        end
-
-        -- Create Beam
-        local beam = Instance.new("Beam")
-        beam.Color = ColorSequence.new((player.Team == target.Parent.Team and player.Team and target.Parent.Team) and tracerColorTeam or tracerColorEnemy)
-        beam.Width0 = 0.1
-        beam.Width1 = 0.1
-        beam.Transparency = NumberSequence.new(0.3)
-        beam.LightEmission = 0.5
-
-        -- Create Attachments
-        local attachment0 = Instance.new("Attachment")
-        local attachment1 = Instance.new("Attachment")
-        attachment0.Parent = player.Character.HumanoidRootPart
-        attachment1.Parent = target.HumanoidRootPart
-
-        -- Assign Attachments to Beam
-        beam.Attachment0 = attachment0
-        beam.Attachment1 = attachment1
-        beam.Parent = game.Workspace
-
-        table.insert(tracerBeams, {beam = beam, target = target, attachment0 = attachment0, attachment1 = attachment1})
     end
 
     local function clearTracers()
         for _, tracer in pairs(tracerBeams) do
-            if tracer.beam then tracer.beam:Destroy() end
-            if tracer.attachment0 then tracer.attachment0:Destroy() end
-            if tracer.attachment1 then tracer.attachment1:Destroy() end
+            pcall(function()
+                if tracer.beam then tracer.beam:Destroy() end
+                if tracer.startAttachment then tracer.startAttachment:Destroy() end
+                if tracer.endAttachment then tracer.endAttachment:Destroy() end
+            end)
         end
         tracerBeams = {}
     end
@@ -477,250 +496,251 @@ local success, err = pcall(function()
             clearTracers()
             return
         end
-        clearTracers()
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            return
-        end
+
+        local enemies = {}
         for _, v in pairs(game.Players:GetPlayers()) do
-            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
-                addTracer(v.Character)
+            if v ~= player and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
+                if isEnemyPlayer(v) then
+                    table.insert(enemies, v)
+                end
             end
         end
-    end
 
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= player then
-            v.CharacterAdded:Connect(function()
-                if tracersEnabled then updateTracers() end
-            end)
-        end
-    end
-
-    game.Players.PlayerAdded:Connect(function(newPlayer)
-        newPlayer.CharacterAdded:Connect(function()
-            if tracersEnabled then updateTracers() end
+        table.sort(enemies, function(a, b)
+            local aDist = (a.Character.Head.Position - (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or camera.CFrame.Position)).Magnitude
+            local bDist = (b.Character.Head.Position - (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or camera.CFrame.Position)).Magnitude
+            return aDist < bDist
         end)
-    end)
 
-    -- Auto Fire: Check if cursor is over an enemy (including expanded hitbox)
-    local function isCursorOnEnemy()
-        local ray = camera:ScreenPointToRay(mouse.X, mouse.Y)
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterDescendantsInstances = {player.Character}
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-        local raycastResult = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
-        if raycastResult then
-            local hitPart = raycastResult.Instance
-            local hitPlayer = game.Players:GetPlayerFromCharacter(hitPart.Parent)
-            if hitPlayer and hitPlayer ~= player and hitPlayer.Character and hitPlayer.Character:FindFirstChild("Humanoid") and hitPlayer.Character.Humanoid.Health > 0 then
-                if isEnemyPlayer(hitPlayer) then
-                    return hitPlayer.Character:FindFirstChild("Head")
-                end
-            end
-            -- Check if ray hits an expanded hitbox
-            if hitboxExtenderEnabled then
-                for _, hitbox in pairs(hitboxParts) do
-                    if hitbox.part == hitPart then
-                        local targetPlayer = game.Players:GetPlayerFromCharacter(hitbox.target)
-                        if targetPlayer and targetPlayer ~= player and isEnemyPlayer(targetPlayer) then
-                            return hitbox.target:FindFirstChild("Head")
-                        end
-                    end
-                end
+        local usedPlayers = {}
+        for i = 1, math.min(#enemies, maxTracers) do
+            pcall(function() updateTracer(enemies[i]) end)
+            usedPlayers[enemies[i]] = true
+        end
+
+        for player, tracer in pairs(tracerBeams) do
+            if not usedPlayers[player] or not player.Character or not player.Character:FindFirstChild("Head") or not player.Character:FindFirstChild("Humanoid") or player.Character.Humanoid.Health <= 0 then
+                pcall(function()
+                    if tracer.beam then tracer.beam:Destroy() end
+                    if tracer.startAttachment then tracer.startAttachment:Destroy() end
+                    if tracer.endAttachment then tracer.endAttachment:Destroy() end
+                end)
+                tracerBeams[player] = nil
             end
         end
-        return nil
     end
 
-    -- Aimbot and Aim Assist Logic
-    local function findTarget(forAimAssist)
-        local closest, shortestDist = nil, math.huge
-        local cursorPos = Vector2.new(mouse.X, mouse.Y)
+    -- Aimbot/Aim Assist Logic
+    local function getClosestPlayerToCursor()
+        local closestPlayer, closestDistance = nil, math.huge
         for _, enemy in pairs(game.Players:GetPlayers()) do
-            if enemy ~= player and enemy.Character then
-                local head = enemy.Character:FindFirstChild("Head")
-                local humanoid = enemy.Character:FindFirstChild("Humanoid")
-                if head and humanoid and humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+            if enemy ~= player and enemy.Character and enemy.Character:FindFirstChild("Head") and enemy.Character:FindFirstChild("Humanoid") then
+                local humanoid = enemy.Character.Humanoid
+                if humanoid.Health > 0 and humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
                     if isEnemyPlayer(enemy) then
-                        local screenPos, onScreen = camera:WorldToScreenPoint(head.Position)
+                        local headPos, onScreen = camera:WorldToScreenPoint(enemy.Character.Head.Position)
                         if onScreen then
-                            local dist = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                            if forAimAssist or dist < fovSize then
-                                if dist < shortestDist then
-                                    shortestDist = dist
-                                    closest = head
-                                end
+                            local mousePos = Vector2.new(mouse.X, mouse.Y)
+                            local distance = (Vector2.new(headPos.X, headPos.Y) - mousePos).Magnitude
+                            local worldDistance = (enemy.Character.Head.Position - (player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or camera.CFrame.Position)).Magnitude
+                            if distance < closestDistance and distance < fovCircleSize and worldDistance <= maxAimbotRange then
+                                closestDistance = distance
+                                closestPlayer = enemy
+                                print("Scanning: Found " .. enemy.Name .. " at " .. math.floor(distance) .. " pixels, " .. math.floor(worldDistance) .. " studs")
                             end
                         end
                     end
                 end
             end
         end
-        return closest
+        if not closestPlayer then
+            print("No valid target in FOV or range")
+        end
+        return closestPlayer
     end
 
+    -- Aimbot (God-Tier, Right-Click)
     mouse.Button2Down:Connect(function()
         if not aimbotEnabled or panicModeEnabled then
+            locked = false
+            target = nil
+            print("Aimbot: Disabled or panicked")
             return
         end
-        target = findTarget(false)
-        if target then
+        local closest = getClosestPlayerToCursor()
+        if closest then
+            target = closest.Character
             locked = true
-            print("Aimbot locked onto: " .. target.Parent.Name)
+            print("Aimbot: Locked onto " .. closest.Name)
+        else
+            print("Aimbot: No target found")
         end
     end)
 
     mouse.Button2Up:Connect(function()
-        if locked then
-            locked = false
-            target = nil
-            print("Aimbot unlocked")
-            local currentCFrame = camera.CFrame
-            local lookVector = currentCFrame.LookVector
-            local flatLook = lookVector * Vector3.new(1, 0, 1)
-            local newLook = currentCFrame.Position + flatLook.Unit * 10
-            local currentPitch = math.asin(lookVector.Y)
-            local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
-            camera.CFrame = newCFrame
+        locked = false
+        target = nil
+        print("Aimbot: Unlocked")
+    end)
+
+    -- Player Cleanup
+    game.Players.PlayerRemoving:Connect(function(p)
+        if espBoxes[p.Character] then
+            pcall(function()
+                espBoxes[p.Character]:Destroy()
+                espBoxes[p.Character] = nil
+            end)
+        end
+        if hitboxAdornments[p.Character] then
+            pcall(function() hitboxAdornments[p.Character]:Destroy() end)
+            hitboxAdornments[p.Character] = nil
+        end
+        if tracerBeams[p] then
+            pcall(function()
+                if tracerBeams[p].beam then tracerBeams[p].beam:Destroy() end
+                if tracerBeams[p].startAttachment then tracerBeams[p].startAttachment:Destroy() end
+                if tracerBeams[p].endAttachment then tracerBeams[p].endAttachment:Destroy() end
+            end)
+            tracerBeams[p] = nil
         end
     end)
 
-    -- Hook FireServer for Auto Fire
-    local function hookFireServer()
-        if hooked then return end
-        local comm = game.ReplicatedStorage:FindFirstChild("Comm")
-        if not comm then
-            print("Error: Could not find Comm in ReplicatedStorage")
-            return
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player then
+            v.CharacterAdded:Connect(function()
+                if espEnabled then pcall(updateESP) end
+                if hitboxExtenderEnabled then pcall(updateHitboxAdornments) end
+                if tracersEnabled then pcall(updateTracers) end
+            end)
         end
-        local hitPart = comm:FindFirstChild("HitPart")
-        if not hitPart then
-            print("Error: Could not find HitPart in Comm")
-            return
-        end
-        print("Successfully hooked Arsenal HitPart event")
-        originalFireServer = hitPart.FireServer
-        hitPart.FireServer = function(self, hit, position, ...)
-            return originalFireServer(self, hit, position, ...)
-        end
-        hooked = true
     end
 
-    runService.RenderStepped:Connect(function()
-        if panicModeEnabled then return end
+    game.Players.PlayerAdded:Connect(function(newPlayer)
+        newPlayer.CharacterAdded:Connect(function()
+            if espEnabled then pcall(updateESP) end
+            if hitboxExtenderEnabled then pcall(updateHitboxAdornments) end
+            if tracersEnabled then pcall(updateTracers) end
+        end)
+    end)
 
-        -- Ensure player character is loaded
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            return
-        end
+    runService.RenderStepped:Connect(function(deltaTime)
+        local success, err = pcall(function()
+            if panicModeEnabled or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-        -- Calculate mouse movement speed for aim assist
-        local currentMousePos = Vector2.new(mouse.X, mouse.Y)
-        mouseSpeed = (currentMousePos - lastMousePos).Magnitude
-        lastMousePos = currentMousePos
+            -- Update FOV Circle
+            if fovCircleEnabled and fovCircle then
+                local screenSize = camera.ViewportSize
+                fovCircle.Position = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
+                fovCircle.Radius = fovCircleSize
+                fovCircle.Color = fovCircleColor
+            end
 
-        -- Update FOV Circle
-        if fovCircleEnabled and fovCircle then
-            local screenSize = camera.ViewportSize
-            local centerPos = Vector2.new(screenSize.X / 2, screenSize.Y / 2)
-            fovCircle.Position = centerPos
-            fovCircle.Radius = fovCircleSize
-            fovCircle.Color = fovCircleColor
-            fovCircle.Visible = true
-        end
+            -- Update ESP
+            if espEnabled then updateESP() end
 
-        -- Update ESP
-        if espEnabled then updateESP() end
+            -- Update Hitbox Adornments
+            if hitboxExtenderEnabled then updateHitboxAdornments() end
 
-        -- Update Hitboxes
-        if hitboxExtenderEnabled then updateHitboxes() end
+            -- Update Tracers
+            if tracersEnabled and tracerUpdateCounter % 6 == 0 then
+                updateTracers()
+            end
+            tracerUpdateCounter = tracerUpdateCounter + 1
 
-        -- Update Tracers
-        if tracersEnabled then
-            for _, tracer in pairs(tracerBeams) do
-                if tracer.target and tracer.target.Parent and tracer.target:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    tracer.beam.Enabled = true
+            -- Aimbot (God-Tier)
+            if aimbotEnabled and locked and target and target.Parent then
+                local humanoid = target:FindFirstChild("Humanoid")
+                if not humanoid or humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead then
+                    target = nil
+                    locked = false
+                    print("Aimbot: Target dead, unlocking")
+                    return
+                end
+
+                local targetPart = target:FindFirstChild("Head")
+                if not targetPart then
+                    targetPart = target:FindFirstChild("HumanoidRootPart")
+                    if not targetPart then
+                        target = nil
+                        locked = false
+                        print("Aimbot: Target missing parts, unlocking")
+                        return
+                    end
+                end
+
+                local distance = (targetPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if distance > maxAimbotRange then
+                    target = nil
+                    locked = false
+                    print("Aimbot: Target out of range (" .. math.floor(distance) .. " studs), unlocking")
+                    return
+                end
+
+                local velocity = targetPart.Velocity
+                local predictionFactor = 0.1
+                local predictedPos = targetPart.Position + velocity * predictionFactor
+
+                local headPos, onScreen = camera:WorldToScreenPoint(predictedPos)
+                if onScreen then
+                    local screenPos = Vector2.new(headPos.X, headPos.Y)
+                    local mousePos = Vector2.new(mouse.X, mouse.Y)
+                    local delta = screenPos - mousePos
+                    delta = Vector2.new(
+                        math.clamp(delta.X, -15, 15),
+                        math.clamp(delta.Y, -15, 15)
+                    )
+                    mousemoverel(delta.X, delta.Y)
+                    print("Aimbot: Moved to (" .. math.floor(delta.X) .. ", " .. math.floor(delta.Y) .. ") for " .. target.Name)
                 else
-                    tracer.beam.Enabled = false
+                    print("Aimbot: Target off-screen")
+                    target = nil
+                    locked = false
                 end
             end
-            updateTracers()
-        end
 
-        -- Hook FireServer for Auto Fire
-        if autoFireEnabled then
-            local successHook, hookErr = pcall(hookFireServer)
-            if not successHook then
-                print("Failed to hook FireServer: " .. tostring(hookErr))
-            end
-        end
+            -- Aim Assist (Always On)
+            if aimAssistEnabled then
+                local closest = getClosestPlayerToCursor()
+                if closest and closest.Character then
+                    local targetPart = closest.Character:FindFirstChild("Head")
+                    if not targetPart then
+                        targetPart = closest.Character:FindFirstChild("HumanoidRootPart")
+                        if not targetPart then return end
+                    end
 
-        -- Auto Fire: Fire when cursor is over an enemy (including expanded hitbox)
-        if autoFireEnabled then
-            local cursorTarget = isCursorOnEnemy()
-            if cursorTarget then
-                local currentTime = tick()
-                if currentTime - lastFireTime >= fireRate then
-                    local hitPart = game.ReplicatedStorage:FindFirstChild("Comm") and game.ReplicatedStorage.Comm:FindFirstChild("HitPart")
-                    if hitPart and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        local successFire, fireErr = pcall(function()
-                            hitPart:FireServer(cursorTarget, cursorTarget.Position)
-                        end)
-                        if successFire then
-                            lastFireTime = currentTime
-                            print("Auto Fire: Shot fired at " .. cursorTarget.Parent.Name)
-                        else
-                            print("Auto Fire failed: " .. tostring(fireErr))
-                        end
-                    else
-                        print("Auto Fire failed: HitPart or player character not found")
+                    local humanoid = closest.Character:FindFirstChild("Humanoid")
+                    if not humanoid or humanoid.Health <= 0 or humanoid:GetState() == Enum.HumanoidStateType.Dead then return end
+
+                    local distance = (targetPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                    if distance > maxAimbotRange then return end
+
+                    local velocity = targetPart.Velocity
+                    local predictionFactor = 0.1
+                    local predictedPos = targetPart.Position + velocity * predictionFactor
+
+                    local headPos, onScreen = camera:WorldToScreenPoint(predictedPos)
+                    if onScreen then
+                        local screenPos = Vector2.new(headPos.X, headPos.Y)
+                        local mousePos = Vector2.new(mouse.X, mouse.Y)
+                        local distToTarget = (screenPos - mousePos).Magnitude
+                        local stickiness = math.clamp(1 - (distToTarget / fovCircleSize), 0, 0.3) -- Softer than aimbot
+                        local delta = (screenPos - mousePos) * stickiness
+                        delta = Vector2.new(
+                            math.clamp(delta.X, -10, 10),
+                            math.clamp(delta.Y, -10, 10)
+                        )
+                        mousemoverel(delta.X, delta.Y)
+                        print("Aim Assist: Adjusted by (" .. math.floor(delta.X) .. ", " .. math.floor(delta.Y) .. ") for " .. closest.Name)
                     end
                 end
             end
-        end
-
-        -- Aimbot
-        if aimbotEnabled and locked then
-            if not target or not target.Parent or not target.Parent:FindFirstChild("Humanoid") or target.Parent.Humanoid.Health <= 0 or target.Parent.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
-                target = findTarget(false)
-                if not target then
-                    locked = false
-                    local currentCFrame = camera.CFrame
-                    local lookVector = currentCFrame.LookVector
-                    local flatLook = lookVector * Vector3.new(1, 0, 1)
-                    local newLook = currentCFrame.Position + flatLook.Unit * 10
-                    local currentPitch = math.asin(lookVector.Y)
-                    local newCFrame = CFrame.new(currentCFrame.Position, newLook) * CFrame.Angles(currentPitch, 0, 0)
-                    camera.CFrame = newCFrame
-                    return
-                end
-            end
-            local currentCFrame = camera.CFrame
-            local targetCFrame = CFrame.new(currentCFrame.Position, target.Position)
-            camera.CFrame = currentCFrame:Lerp(targetCFrame, 0.8)
-        end
-
-        -- Aim Assist (Less Sticky)
-        if aimAssistEnabled and not locked then
-            local assistTarget = findTarget(true)
-            if assistTarget then
-                local screenPos, onScreen = camera:WorldToScreenPoint(assistTarget.Position)
-                if onScreen then
-                    local cursorPos = Vector2.new(mouse.X, mouse.Y)
-                    local distToTarget = (Vector2.new(screenPos.X, screenPos.Y) - cursorPos).Magnitude
-                    local baseStrength = 0.05
-                    local stickiness = math.clamp(1 - (distToTarget / (fovSize * 1.5)), 0, 1)
-                    local speedFactor = math.clamp(mouseSpeed / 50, 0, 1)
-                    local finalStrength = baseStrength * stickiness * (1 - speedFactor)
-                    local currentCFrame = camera.CFrame
-                    local targetCFrame = CFrame.new(currentCFrame.Position, assistTarget.Position)
-                    camera.CFrame = currentCFrame:Lerp(targetCFrame, finalStrength)
-                end
-            end
+        end)
+        if not success then
+            print("RenderStepped error: " .. tostring(err))
         end
     end)
 
-    print("Fuckery Hub Arsenal script loaded - v2.7 by d4mage1 - Fixed hitbox extender (expanded, transparent, slider)")
+    print("Fuckery Hub Arsenal script loaded - v4.10 by d4mage1 - God-tier aimbot, always-on aim assist, fixed ESP (enemies only), optimized tracers, custom FOV, Xeno-optimized")
 end)
 
 if not success then
