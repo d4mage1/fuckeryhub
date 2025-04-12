@@ -9,7 +9,7 @@ print([[
   _ __ ___   __ _  __| | ___   | |__  _   _     __| | || |_ _ __ ___   __ _  __ _  ___| |
  | '_ ` _ \ / _` |/ _` |/ _ \  | '_ \| | | |   / _` |__   _| '_ ` _ \ / _` |/ _` |/ _ \ |
  | | | | | | (_| | (_| |  __/  | |_) | |_| |  | (_| |  | | | | | | | | (_| | (_| |  __/ |
- |_| |_| |_|\__,_|\__,_|\___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|\__,_|\__, |\___|_|
+ |_| |_| |_|__,_|__,_|_|___|  |_.__/ \__, |   \__,_|  |_| |_| |_| |_|__,_|__,_|_|___|_|
                                        __/ |                                 __/ |       
                                       |___/                                 |___/        
 ]])
@@ -98,6 +98,27 @@ if Window then
                 print("Arsenal script loaded successfully!")
             else
                 warn("Failed to load Arsenal script: " .. tostring(result))
+            end
+        end
+    })
+
+    SelectGameTab:CreateButton({
+        Name = "Load Rivals Script",
+        Callback = function()
+            print("Loading Rivals script...")
+            local success, result = pcall(function()
+                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/rivials_fuckery.lua")
+                local loadedFunc = loadstring(scriptContent)
+                if loadedFunc then
+                    return loadedFunc()
+                else
+                    error("Failed to loadstring Rivals script: scriptContent is invalid")
+                end
+            end)
+            if success then
+                print("Rivals script loaded successfully!")
+            else
+                warn("Failed to load Rivals script: " .. tostring(result))
             end
         end
     })
