@@ -1,8 +1,6 @@
-print(" ")
 print("=====================================")
 print("     FUCKERY HUB - MAIN MENU LOADED  ")
 print("=====================================")
-print(" ")
 print([[ 
                   _         _                  _ _  _                             __ 
                  | |       | |                | | || |                           /_ |
@@ -13,174 +11,69 @@ print([[
                                       __/ |                                 __/ |       
                                      |___/                                 |___/        
 ]])
-print(" ")
 print("Loaded by: d4mage1")
 print("Version: 1.3.3 - Main Hub")
 print(" ")
 
--- Services
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
--- Try to load Rayfield UI Library
+-- Load Rayfield UI Library (once for all scripts)
 local Rayfield
-local rayfieldUrl = "https://raw.githubusercontent.com/SiriusMenu/Rayfield/main/source" -- New URL to try in April 2025
-local rayfieldFallbackUrl = "https://raw.githubusercontent.com/shlexware/Rayfield/main/source" -- Keep your fallback
-local rawScript
-
--- Try primary URL
 local success, err = pcall(function()
-    print("Attempting to fetch Rayfield from primary URL: " .. rayfieldUrl)
-    rawScript = game:HttpGet(rayfieldUrl)
-    print("Primary URL fetch successful, rawScript length: " .. (rawScript and #rawScript or "nil"))
+    Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusMenu/Rayfield/main/source"))()
 end)
-if not success then
-    warn("Failed to load Rayfield from primary URL: " .. tostring(err))
-    -- Try fallback URL
-    success, err = pcall(function()
-        print("Attempting to fetch Rayfield from fallback URL: " .. rayfieldFallbackUrl)
-        rawScript = game:HttpGet(rayfieldFallbackUrl)
-        print("Fallback URL fetch successful, rawScript length: " .. (rawScript and #rawScript or "nil"))
-    end)
-    if not success then
-        warn("Failed to load Rayfield from fallback URL: " .. tostring(err))
-        rawScript = nil
-    end
+if not success or not Rayfield then
+    warn("Failed to load Rayfield: " .. tostring(err))
+    return
 end
+print("Rayfield loaded successfully!")
 
--- Load Rayfield if rawScript exists
-if rawScript then
-    success, err = pcall(function()
-        print("Attempting to loadstring Rayfield script...")
-        Rayfield = loadstring(rawScript) -- Get the function
-        if Rayfield then
-            print("Rayfield loadstring successful, initializing Rayfield...")
-            Rayfield = Rayfield() -- Call it to initialize
-            print("Rayfield initialized successfully!")
+-- Create Main Hub Window
+local Window = Rayfield:CreateWindow({
+    Name = "Fuckery Hub - Main Menu",
+    LoadingTitle = "Fuckery Hub",
+    LoadingSubtitle = "by d4mage1",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "FuckeryHub",
+        FileName = "MainConfig"
+    },
+    Discord = {
+        Enabled = true,
+        Invite = "mAFyAPnVA4",
+        RememberJoins = true
+    },
+    KeySystem = false
+})
+
+-- Select Game Tab
+local SelectGameTab = Window:CreateTab("Games")
+SelectGameTab:CreateSection("Load Game Scripts")
+
+SelectGameTab:CreateButton({
+    Name = "Load Arsenal Script",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua"))()
+        end)
+        if success then
+            print("Arsenal script loaded successfully!")
         else
-            error("loadstring returned nil, Rayfield script is invalid")
-        end
-    end)
-    if not success or not Rayfield then
-        warn("Failed to initialize Rayfield: " .. tostring(err))
-        Rayfield = nil
-    end
-else
-    warn("No Rayfield script loaded. Falling back to manual script loading...")
-end
-
--- Create Main Hub Window (if Rayfield loaded)
-local Window
-if Rayfield then
-    success, err = pcall(function()
-        print("Creating Rayfield window...")
-        Window = Rayfield:CreateWindow({
-            Name = "Fuckery Hub - Main Menu",
-            LoadingTitle = "Fuckery Hub",
-            LoadingSubtitle = "by d4mage1",
-            ConfigurationSaving = {
-                Enabled = true,
-                FolderName = "FuckeryHub",
-                FileName = "MainConfig"
-            },
-            KeySystem = false
-        })
-        print("Rayfield window created successfully!")
-    end)
-    if not success or not Window then
-        warn("Failed to create Rayfield window: " .. tostring(err))
-        Window = nil
-    end
-else
-    warn("Rayfield UI failed to load. Use chat commands to load scripts:")
-    print("Chat '/loadarsenal' to load Arsenal script")
-    print("Chat '/loadrivals' to load Rivals script")
-end
-
--- Select Game Tab (if GUI loaded)
-if Window then
-    local SelectGameTab = Window:CreateTab("Games")
-
-    SelectGameTab:CreateButton({
-        Name = "Load Arsenal Script",
-        Callback = function()
-            print("Loading Arsenal script...")
-            local success, result = pcall(function()
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua")
-                local loadedFunc = loadstring(scriptContent)
-                if loadedFunc then
-                    return loadedFunc()
-                else
-                    error("Failed to loadstring Arsenal script: scriptContent is invalid")
-                end
-            end)
-            if success then
-                print("Arsenal script loaded successfully!")
-            else
-                warn("Failed to load Arsenal script: " .. tostring(result))
-            end
-        end
-    })
-
-    SelectGameTab:CreateButton({
-        Name = "Load Rivals Script",
-        Callback = function()
-            print("Loading Rivals script...")
-            local success, result = pcall(function()
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/rivals_fuckery.lua") -- Fixed typo
-                local loadedFunc = loadstring(scriptContent)
-                if loadedFunc then
-                    return loadedFunc()
-                else
-                    error("Failed to loadstring Rivals script: scriptContent is invalid")
-                end
-            end)
-            if success then
-                print("Rivals script loaded successfully!")
-            else
-                warn("Failed to load Rivals script: " .. tostring(result))
-            end
-        end
-    })
-end
-
--- Manual script loading via chat commands (if GUI failed)
-LocalPlayer.Chatted:Connect(function(message)
-    if not Window then -- Only allow chat commands if GUI failed
-        if message:lower() == "/loadarsenal" then
-            print("Loading Arsenal script via chat command...")
-            local success, result = pcall(function()
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/arsenal_fuckery.lua")
-                local loadedFunc = loadstring(scriptContent)
-                if loadedFunc then
-                    return loadedFunc()
-                else
-                    error("Failed to loadstring Arsenal script: scriptContent is invalid")
-                end
-            end)
-            if success then
-                print("Arsenal script loaded successfully!")
-            else
-                warn("Failed to load Arsenal script: " .. tostring(result))
-            end
-        elseif message:lower() == "/loadrivals" then
-            print("Loading Rivals script via chat command...")
-            local success, result = pcall(function()
-                local scriptContent = game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/rivals_fuckery.lua") -- Fixed typo
-                local loadedFunc = loadstring(scriptContent)
-                if loadedFunc then
-                    return loadedFunc()
-                else
-                    error("Failed to loadstring Rivals script: scriptContent is invalid")
-                end
-            end)
-            if success then
-                print("Rivals script loaded successfully!")
-            else
-                warn("Failed to load Rivals script: " .. tostring(result))
-            end
+            warn("Failed to load Arsenal script: " .. tostring(result))
         end
     end
-end)
+})
+
+SelectGameTab:CreateButton({
+    Name = "Load Rivals Script",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/d4mage1/fuckeryhub/refs/heads/main/rivals_fuckery.lua"))()
+        end)
+        if success then
+            print("Rivals script loaded successfully!")
+        else
+            warn("Failed to load Rivals script: " .. tostring(result))
+        end
+    end
+})
 
 print("Fuckery Hub Main Menu loaded - Select a game to start")
