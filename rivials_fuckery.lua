@@ -9,9 +9,9 @@ print([[
  _ __ ___   __ _  __| | ___  | |__  _   _    __| |/ /| |_ __ ___   __ _  __ _  ___`| | 
 | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` / /_| | '_ ` _ \ / _` |/ _` |/ _ \| | 
 | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| \___  | | | | | | (_| | (_| |  __/| |_
-|_| |_| |_|\__,_|\__,_|\___| |_.__/ \__, |  \__,_|   |_/_| |_| |_|\__,_|\__, |\___\___/
-                                     __/ |                               __/ |         
-                                    |___/                               |___/              
+|_| |_| |_|__,_|__,_|_|___| |_.__/ |__, |  |__,_|   |_|_| |_| |_|__,_|__,_|_|___|___/
+                                    __/ |                               __/ |         
+                                   |___/                               |___/              
 ]])
 print(" ")
 print("Loaded by: d4mage1")
@@ -76,13 +76,52 @@ local success, err = pcall(function()
 
     -- Try to load Rayfield
     local Rayfield = nil
-    local rayfieldSuccess, rayfieldErr = pcall(function()
-        wait(1.5)
-        Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-    end)
+    local rawScript
+    local rayfieldUrl = "https://raw.githubusercontent.com/SiriusMenu/Rayfield/main/source" -- Updated URL for April 2025
+    local rayfieldFallbackUrl = "https://sirius.menu/rayfield" -- Original as fallback
 
+    -- Try primary URL
+    local rayfieldSuccess, rayfieldErr = pcall(function()
+        print("Attempting to fetch Rayfield from primary URL: " .. rayfieldUrl)
+        rawScript = game:HttpGet(rayfieldUrl)
+        print("Primary URL fetch successful, rawScript length: " .. (rawScript and #rawScript or "nil"))
+    end)
     if not rayfieldSuccess then
-        print("Failed to load Rayfield: " .. tostring(rayfieldErr))
+        warn("Failed to load Rayfield from primary URL: " .. tostring(rayfieldErr))
+        -- Try fallback URL
+        rayfieldSuccess, rayfieldErr = pcall(function()
+            print("Attempting to fetch Rayfield from fallback URL: " .. rayfieldFallbackUrl)
+            rawScript = game:HttpGet(rayfieldFallbackUrl)
+            print("Fallback URL fetch successful, rawScript length: " .. (rawScript and #rawScript or "nil"))
+        end)
+        if not rayfieldSuccess then
+            warn("Failed to load Rayfield from fallback URL: " .. tostring(rayfieldErr))
+            rawScript = nil
+        end
+    end
+
+    -- Load Rayfield if rawScript exists
+    if rawScript then
+        rayfieldSuccess, rayfieldErr = pcall(function()
+            print("Attempting to loadstring Rayfield script...")
+            Rayfield = loadstring(rawScript) -- Get the function
+            if Rayfield then
+                print("Rayfield loadstring successful, initializing Rayfield...")
+                Rayfield = Rayfield() -- Call it to initialize
+                print("Rayfield initialized successfully!")
+            else
+                error("loadstring returned nil, Rayfield script is invalid")
+            end
+        end)
+        if not rayfieldSuccess or not Rayfield then
+            warn("Failed to initialize Rayfield: " .. tostring(rayfieldErr))
+            Rayfield = nil
+        end
+    else
+        warn("No Rayfield script loaded. Falling back to keybinds...")
+    end
+
+    if not Rayfield then
         print("Falling back to keybinds...")
         print("Keybinds:")
         print("F1 - Toggle Aimbot")
