@@ -33,7 +33,7 @@ If you’re interested in collaborating or need help with your project, reach ou
 
 🎮 (If you do, at least mention my name.)
 ---
-#📥 Installation Instructions
+# 📥 Installation Instructions
 
 Clone this repository or download the latest fuckery_hub.lua file from the repo.
 Open your executor (I use Xeno, but most should work fine).
