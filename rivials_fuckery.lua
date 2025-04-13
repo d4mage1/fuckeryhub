@@ -1,18 +1,18 @@
 print("=====================================")
-print("     FUCKERY HUB - ARSENAL LOADED    ")
+print("     FUCKERY HUB - RIVALS LOADED     ")
 print("=====================================")
 print([[
-                     _        _                 _   ___                            __  
+                  _        _                 _   ___                            __  
                     | |      | |               | | /   |                          /  | 
  _ __ ___   __ _  __| | ___  | |__  _   _    __| |/ /| |_ __ ___   __ _  __ _  ___`| | 
 | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \| | | |  / _` / /_| | '_ ` _ \ / _` |/ _` |/ _ \| | 
 | | | | | | (_| | (_| |  __/ | |_) | |_| | | (_| \___  | | | | | | (_| | (_| |  __/| |_
 |_| |_| |_|__,_|__,_|_|___| |_.__/ |__, |  |__,_|   |_|_| |_| |_|__,_|__,_|_|___|___/
                                     __/ |                               __/ |         
-                                   |___/                               |___/                
+                                   |___/                               |___/              
 ]])
 print("Loaded by: d4mage1")
-print("Version: 4.10 - Arsenal Edition (Xeno)")
+print("Version: 1.0 - Rivals Edition (Xeno)")
 print(" ")
 
 -- Services
@@ -31,28 +31,23 @@ end
 -- Feature Toggles
 local aimbotEnabled = false
 local aimAssistEnabled = false
-local hitboxExtenderEnabled = false
 local espEnabled = false
-local tracersEnabled = false
+local speedHackEnabled = false
+local noClipEnabled = false
 local fovCircleEnabled = false
 local panicModeEnabled = false
 
 -- Feature Variables
 local espBoxes = {}
-local hitboxAdornments = {}
-local tracerBeams = {}
 local fovCircle = nil
-local hitboxSize = 6
 local fovCircleSize = 200
 local fovCircleColor = Color3.fromRGB(255, 255, 255)
 local espColorEnemy = Color3.fromRGB(255, 0, 0)
-local hitboxColor = Color3.fromRGB(255, 0, 0)
-local tracerColorEnemy = Color3.fromRGB(255, 0, 0)
 local target = nil
 local locked = false
-local tracerUpdateCounter = 0
-local maxTracers = 10
 local maxAimbotRange = 500
+local speedMultiplier = 2
+local defaultWalkSpeed = 16
 
 -- Game Mode Detection
 local function isFFA()
@@ -74,7 +69,7 @@ local function isEnemyPlayer(enemy)
     return player.Team ~= enemyPlayer.Team
 end
 
--- Load Rayfield UI Library (fresh instance for Arsenal)
+-- Load Rayfield UI Library (fresh instance for Rivals)
 local Rayfield
 local success, err = pcall(function()
     Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusMenu/Rayfield/main/source"))()
@@ -83,17 +78,17 @@ if not success or not Rayfield then
     warn("Failed to load Rayfield: " .. tostring(err))
     return
 end
-print("Rayfield loaded successfully for Arsenal!")
+print("Rayfield loaded successfully for Rivals!")
 
--- Create Rayfield Window
+-- Create a new Rayfield Window for Rivals
 local Window = Rayfield:CreateWindow({
-    Name = "Fuckery Hub - Arsenal",
-    LoadingTitle = "Fuckery Hub Loading",
+    Name = "Fuckery Hub - Rivals",
+    LoadingTitle = "Fuckery Hub Loading - Rivals",
     LoadingSubtitle = "by d4mage1",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "FuckeryHub",
-        FileName = "ArsenalConfig"
+        FileName = "RivalsConfig"
     },
     Discord = {
         Enabled = true,
@@ -136,51 +131,40 @@ CombatTab:CreateSlider({
     end
 })
 
-CombatTab:CreateToggle({
-    Name = "Hitbox Extender",
+-- Movement Tab
+local MovementTab = Window:CreateTab("Movement")
+MovementTab:CreateSection("Movement Features")
+
+MovementTab:CreateToggle({
+    Name = "Speed Hack",
     CurrentValue = false,
     Callback = function(Value)
-        hitboxExtenderEnabled = Value
-        print("Hitbox Extender " .. (hitboxExtenderEnabled and "enabled" or "disabled"))
-        clearHitboxAdornments()
-        if hitboxExtenderEnabled then updateHitboxAdornments() end
-    end
-})
-
-CombatTab:CreateSlider({
-    Name = "Hitbox Size",
-    Range = {4, 12},
-    Increment = 1,
-    Suffix = "Studs",
-    CurrentValue = 6,
-    Callback = function(Value)
-        hitboxSize = Value
-        print("Hitbox Size set to " .. hitboxSize .. " studs")
-        if hitboxExtenderEnabled then
-            clearHitboxAdornments()
-            updateHitboxAdornments()
+        speedHackEnabled = Value
+        print("Speed Hack " .. (speedHackEnabled and "enabled" or "disabled"))
+        if not speedHackEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = defaultWalkSpeed
         end
     end
 })
 
-CombatTab:CreateDropdown({
-    Name = "Hitbox Color",
-    Options = {"Red", "Green", "Blue", "Yellow", "White"},
-    CurrentOption = "Red",
+MovementTab:CreateSlider({
+    Name = "Speed Multiplier",
+    Range = {1, 5},
+    Increment = 0.5,
+    Suffix = "x",
+    CurrentValue = 2,
     Callback = function(Value)
-        local colors = {
-            Red = Color3.fromRGB(255, 0, 0),
-            Green = Color3.fromRGB(0, 255, 0),
-            Blue = Color3.fromRGB(0, 0, 255),
-            Yellow = Color3.fromRGB(255, 255, 0),
-            White = Color3.fromRGB(255, 255, 255)
-        }
-        hitboxColor = colors[Value] or hitboxColor
-        print("Hitbox Color set to " .. Value)
-        if hitboxExtenderEnabled then
-            clearHitboxAdornments()
-            updateHitboxAdornments()
-        end
+        speedMultiplier = Value
+        print("Speed Multiplier set to " .. speedMultiplier .. "x")
+    end
+})
+
+MovementTab:CreateToggle({
+    Name = "No Clip",
+    CurrentValue = false,
+    Callback = function(Value)
+        noClipEnabled = Value
+        print("No Clip " .. (noClipEnabled and "enabled" or "disabled"))
     end
 })
 
@@ -216,54 +200,6 @@ VisualsTab:CreateDropdown({
         if espEnabled then
             clearESP()
             updateESP()
-        end
-    end
-})
-
-VisualsTab:CreateToggle({
-    Name = "Tracers (Enemies Only)",
-    CurrentValue = false,
-    Callback = function(Value)
-        tracersEnabled = Value
-        print("Tracers " .. (tracersEnabled and "enabled" or "disabled"))
-        clearTracers()
-        if tracersEnabled then updateTracers() end
-    end
-})
-
-VisualsTab:CreateSlider({
-    Name = "Max Tracers",
-    Range = {5, 20},
-    Increment = 1,
-    Suffix = "Tracers",
-    CurrentValue = 10,
-    Callback = function(Value)
-        maxTracers = Value
-        print("Max Tracers set to " .. maxTracers)
-        if tracersEnabled then
-            clearTracers()
-            updateTracers()
-        end
-    end
-})
-
-VisualsTab:CreateDropdown({
-    Name = "Tracer Color",
-    Options = {"Red", "Green", "Blue", "Yellow", "White"},
-    CurrentOption = "Red",
-    Callback = function(Value)
-        local colors = {
-            Red = Color3.fromRGB(255, 0, 0),
-            Green = Color3.fromRGB(0, 255, 0),
-            Blue = Color3.fromRGB(0, 0, 255),
-            Yellow = Color3.fromRGB(255, 255, 0),
-            White = Color3.fromRGB(255, 255, 255)
-        }
-        tracerColorEnemy = colors[Value] or tracerColorEnemy
-        print("Tracer Color set to " .. Value)
-        if tracersEnabled then
-            clearTracers()
-            updateTracers()
         end
     end
 })
